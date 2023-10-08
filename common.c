@@ -125,110 +125,110 @@ int create_raw_socket(void) //RRR IN USE
 // 	return rc;
 // }
 
-int handle_arp_packet(struct ifs_data *ifs)
-{
-	struct sockaddr_ll so_name;
-	struct ether_frame frame_hdr;
-	struct msghdr	msg = {0};
-	struct iovec	msgvec[1];
-	int    rc;
+// int handle_arp_packet(struct ifs_data *ifs)
+// {
+// 	struct sockaddr_ll so_name;
+// 	struct ether_frame frame_hdr;
+// 	struct msghdr	msg = {0};
+// 	struct iovec	msgvec[1];
+// 	int    rc;
 
-	/* Point to frame header */
-	msgvec[0].iov_base = &frame_hdr;
-	msgvec[0].iov_len  = sizeof(struct ether_frame);
+// 	/* Point to frame header */
+// 	msgvec[0].iov_base = &frame_hdr;
+// 	msgvec[0].iov_len  = sizeof(struct ether_frame);
 
-	/* Fill out message metadata struct */
-	msg.msg_name	= &so_name;
-	msg.msg_namelen = sizeof(struct sockaddr_ll);
-	msg.msg_iovlen	= 1;
-	msg.msg_iov	= msgvec;
+// 	/* Fill out message metadata struct */
+// 	msg.msg_name	= &so_name;
+// 	msg.msg_namelen = sizeof(struct sockaddr_ll);
+// 	msg.msg_iovlen	= 1;
+// 	msg.msg_iov	= msgvec;
 
-	rc = recvmsg(ifs->rsock, &msg, 0);
-	if (rc <= 0) {
-		perror("sendmsg");
-		return -1;
-	}
+// 	rc = recvmsg(ifs->rsock, &msg, 0);
+// 	if (rc <= 0) {
+// 		perror("sendmsg");
+// 		return -1;
+// 	}
 
-	/* Send back the ARP response via the same receiving interface */
-	/* Send ARP response only if the request was a broadcast ARP request
-	 * This is so dummy!
-	 */
-	int check = 0;
-	uint8_t brdcst[] = ETH_BROADCAST;
-	for (int i = 0; i < 6; i++) {
-		if (frame_hdr.dst_addr[i] != brdcst[i])
-		check = -1;
-	}
-	if (!check) {
-		/* Handling an ARP request */
-		printf("\nWe got a hand offer from neighbor: ");
-		print_mac_addr(frame_hdr.src_addr, 6);
+// 	/* Send back the ARP response via the same receiving interface */
+// 	/* Send ARP response only if the request was a broadcast ARP request
+// 	 * This is so dummy!
+// 	 */
+// 	int check = 0;
+// 	uint8_t brdcst[] = ETH_BROADCAST;
+// 	for (int i = 0; i < 6; i++) {
+// 		if (frame_hdr.dst_addr[i] != brdcst[i])
+// 		check = -1;
+// 	}
+// 	if (!check) {
+// 		/* Handling an ARP request */
+// 		printf("\nWe got a hand offer from neighbor: ");
+// 		print_mac_addr(frame_hdr.src_addr, 6);
 
-		/* print the if_index of the receiving interface */
-		printf("We received an incoming packet from iface with index %d\n",
-		       so_name.sll_ifindex);
+// 		/* print the if_index of the receiving interface */
+// 		printf("We received an incoming packet from iface with index %d\n",
+// 		       so_name.sll_ifindex);
 
-		rc = send_arp_response(ifs, &so_name, frame_hdr);
-		if (rc < 0)
-		perror("send_arp_response");
-	}
+// 		rc = send_arp_response(ifs, &so_name, frame_hdr);
+// 		if (rc < 0)
+// 		perror("send_arp_response");
+// 	}
 
-	/* Node received an ARP Reply */
-	printf("\nHello from neighbor ");
-	print_mac_addr(frame_hdr.src_addr, 6);
+// 	/* Node received an ARP Reply */
+// 	printf("\nHello from neighbor ");
+// 	print_mac_addr(frame_hdr.src_addr, 6);
 
-	return rc;
-}
+// 	return rc;
+// }
 
-int send_arp_response(struct ifs_data *ifs, struct sockaddr_ll *so_name,
-		      struct ether_frame frame)
-{
-	struct msghdr *msg;
-	struct iovec msgvec[1];
-	int rc;
+// int send_arp_response(struct ifs_data *ifs, struct sockaddr_ll *so_name,
+// 		      struct ether_frame frame)
+// {
+// 	struct msghdr *msg;
+// 	struct iovec msgvec[1];
+// 	int rc;
 
-	/* Swap MAC addresses of the ether_frame to send back (unicast) the ARP
-	 * response */
-	memcpy(frame.dst_addr, frame.src_addr, 6);
+// 	/* Swap MAC addresses of the ether_frame to send back (unicast) the ARP
+// 	 * response */
+// 	memcpy(frame.dst_addr, frame.src_addr, 6);
 
-	/* Find the MAC address of the interface where the broadcast packet came
-	 * from. We use sll_ifindex recorded in the so_name. */
-	for (int i = 0; i < ifs->ifn; i++) {
-		if (ifs->addr[i].sll_ifindex == so_name->sll_ifindex)
-		memcpy(frame.src_addr, ifs->addr[i].sll_addr, 6);
-	}
-	/* Match the ethertype in packet_socket.c: */
-	frame.eth_proto[0] = frame.eth_proto[1] = 0xFF;
+// 	/* Find the MAC address of the interface where the broadcast packet came
+// 	 * from. We use sll_ifindex recorded in the so_name. */
+// 	for (int i = 0; i < ifs->ifn; i++) {
+// 		if (ifs->addr[i].sll_ifindex == so_name->sll_ifindex)
+// 		memcpy(frame.src_addr, ifs->addr[i].sll_addr, 6);
+// 	}
+// 	/* Match the ethertype in packet_socket.c: */
+// 	frame.eth_proto[0] = frame.eth_proto[1] = 0xFF;
 
-	/* Point to frame header */
-	msgvec[0].iov_base = &frame;
-	msgvec[0].iov_len  = sizeof(struct ether_frame);
+// 	/* Point to frame header */
+// 	msgvec[0].iov_base = &frame;
+// 	msgvec[0].iov_len  = sizeof(struct ether_frame);
 
-	/* Allocate a zeroed-out message info struct */
-	msg = (struct msghdr *)calloc(1, sizeof(struct msghdr));
+// 	/* Allocate a zeroed-out message info struct */
+// 	msg = (struct msghdr *)calloc(1, sizeof(struct msghdr));
 
-	/* Fill out message metadata struct */ 
-	msg->msg_name	 = so_name;
-	msg->msg_namelen = sizeof(struct sockaddr_ll);
-	msg->msg_iovlen	 = 1;
-	msg->msg_iov	 = msgvec;
+// 	/* Fill out message metadata struct */ 
+// 	msg->msg_name	 = so_name;
+// 	msg->msg_namelen = sizeof(struct sockaddr_ll);
+// 	msg->msg_iovlen	 = 1;
+// 	msg->msg_iov	 = msgvec;
 
-	/* Construct and send message */
-	rc = sendmsg(ifs->rsock, msg, 0);
-	if (rc == -1) {
-		perror("sendmsg");
-		free(msg);
-		return -1;
-	}
+// 	/* Construct and send message */
+// 	rc = sendmsg(ifs->rsock, msg, 0);
+// 	if (rc == -1) {
+// 		perror("sendmsg");
+// 		free(msg);
+// 		return -1;
+// 	}
 
-	printf("Nice to meet you ");
-	print_mac_addr(frame.dst_addr, 6);
+// 	printf("Nice to meet you ");
+// 	print_mac_addr(frame.dst_addr, 6);
 
-	printf("I am ");
-	print_mac_addr(frame.src_addr, 6);
+// 	printf("I am ");
+// 	print_mac_addr(frame.src_addr, 6);
 
-	/* Remember that we allocated this on the heap; free it */
-	free(msg);
+// 	/* Remember that we allocated this on the heap; free it */
+// 	free(msg);
 
-	return rc;
-}
+// 	return rc;
+// }
