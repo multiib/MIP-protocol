@@ -80,50 +80,50 @@ int create_raw_socket(void) //RRR IN USE
 	return sd;
 }
 
-int send_arp_request(struct ifs_data *ifs)
-{
-	struct ether_frame frame_hdr;
-	struct msghdr	*msg;
-	struct iovec	msgvec[1];
-	int    rc;
+// int send_arp_request(struct ifs_data *ifs)
+// {
+// 	struct ether_frame frame_hdr;
+// 	struct msghdr	*msg;
+// 	struct iovec	msgvec[1];
+// 	int    rc;
 
-	/* Fill in Ethernet header. ARP request is a BROADCAST packet. */
-	uint8_t dst_addr[] = ETH_BROADCAST;
-	memcpy(frame_hdr.dst_addr, dst_addr, 6);
-	memcpy(frame_hdr.src_addr, ifs->addr[0].sll_addr, 6);
-	/* Match the ethertype in packet_socket.c: */
-	frame_hdr.eth_proto[0] = frame_hdr.eth_proto[1] = 0xFF;
+// 	/* Fill in Ethernet header. ARP request is a BROADCAST packet. */
+// 	uint8_t dst_addr[] = ETH_BROADCAST;
+// 	memcpy(frame_hdr.dst_addr, dst_addr, 6);
+// 	memcpy(frame_hdr.src_addr, ifs->addr[0].sll_addr, 6);
+// 	/* Match the ethertype in packet_socket.c: */
+// 	frame_hdr.eth_proto[0] = frame_hdr.eth_proto[1] = 0xFF;
 
-	/* Point to frame header */
-	msgvec[0].iov_base = &frame_hdr;
-	msgvec[0].iov_len  = sizeof(struct ether_frame);
+// 	/* Point to frame header */
+// 	msgvec[0].iov_base = &frame_hdr;
+// 	msgvec[0].iov_len  = sizeof(struct ether_frame);
 
-	/* Allocate a zeroed-out message info struct */
-	msg = (struct msghdr *)calloc(1, sizeof(struct msghdr));
+// 	/* Allocate a zeroed-out message info struct */
+// 	msg = (struct msghdr *)calloc(1, sizeof(struct msghdr));
 
-	/* Fill out message metadata struct */
-	/* host A and C (senders) have only one interface, which is stored in
-	 * the first element of the array when we walked through the interface
-	 * list.
-	 */
-	msg->msg_name	 = &(ifs->addr[0]);
-	msg->msg_namelen = sizeof(struct sockaddr_ll);
-	msg->msg_iovlen	 = 1;
-	msg->msg_iov	 = msgvec;
+// 	/* Fill out message metadata struct */
+// 	/* host A and C (senders) have only one interface, which is stored in
+// 	 * the first element of the array when we walked through the interface
+// 	 * list.
+// 	 */
+// 	msg->msg_name	 = &(ifs->addr[0]);
+// 	msg->msg_namelen = sizeof(struct sockaddr_ll);
+// 	msg->msg_iovlen	 = 1;
+// 	msg->msg_iov	 = msgvec;
 
-	/* Send message via RAW socket */
-	rc = sendmsg(ifs->rsock, msg, 0);
-	if (rc == -1) {
-		perror("sendmsg");
-		free(msg);
-		return -1;
-	}
+// 	/* Send message via RAW socket */
+// 	rc = sendmsg(ifs->rsock, msg, 0);
+// 	if (rc == -1) {
+// 		perror("sendmsg");
+// 		free(msg);
+// 		return -1;
+// 	}
 
-	/* Remember that we allocated this on the heap; free it */
-	free(msg);
+// 	/* Remember that we allocated this on the heap; free it */
+// 	free(msg);
 
-	return rc;
-}
+// 	return rc;
+// }
 
 int handle_arp_packet(struct ifs_data *ifs)
 {
