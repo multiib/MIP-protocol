@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     char *mip_address = NULL;
 
     struct ifs_data ifs;
-    get_mac_from_interfaces(&so_addrs);
+    get_mac_from_interfaces(&ifs);
         // Loop to print the MAC addresses
     for (int i = 0; i < ifs.ifn; i++) {  // ifn would ideally contain the number of populated entries in addr[]
         print_mac_addr(ifs.addr[i].sll_addr, 6);  // The MAC address length is typically 6 bytes
