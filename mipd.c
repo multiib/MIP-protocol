@@ -23,11 +23,11 @@ int main(int argc, char *argv[]) {
     char *socket_upper = NULL;
     char *mip_address = NULL;
 
-    struct ifs_data so_addrs:
+    struct ifs_data ifs;
     get_mac_from_interfaces(&so_addrs);
         // Loop to print the MAC addresses
-    for (int i = 0; i < my_ifs.ifn; i++) {  // ifn would ideally contain the number of populated entries in addr[]
-        print_mac_addr(my_ifs.addr[i].sll_addr, 6);  // The MAC address length is typically 6 bytes
+    for (int i = 0; i < ifs.ifn; i++) {  // ifn would ideally contain the number of populated entries in addr[]
+        print_mac_addr(ifs.addr[i].sll_addr, 6);  // The MAC address length is typically 6 bytes
     }
 
     // Call the function to parse arguments
