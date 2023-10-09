@@ -14,7 +14,7 @@
 #include "utils.h"
 
 
-void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, char **mip_address);
+void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t **mip_address);
 
 int main(int argc, char *argv[]) {
     // Declaration of variables
