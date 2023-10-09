@@ -77,7 +77,6 @@ void get_mac_from_ifaces(struct ifs_data *ifs)
 
 void init_ifs(struct ifs_data *ifs, int rsock, uint8_t mip_addr)
 {
-	uint8_t rand_mip;
 
 	/* Get some info about the local ifaces */
 	get_mac_from_ifaces(ifs);

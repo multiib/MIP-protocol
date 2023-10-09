@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     }
 
     int raw_fd = create_raw_socket();
-    init_ifs(&ifs, raw_fd);
+    init_ifs(&ifs, raw_fd, mip_address);
 
     // Create epoll table
 	int epollfd = epoll_create1(0);
