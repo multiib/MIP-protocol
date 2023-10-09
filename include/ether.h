@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <linux/if_packet.h>
 
+#include "utils.h"
+
 
 #define ETH_HDR_LEN sizeof(struct eth_hdr)
 
