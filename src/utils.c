@@ -21,14 +21,7 @@ void print_mac_addr(uint8_t *addr, size_t len)
 
 
 
-void print_arp_cache() {
-    printf("ARP Cache:\n");
-    for (int i = 0; i < ARP_CACHE_SIZE; ++i) {
-        printf("IP: %u, MAC: ", arp_cache[i].ip);
-        print_mac_addr(arp_cache[i].mac, 6);
-        printf("\n");
-    }
-}
+
 /* Prepare RAW socket */
 int create_raw_socket(void)
 {
@@ -82,7 +75,7 @@ void get_mac_from_ifaces(struct ifs_data *ifs)
 }
 
 
-void init_ifs(struct ifs_data *ifs, int rsock)
+void init_ifs(struct ifs_data *ifs, int rsock, uint8_t mip_addr)
 {
 	uint8_t rand_mip;
 
@@ -97,9 +90,7 @@ void init_ifs(struct ifs_data *ifs, int rsock)
 	 * about what's wrong with the current Internet.
 	 */
 
-	srand(time(0));
-	rand_mip = (uint8_t)(rand() % 256);
-	
-	ifs->local_hip_addr = rand_mip;
+
+	ifs->local_mip_addr = mip_addr;
 }
 

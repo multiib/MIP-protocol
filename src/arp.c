@@ -1,9 +1,19 @@
 #include "arp.h"
 #include <stdlib.h>
 #include <string.h>
+#include "utils.h"
 
 static ArpEntry arp_cache[ARP_CACHE_SIZE];
 static int arp_count = 0;
+
+void print_arp_cache(ArpEntry *arp_cache) {
+    printf("ARP Cache:\n");
+    for (int i = 0; i < ARP_CACHE_SIZE; ++i) {
+        printf("IP: %u, MAC: ", arp_cache[i].ip);
+        print_mac_addr(arp_cache[i].mac, MAC_ADDR_SIZE);
+        printf("\n");
+    }
+}
 
 void arp_init() {
     arp_count = 0;
