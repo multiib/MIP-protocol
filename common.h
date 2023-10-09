@@ -21,7 +21,7 @@ struct ether_frame {
 
 struct ifs_data {
 	struct sockaddr_ll addr[MAX_IF];
-	int rsock[MAX_IF];
+	int rsock;
 	int ifn;
 };
 

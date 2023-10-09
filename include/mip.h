@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define HIP_HDR_LEN	sizeof(struct mip_hdr)
+
+
+#define MIP_HDR_LEN	sizeof(struct mip_hdr)
 
 #define HIP_VERSION	4
 
