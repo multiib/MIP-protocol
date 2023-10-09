@@ -48,44 +48,6 @@ int main(int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
     
-    // Add raw sockets to epoll table
-    for (int i = 0; i < ifs.ifn; i++){
-        ev.data.fd = ifs.rsock[i];
-        ev.events = EPOLLIN | EPOLLOUT; // Poll for both read and write events
-
-        if (epoll_ctl(epollfd, EPOLL_CTL_ADD, ifs.rsock[i], &ev) == -1) {
-            perror("epoll_ctl: add");
-            exit(EXIT_FAILURE);
-        }
-    }
-    // Add UNIX socket to epoll table
-    {
-        ev.data.fd = unix_fd;
-        ev.events = EPOLLIN //| EPOLLOUT; // Poll for both read and write events
-
-        if (epoll_ctl(epollfd, EPOLL_CTL_ADD, unix_fd, &ev) == -1) {
-            perror("epoll_ctl: add");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    send_arp_request(ifs.rsock[0]);
-
-    // Event loop
-    while (1) {
-
-
-        rc = epoll_wait(epollfd, events, 10, -1);
-        if (n == -1) {
-            perror("epoll_wait");
-            exit(EXIT_FAILURE);
-        }
-
-
-
-
-
-
 
     return 0;
 }
