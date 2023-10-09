@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <linux/if_packet.h>
 
-#define MAC_ADDR_SIZE 6
+
 #define ETH_HDR_LEN sizeof(struct eth_hdr)
 
 struct eth_hdr {

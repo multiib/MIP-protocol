@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 
 #include "ether.h"
-#include "hip.h"
+#include "mip.h"
 #include "pdu.h"
 #include "utils.h"
 #include "arp.h"
