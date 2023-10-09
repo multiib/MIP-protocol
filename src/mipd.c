@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 
             ////// Solid work today! TODO: Add handle mip packet function, Add UNIX socket handling, Add ARP handling
 
-			rc = handle_mip_packet(&local_if, argv[1]);
+			rc = handle_mip_packet(&local_if, argv[1]); /////// local does not exist
 			if (rc < 0) {
 				perror("handle_mip_packet");
 				exit(EXIT_FAILURE);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 		}
 		break;
 	}
-	close(raw_sock);
+	close(raw_fd);
 
     return 0;
 }
