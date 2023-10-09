@@ -17,12 +17,12 @@ struct pdu * alloc_pdu(void)
 	pdu->ethhdr = (struct eth_hdr *)malloc(sizeof(struct eth_hdr));
 	pdu->ethhdr->ethertype = htons(0xFFFF);
 	
-	pdu->miphdr = (struct hip_hdr *)malloc(sizeof(struct mip_hdr));
+	pdu->miphdr = (struct mip_hdr *)malloc(sizeof(struct mip_hdr));
         pdu->miphdr->dst = MIP_DST_ADDR;
         pdu->miphdr->src = MIP_DST_ADDR ;
-        pdu->miphdr->ttl = 0x5;
-        pdu->miphdr->sdu_len = SDU_LEN;
-        pdu->miphdr->sdu_type = SDU_TYPE;
+        pdu->miphdr->ttl = 0x0;
+        pdu->miphdr->sdu_len = NULL;
+        pdu->miphdr->sdu_type = NULL;
 
 	return pdu;
 }
@@ -30,7 +30,7 @@ struct pdu * alloc_pdu(void)
 void fill_pdu(struct pdu *pdu,
 	      uint8_t *src_mac_addr,
 	      uint8_t *dst_mac_addr,
-	      uint8_t src_hip_addr,
+	      uint8_t src_mip_addr,
 	      uint8_t dst_mip_addr,
 	      const char *sdu,
 	      uint8_t pkt_type)
@@ -49,7 +49,7 @@ void fill_pdu(struct pdu *pdu,
     }
 	else (pkt_type == 1){
 		pdu->miphdr->type = ARP_TYPE_MATCH;
-    }
+    };
 
 	slen = strlen(sdu) + 1;
 
@@ -103,7 +103,7 @@ size_t mip_deserialize_pdu(struct pdu *pdu, uint8_t *rcv_buf)
 	memcpy(pdu->ethhdr, rcv_buf + rcv_len, ETH_HDR_LEN);
 	rcv_len += ETH_HDR_LEN;
 
-	pdu->miphdr = (struct hip_hdr *)malloc(MIP_HDR_LEN);
+	pdu->miphdr = (struct mip_hdr *)malloc(MIP_HDR_LEN);
 	uint32_t *tmp = (uint32_t *) (rcv_buf + rcv_len);
 	uint32_t header = ntohl(*tmp);
 	pdu->miphdr->dst = (uint8_t) (header >> 24);
