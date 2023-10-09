@@ -1,34 +1,54 @@
+# Compiler to use
 CC = gcc
-CFLAGS = -Wall -Wextra #-std=c99
-LDFLAGS =
 
-COMMON_SRC = common.c
-MIPD_SRC = mipd.c
-PING_SERVER_SRC = ping_server.c
-PING_CLIENT_SRC = ping_client.c
+# Compiler flags
+CFLAGS = -Wall -I./include
 
-COMMON_OBJ = $(COMMON_SRC:.c=.o)
-MIPD_OBJ = $(MIPD_SRC:.c=.o)
-PING_SERVER_OBJ = $(PING_SERVER_SRC:.c=.o)
-PING_CLIENT_OBJ = $(PING_CLIENT_SRC:.c=.o)
+# Source directory
+SRC_DIR = ./src
 
-MIPD_EXE = mipd
-PING_SERVER_EXE = ping_server
-PING_CLIENT_EXE = ping_client
+# Object directory
+OBJ_DIR = ./obj
 
-all: $(MIPD_EXE) $(PING_SERVER_EXE) $(PING_CLIENT_EXE)
+# Executable directory
+BIN_DIR = ./bin
 
-$(MIPD_EXE): $(COMMON_OBJ) $(MIPD_OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+# Source files
+SRC_FILES = arp.c mipd.c ping_client.c ping_server.c utils.c pdu.c
 
-$(PING_SERVER_EXE): $(COMMON_OBJ) $(PING_SERVER_OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+# Object files
+OBJ_FILES = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o)
 
-$(PING_CLIENT_EXE): $(COMMON_OBJ) $(PING_CLIENT_OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
+# Executables
+EXE_FILES = mipd ping_client ping_server
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+# Executable paths
+EXE_PATHS = $(EXE_FILES:%=$(BIN_DIR)/%)
 
+all: directories $(EXE_PATHS)
+
+# Rule to make directories
+directories:
+	mkdir -p $(OBJ_DIR) $(BIN_DIR)
+
+# General rule for making object files
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Rule for making mipd executable
+$(BIN_DIR)/mipd: $(OBJ_DIR)/mipd.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+# Rule for making ping_client executable
+$(BIN_DIR)/ping_client: $(OBJ_DIR)/ping_client.o $(OBJ_DIR)/utils.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+# Rule for making ping_server executable
+$(BIN_DIR)/ping_server: $(OBJ_DIR)/ping_server.o $(OBJ_DIR)/utils.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+# Rule for cleaning the project
 clean:
-	rm -f $(COMMON_OBJ) $(MIPD_OBJ) $(PING_SERVER_OBJ) $(PING_CLIENT_OBJ) $(MIPD_EXE) $(PING_SERVER_EXE) $(PING_CLIENT_EXE)
+	rm -f $(OBJ_DIR)/*.o $(EXE_PATHS)
+
+.PHONY: all directories clean

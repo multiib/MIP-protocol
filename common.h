@@ -12,22 +12,22 @@
 
 
 struct ether_frame {
-    uint8_t dest_addr : 8;    // Destination MIP address
+    uint8_t dst_addr : 8;     // Destination MIP address
     uint8_t src_addr : 8;     // Source MIP address
     uint8_t ttl : 4;          // Time To Live
-    uint16_t  : 9;     // SDU length
+    uint16_t : 9;             // SDU length
     uint8_t sdu_type : 3;     // SDU type
 } __attribute__((packed));
 
 struct ifs_data {
 	struct sockaddr_ll addr[MAX_IF];
-	int rsock;
+	int rsock[MAX_IF];
 	int ifn;
 };
 
-void get_mac_from_interfaces(struct ifs_data *);
+void init_ifs(struct ifs_data *);
 void print_mac_addr(uint8_t *, size_t);
-void init_ifs(struct ifs_data *, int);
+// void init_ifs(struct ifs_data *, int);
 int create_raw_socket(void);
 int send_arp_request(struct ifs_data *);
 int send_arp_response(struct ifs_data *,
