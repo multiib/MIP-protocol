@@ -16,8 +16,8 @@
 #define MIP_DST_ADDR	0xff
 
 struct mip_hdr {
-    uint8_t dst_addr : 8;     // Destination MIP address
-    uint8_t src_addr : 8;     // Source MIP address
+    uint8_t dst : 8;     // Destination MIP address
+    uint8_t src : 8;     // Source MIP address
     uint8_t ttl : 4;          // Time To Live
     uint16_t sdu_len : 9;     // SDU length
     uint8_t sdu_type : 3;     // SDU type

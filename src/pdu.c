@@ -44,11 +44,12 @@ void fill_pdu(struct pdu *pdu,
         pdu->miphdr->dst = dst_mip_addr;
         pdu->miphdr->src = src_mip_addr;
 
-	if (!pkt_type)
+	if (!pkt_type){
 		pdu->miphdr->type = ARP_TYPE_LOOKUP;
-	else (pkt_type == 1)
+    }
+	else (pkt_type == 1){
 		pdu->miphdr->type = ARP_TYPE_MATCH;
-
+    }
 
 	slen = strlen(sdu) + 1;
 
@@ -102,7 +103,7 @@ size_t mip_deserialize_pdu(struct pdu *pdu, uint8_t *rcv_buf)
 	memcpy(pdu->ethhdr, rcv_buf + rcv_len, ETH_HDR_LEN);
 	rcv_len += ETH_HDR_LEN;
 
-	pdu->miphdr = (struct hip_hdr *)malloc(HIP_HDR_LEN);
+	pdu->miphdr = (struct hip_hdr *)malloc(MIP_HDR_LEN);
 	uint32_t *tmp = (uint32_t *) (rcv_buf + rcv_len);
 	uint32_t header = ntohl(*tmp);
 	pdu->miphdr->dst = (uint8_t) (header >> 24);
@@ -110,7 +111,7 @@ size_t mip_deserialize_pdu(struct pdu *pdu, uint8_t *rcv_buf)
 	pdu->miphdr->ttl = (size_t) (((header >> 12) & 0xf));
 	pdu->miphdr->sdu_len = (uint8_t) ((header >> 3) & 0x3f);
 	pdu->miphdr->sdu_type = (uint8_t) (header & 0xf);
-	rcv_len += HIP_HDR_LEN;
+	rcv_len += MIP_HDR_LEN;
 
 	pdu->sdu = (uint8_t *)calloc(1, pdu->miphdr->sdu_len * 4);
 	memcpy(pdu->sdu, rcv_buf + rcv_len, pdu->miphdr->sdu_len * 4);
@@ -130,9 +131,9 @@ void print_pdu_content(struct pdu *pdu)
 
 	printf("\t Source MIP address: %u\n", pdu->miphdr->src);
 	printf("\t Destination MIP address: %u\n", pdu->miphdr->dst);
-	printf("\t SDU length: %d\n", pdu->miphdr->len * 4);
-	printf("\t MIP protocol version: %u\n", pdu->miphdr->version);
-	printf("\t PDU type: 0x%02x\n", pdu->miphdr->type);
+    printf("\t TTL: %d\n", pdu->miphdr->ttl);
+	printf("\t SDU length: %d\n", pdu->miphdr->sdu_len * 4);
+    printf("\t SDU type: %d\n", pdu->miphdr->sdu_type);
 
 	printf("\t SDU: %s\n", pdu->sdu);
 	printf("====================================================\n");
