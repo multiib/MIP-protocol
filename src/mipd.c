@@ -18,8 +18,9 @@ void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_uppe
 
 int main(int argc, char *argv[]) {
     // Declaration of variables
-    int rc;                    // Return code
-    struct epoll_event ev, events[MAX_EVENTS]; // Epoll events
+
+    struct epoll_event events[MAX_EVENTS]; // Epoll events
+    int raw_fd, efd, rc;
 
     // To be set by CLI
     int debug_mode = 0;        // Debug flag
@@ -38,16 +39,39 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    int raw_fd = create_raw_socket();
+    // Create RAW socket
+    raw_fd = create_raw_socket();
+    if (raw_fd == -1) {
+        perror("create_raw_socket");
+        exit(EXIT_FAILURE);
+    }
+
+    // Get MAC addresses from interfaces
     init_ifs(&ifs, raw_fd, mip_address);
 
-    // Create epoll table
-	int epollfd = epoll_create1(0);
-	if (epollfd == -1) {
-		perror("epoll_create1");
-		exit(EXIT_FAILURE);
+
+
+    /* Add socket to epoll table */
+	efd = epoll_add_sock(raw_fd);
+
+	while(1) {
+		rc = epoll_wait(efd, events, MAX_EVENTS, -1);
+		if (rc == -1) {
+			perror("epoll_wait");
+			exit(EXIT_FAILURE);
+		} else if (events->data.fd == raw_fd) {
+
+            ////// Solid work today! TODO: Add handle mip packet function, Add UNIX socket handling, Add ARP handling
+
+			rc = handle_mip_packet(&local_if, argv[1]);
+			if (rc < 0) {
+				perror("handle_mip_packet");
+				exit(EXIT_FAILURE);
+			}
+		}
+		break;
 	}
-    
+	close(raw_sock);
 
     return 0;
 }

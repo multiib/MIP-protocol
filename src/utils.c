@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "arp.h"
 
+
 // Print MAC address in hex format
 void print_mac_addr(uint8_t *addr, size_t len)
 {
@@ -93,3 +94,34 @@ void init_ifs(struct ifs_data *ifs, int rsock, uint8_t mip_addr)
 	ifs->local_mip_addr = mip_addr;
 }
 
+u_int32_t create_sdu(int sdu_type, uint8_t mip_addr){
+    u_int32_t sdu = 0;
+    if (sdu_type){
+        sdu |= (1 << 31);
+    }
+
+    sdu |= (mip_addr << 23);
+    return sdu;
+}
+
+int epoll_add_sock(int sd)
+{
+	struct epoll_event ev;
+
+	/* Create epoll table */
+	int epollfd = epoll_create1(0);
+	if (epollfd == -1) {
+		perror("epoll_create1");
+		exit(EXIT_FAILURE);
+	}
+
+	/* Add RAW socket to epoll table */
+	ev.events = EPOLLIN;
+	ev.data.fd = sd;
+	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sd, &ev) == -1) {
+		perror("epoll_ctl: raw_sock");
+		exit(EXIT_FAILURE);
+	}
+
+	return epollfd;
+}

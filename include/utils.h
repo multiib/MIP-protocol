@@ -10,6 +10,9 @@
 
 #define MAC_ADDR_SIZE 6
 
+#define SDU_TYPE_LOOKUP 0
+#define SDU_TYPE_MATCH  1
+
 struct ifs_data {
 	struct sockaddr_ll addr[MAX_IF];
 	int rsock;
@@ -21,5 +24,7 @@ void print_mac_addr(uint8_t *, size_t);
 int create_raw_socket(void);
 void get_mac_from_ifaces(struct ifs_data *);
 void init_ifs(struct ifs_data *, int, uint8_t);
+u_int32_t create_sdu(int, uint8_t);
+int epoll_add_sock(int);
 
 #endif
