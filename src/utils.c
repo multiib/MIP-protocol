@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include <stdint.h>
 
-#include "utils.c"
+#include "utils.h"
 #include "arp.h"
 
 // Print MAC address in hex format
@@ -33,7 +33,7 @@ void print_arp_cache() {
 int create_raw_socket(void)
 {
 	int sd;
-	short unsigned int protocol = 0xBB88;
+	short unsigned int protocol = 0xFFFF;
 
 	/* Set up a raw AF_PACKET socket without ethertype filtering */
 	sd = socket(AF_PACKET, SOCK_RAW, htons(protocol));
