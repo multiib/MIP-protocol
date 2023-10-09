@@ -14,7 +14,7 @@
 #include "utils.h"
 
 
-void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t **mip_address);
+void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *mip_address);
 
 int main(int argc, char *argv[]) {
     // Declaration of variables
@@ -38,8 +38,8 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    // Call the function to get MAC addresses and set up raw sockets
-    init_ifs(&ifs);
+    int raw_fd = create_raw_socket();
+    init_ifs(&ifs, raw_fd);
 
     // Create epoll table
 	int epollfd = epoll_create1(0);

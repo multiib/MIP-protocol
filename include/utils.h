@@ -16,6 +16,7 @@ struct ifs_data {
 
 void print_mac_addr(uint8_t *, size_t);
 void print_arp_cache();
+int create_raw_socket(void);
 void get_mac_from_ifaces(struct ifs_data *);
 void init_ifs(struct ifs_data *, int);
 

@@ -29,7 +29,21 @@ void print_arp_cache() {
         printf("\n");
     }
 }
+/* Prepare RAW socket */
+int create_raw_socket(void)
+{
+	int sd;
+	short unsigned int protocol = 0xBB88;
 
+	/* Set up a raw AF_PACKET socket without ethertype filtering */
+	sd = socket(AF_PACKET, SOCK_RAW, htons(protocol));
+	if (sd == -1) {
+		perror("socket");
+		exit(EXIT_FAILURE);
+	}
+
+	return sd;
+}
 
 /*
  * This function stores struct sockaddr_ll addresses for all interfaces of the
@@ -88,3 +102,4 @@ void init_ifs(struct ifs_data *ifs, int rsock)
 	
 	ifs->local_hip_addr = rand_mip;
 }
+
