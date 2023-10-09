@@ -18,11 +18,11 @@ struct pdu * alloc_pdu(void)
 	pdu->ethhdr->ethertype = htons(0xFFFF);
 	
 	pdu->miphdr = (struct mip_hdr *)malloc(sizeof(struct mip_hdr));
-        pdu->miphdr->dst = MIP_DST_ADDR;
-        pdu->miphdr->src = MIP_DST_ADDR ;
-        pdu->miphdr->ttl = 0x0;
-        pdu->miphdr->sdu_len = NULL;
-        pdu->miphdr->sdu_type = NULL;
+        // pdu->miphdr->dst = MIP_DST_ADDR;
+        // pdu->miphdr->src = MIP_DST_ADDR ;
+        // pdu->miphdr->ttl = 0x0;
+        // pdu->miphdr->sdu_len = NULL;
+        // pdu->miphdr->sdu_type = NULL;
 
 	return pdu;
 }
@@ -45,11 +45,14 @@ void fill_pdu(struct pdu *pdu,
         pdu->miphdr->src = src_mip_addr;
 
 	if (!pkt_type){
-		pdu->miphdr->type = ARP_TYPE_LOOKUP;
+		pdu->miphdr->sdu_type = ARP_TYPE_LOOKUP;
     }
-	else (pkt_type == 1){
-		pdu->miphdr->type = ARP_TYPE_MATCH;
-    };
+	if (pkt_type == 1){
+		pdu->miphdr->sdu_type = ARP_TYPE_MATCH;
+    }else{
+        perror("Invalid packet type");
+        exit(EXIT_FAILURE);
+    }
 
 	slen = strlen(sdu) + 1;
 
@@ -58,7 +61,7 @@ void fill_pdu(struct pdu *pdu,
 		slen = slen + (4 - (slen % 4));
 
 	/* to get the real SDU length in bytes, the len value is multiplied by 4 */
-        pdu->miphdr->len = slen / 4;
+        pdu->miphdr->sdu_len = slen / 4;
 
 	pdu->sdu = (uint8_t *)calloc(1, slen);
 	memcpy(pdu->sdu, sdu, slen);
