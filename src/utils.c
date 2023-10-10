@@ -7,6 +7,7 @@
 #include <linux/if_packet.h>
 #include <net/ethernet.h>
 #include <arpa/inet.h>
+#include <ifaddrs.h>
 
 
 #include "utils.h"
