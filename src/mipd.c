@@ -38,7 +38,6 @@ int main(int argc, char *argv[]) {
     epoll_fd = epoll_create1(0);
     if (epoll_fd == -1) {
             perror("epoll_create1");
-            close(sd);
             exit(EXIT_FAILURE);
     }
 
