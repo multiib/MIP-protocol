@@ -116,8 +116,8 @@ int add_to_epoll_table(int efd, int fd)
 
 		struct  epoll_event ev;
 		
-		ev->events = EPOLLIN;
-		ev->data.fd = fd;
+		ev.events = EPOLLIN;
+		ev.data.fd = fd;
 		if (epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ev) == -1) {
 				perror("epoll_ctl");
 				rc = -1;
