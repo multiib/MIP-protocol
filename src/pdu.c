@@ -45,10 +45,10 @@ void fill_pdu(struct pdu *pdu,
         pdu->miphdr->src = src_mip_addr;
 
 	if (!pkt_type){
-		pdu->miphdr->sdu_type = ARP_TYPE_LOOKUP;
+		pdu->miphdr->sdu_type = SDU_TYPE_LOOKUP;
     }
 	if (pkt_type == 1){
-		pdu->miphdr->sdu_type = ARP_TYPE_MATCH;
+		pdu->miphdr->sdu_type = SDU_TYPE_MATCH;
     }else{
         perror("Invalid packet type");
         exit(EXIT_FAILURE);
