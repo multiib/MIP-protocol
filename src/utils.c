@@ -1,9 +1,13 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <string.h>
-#include <ifaddrs.h>
+#include <sys/socket.h>
+#include <sys/epoll.h>
+#include <linux/if_packet.h>
+#include <net/ethernet.h>
 #include <arpa/inet.h>
-#include <stdint.h>
+
 
 #include "utils.h"
 #include "arp.h"
@@ -105,13 +109,15 @@ u_int32_t create_sdu_miparp(int sdu_type, uint8_t mip_addr){
     return sdu;
 }
 
-int add_to_epoll_table(int efd, struct epoll_event *ev, int fd)
+int add_to_epoll_table(int efd, int fd)
 {
 		int rc = 0;
 
+		struct  epoll_event ev;
+		
 		ev->events = EPOLLIN;
 		ev->data.fd = fd;
-		if (epoll_ctl(efd, EPOLL_CTL_ADD, fd, ev) == -1) {
+		if (epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ev) == -1) {
 				perror("epoll_ctl");
 				rc = -1;
 		}

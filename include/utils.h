@@ -25,7 +25,7 @@ int create_raw_socket(void);
 void get_mac_from_ifaces(struct ifs_data *);
 void init_ifs(struct ifs_data *, int, uint8_t);
 u_int32_t create_sdu_miparp(int, uint8_t);
-int add_to_epoll_table(int, struct epoll_event *, int);
+int add_to_epoll_table(int, int);
 void handle_client(int);
 
 #endif

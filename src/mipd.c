@@ -21,7 +21,7 @@ void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_uppe
 int main(int argc, char *argv[]) {
     // Declaration of variables
 
-    struct epoll_event ev, events[MAX_EVENTS]; // Epoll events
+    struct epoll_event events[MAX_EVENTS]; // Epoll events
     int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
 
     // To be set by CLI
@@ -58,14 +58,14 @@ int main(int argc, char *argv[]) {
 
 
     // Add RAW socket to epoll instance
-    rc = add_to_epoll_table(epoll_fd, &ev, raw_fd);
+    rc = add_to_epoll_table(epoll_fd, raw_fd);
     if (rc == -1) {
         perror("add_to_epoll_table");
         exit(EXIT_FAILURE);
     }
 
     // Add UNIX listening socket to epoll instance
-    rc = add_to_epoll_table(epoll_fd, &ev, listening_fd);
+    rc = add_to_epoll_table(epoll_fd, listening_fd);
     if (rc == -1) {
         perror("add_to_epoll_table");
         exit(EXIT_FAILURE);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
             }
 
-            rc = add_to_epoll_table(epoll_fd, &ev, unix_fd);
+            rc = add_to_epoll_table(epoll_fd, unix_fd);
             if (rc == -1) {
                 perror("add_to_epoll_table");
                 exit(EXIT_FAILURE);
