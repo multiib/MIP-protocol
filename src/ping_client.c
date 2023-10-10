@@ -7,6 +7,7 @@
 #include <sys/socket.h>	/* sockets operations */
 #include <sys/un.h>		/* definitions for UNIX domain sockets */
 #include "ipc.h"
+#include "utils.h"
 
 // Declaration of the parse_arguments function
 void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message);
@@ -16,15 +17,13 @@ int main(int argc, char *argv[]) {
     char *destination_host = NULL;
     char *message = NULL;
 
-    struct epoll_event ev, events[MAX_EVENTS];
-	int sd, accept_sd, epollfd, rc;
+	int sd, rc;
 
     // Call the function to parse arguments
     parse_arguments(argc, argv, &socket_lower, &destination_host, &message);
 
     
     struct sockaddr_un addr;
-    int	   sd, rc;
     char   buf[256];
 
     sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
@@ -35,7 +34,7 @@ int main(int argc, char *argv[]) {
 
     memset(&addr, 0, sizeof(addr));
     addr.sun_family = AF_UNIX;
-    strncpy(addr.sun_path, *socket_lower, sizeof(addr.sun_path) - 1);
+    strncpy(addr.sun_path, socket_lower, sizeof(addr.sun_path) - 1);
 
     rc = connect(sd, (struct sockaddr *)&addr, sizeof(addr));
     if ( rc < 0) {
