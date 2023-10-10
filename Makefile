@@ -14,7 +14,7 @@ OBJ_DIR = ./obj
 BIN_DIR = ./bin
 
 # Source files
-SRC_FILES = arp.c mipd.c ping_client.c ping_server.c utils.c pdu.c
+SRC_FILES = arp.c mipd.c ping_client.c ping_server.c utils.c pdu.c ipc.c
 
 # Object files
 OBJ_FILES = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o)
@@ -36,7 +36,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Rule for making mipd executable
-$(BIN_DIR)/mipd: $(OBJ_DIR)/mipd.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o
+$(BIN_DIR)/mipd: $(OBJ_DIR)/mipd.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for making ping_client executable

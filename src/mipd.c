@@ -12,6 +12,8 @@
 #include "ether.h"
 #include "pdu.h"
 #include "utils.h"
+#include "mip.h"
+#include "ipc.h"
 
 
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *mip_address);
@@ -19,24 +21,25 @@ void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_uppe
 int main(int argc, char *argv[]) {
     // Declaration of variables
 
-    struct epoll_event events[MAX_EVENTS]; // Epoll events
-    int raw_fd, efd, rc;
+    struct epoll_event ev, events[MAX_EVENTS]; // Epoll events
+    int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
 
     // To be set by CLI
     int debug_mode = 0;        // Debug flag
-    char *socket_upper = NULL; // UNIX socket path
+    char *socket_upper;        // UNIX socket path
     uint8_t mip_address;       // MIP Adress
 
-    struct ifs_data ifs; // Struct to hold MAC addresses, corresponding raw sockets and number of interfaces
+    struct ifs_data ifs; // Struct to hold MAC addresses
 
     // Parse arguments
     parse_arguments(argc, argv, &debug_mode, &socket_upper, &mip_address);
 
-    // Create UNIX socket TODO: Create function for this
-    int unix_fd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
-    if (unix_fd == -1) {
-        perror("socket");
-        exit(EXIT_FAILURE);
+    // Create epoll instance
+    epoll_fd = epoll_create1(0);
+    if (epoll_fd == -1) {
+            perror("epoll_create1");
+            close(sd);
+            exit(EXIT_FAILURE);
     }
 
     // Create RAW socket
@@ -50,25 +53,58 @@ int main(int argc, char *argv[]) {
     init_ifs(&ifs, raw_fd, mip_address);
 
 
+    // Create UNIX listening socket
+    listening_fd = create_unix_sock(socket_upper);
 
-    /* Add socket to epoll table */
-	efd = epoll_add_sock(raw_fd);
+
+
+    // Add RAW socket to epoll instance
+    rc = add_to_epoll_table(epoll_fd, &ev, raw_fd);
+    if (rc == -1) {
+        perror("add_to_epoll_table");
+        exit(EXIT_FAILURE);
+    }
+
+    // Add UNIX listening socket to epoll instance
+    rc = add_to_epoll_table(epoll_fd, &ev, listening_fd);
+    if (rc == -1) {
+        perror("add_to_epoll_table");
+        exit(EXIT_FAILURE);
+    }
+
+
 
 	while(1) {
-		rc = epoll_wait(efd, events, MAX_EVENTS, -1);
+		rc = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
 		if (rc == -1) {
 			perror("epoll_wait");
 			exit(EXIT_FAILURE);
+
+		} else if (events->data.fd == listening_fd) {
+
+            unix_fd = accept(listening_fd, NULL, NULL);
+            if (unix_fd == -1) {
+                perror("accept");
+                exit(EXIT_FAILURE);
+            }
+
+            rc = add_to_epoll_table(epoll_fd, &ev, unix_fd);
+            if (rc == -1) {
+                perror("add_to_epoll_table");
+                exit(EXIT_FAILURE);
+            }
 		} else if (events->data.fd == raw_fd) {
+            // Handle RAW socket
+            //handle_raw_socket(raw_fd, &ifs, debug_mode);
+            printf("RAW socket\n");
+        } else {
+            // Handle UNIX socket
+            //handle_unix_socket(events->data.fd, &ifs, debug_mode);
+            printf("UNIX socket\n");
+            handle_client(events->data.fd);
+        }
 
-            ////// Solid work today! TODO: Add handle mip packet function, Add UNIX socket handling, Add ARP handling
 
-			rc = handle_mip_packet(&local_if, argv[1]); /////// local does not exist
-			if (rc < 0) {
-				perror("handle_mip_packet");
-				exit(EXIT_FAILURE);
-			}
-		}
 		break;
 	}
 	close(raw_fd);

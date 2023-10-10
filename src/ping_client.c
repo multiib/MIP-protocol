@@ -1,6 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <stdio.h>		/* standard input/output library functions */
+#include <stdlib.h>		/* standard library definitions (macros) */
+#include <unistd.h>		/* standard symbolic constants and types */
+#include <string.h>		/* string operations (strncpy, memset..) */
+
+#include <sys/epoll.h>	/* epoll */
+#include <sys/socket.h>	/* sockets operations */
+#include <sys/un.h>		/* definitions for UNIX domain sockets */
+#include "ipc.h"
 
 // Declaration of the parse_arguments function
 void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message);
@@ -10,16 +16,49 @@ int main(int argc, char *argv[]) {
     char *destination_host = NULL;
     char *message = NULL;
 
+    struct epoll_event ev, events[MAX_EVENTS];
+	int sd, accept_sd, epollfd, rc;
+
     // Call the function to parse arguments
     parse_arguments(argc, argv, &socket_lower, &destination_host, &message);
 
-    // Now you can use 'socket_lower', 'destination_host', and 'message' in your program
+    
+    struct sockaddr_un addr;
+    int	   sd, rc;
+    char   buf[256];
 
-    // Example: Print the values
-    printf("Socket lower: %s\n", socket_lower);
-    printf("Destination host: %s\n", destination_host);
-    printf("Message: %s\n", message);
+    sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    if (sd < 0) {
+            perror("socket");
+            exit(EXIT_FAILURE);
+    }
 
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, *socket_lower, sizeof(addr.sun_path) - 1);
+
+    rc = connect(sd, (struct sockaddr *)&addr, sizeof(addr));
+    if ( rc < 0) {
+            perror("connect");
+            close(sd);
+            exit(EXIT_FAILURE);
+    }
+
+
+
+    do {
+            memset(buf, 0, sizeof(buf));
+
+            fgets(buf, sizeof(buf), stdin);
+
+            rc = write(sd, buf, strlen(buf));
+            if (rc < 0) {
+                    perror("write");
+                    close(sd);
+                    exit(EXIT_FAILURE);
+            }
+    } while (1);
+    
     return 0;
 }
 

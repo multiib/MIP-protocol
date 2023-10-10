@@ -10,8 +10,7 @@
 
 #define HIP_VERSION	4
 
-#define ARP_TYPE_LOOKUP 0
-#define ARP_TYPE_MATCH  1
+
 
 #define MIP_DST_ADDR	0xff
 

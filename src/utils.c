@@ -7,6 +7,7 @@
 
 #include "utils.h"
 #include "arp.h"
+#include "ether.h"
 
 
 // Print MAC address in hex format
@@ -27,7 +28,7 @@ void print_mac_addr(uint8_t *addr, size_t len)
 int create_raw_socket(void)
 {
 	int sd;
-	short unsigned int protocol = 0xFFFF;
+	short unsigned int protocol = ETH_P_MIP;
 
 	/* Set up a raw AF_PACKET socket without ethertype filtering */
 	sd = socket(AF_PACKET, SOCK_RAW, htons(protocol));
@@ -94,7 +95,7 @@ void init_ifs(struct ifs_data *ifs, int rsock, uint8_t mip_addr)
 	ifs->local_mip_addr = mip_addr;
 }
 
-u_int32_t create_sdu(int sdu_type, uint8_t mip_addr){
+u_int32_t create_sdu_miparp(int sdu_type, uint8_t mip_addr){
     u_int32_t sdu = 0;
     if (sdu_type){
         sdu |= (1 << 31);
@@ -104,24 +105,39 @@ u_int32_t create_sdu(int sdu_type, uint8_t mip_addr){
     return sdu;
 }
 
-int epoll_add_sock(int sd)
+int add_to_epoll_table(int efd, struct epoll_event *ev, int fd)
 {
-	struct epoll_event ev;
+		int rc = 0;
 
-	/* Create epoll table */
-	int epollfd = epoll_create1(0);
-	if (epollfd == -1) {
-		perror("epoll_create1");
-		exit(EXIT_FAILURE);
-	}
+		ev->events = EPOLLIN;
+		ev->data.fd = fd;
+		if (epoll_ctl(efd, EPOLL_CTL_ADD, fd, ev) == -1) {
+				perror("epoll_ctl");
+				rc = -1;
+		}
 
-	/* Add RAW socket to epoll table */
-	ev.events = EPOLLIN;
-	ev.data.fd = sd;
-	if (epoll_ctl(epollfd, EPOLL_CTL_ADD, sd, &ev) == -1) {
-		perror("epoll_ctl: raw_sock");
-		exit(EXIT_FAILURE);
-	}
+		return rc;
+}
 
-	return epollfd;
+void handle_client(int fd)
+{
+		char buf[256];
+		int rc;
+
+		/* The memset() function fills the first 'sizeof(buf)' bytes
+		 * of the memory area pointed to by 'buf' with the constant byte 0.
+		 */
+		memset(buf, 0, sizeof(buf));
+
+		/* read() attempts to read up to 'sizeof(buf)' bytes from file
+		 * descriptor fd into the buffer starting at buf.
+		 */
+		rc = read(fd, buf, sizeof(buf));
+		if (rc <= 0) {
+				close(fd);
+				printf("<%d> left the chat...\n", fd);
+				return;
+		}
+
+		printf("<%d>: %s\n", fd, buf);
 }

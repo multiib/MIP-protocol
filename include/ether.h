@@ -1,5 +1,5 @@
-#ifndef _ETHER_H
-#define _ETHER_H
+#ifndef _ETHER_H_
+#define _ETHER_H_
 
 #include <stdint.h>
 #include <unistd.h>
@@ -7,7 +7,7 @@
 
 #include "utils.h"
 
-
+#define ETH_P_MIP 0x88B5
 #define ETH_HDR_LEN sizeof(struct eth_hdr)
 
 struct eth_hdr {
