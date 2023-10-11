@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
             close(sd);
             exit(EXIT_FAILURE);
     }
+    printf("Connected to %s\n", socket_lower);
 
 
 
