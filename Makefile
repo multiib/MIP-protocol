@@ -23,7 +23,7 @@ OBJ_FILES = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o)
 EXE_FILES = mipd ping_client ping_server
 
 # Executable paths
-EXE_PATHS = $(EXE_FILES:%=$(BIN_DIR)/%)
+EXE_PATHS = $(EXE_FILES)
 
 all: directories $(EXE_PATHS)
 
