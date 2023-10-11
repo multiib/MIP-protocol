@@ -142,7 +142,6 @@ void handle_client(int fd)
 		rc = read(fd, buf, sizeof(buf));
 		if (rc <= 0) {
 				close(fd);
-				printf("<%d> left the chat...\n", fd);
 				return;
 		}
 
