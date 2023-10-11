@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
                 perror("add_to_epoll_table");
                 exit(EXIT_FAILURE);
             }
-            printf("Added to epoll table\n")
+            printf("Added to epoll table\n");
 		} else if (events->data.fd == raw_fd) {
             printf("RAW socket\n");
             // Handle RAW socket
