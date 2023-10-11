@@ -10,9 +10,6 @@ SRC_DIR = ./src
 # Object directory
 OBJ_DIR = ./obj
 
-# Executable directory
-BIN_DIR = ./bin
-
 # Source files
 SRC_FILES = arp.c mipd.c ping_client.c ping_server.c utils.c pdu.c ipc.c
 
@@ -22,29 +19,29 @@ OBJ_FILES = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o)
 # Executables
 EXE_FILES = mipd ping_client ping_server
 
-# Executable paths
+# Executable paths (now just the names, so they'll be in the WD)
 EXE_PATHS = $(EXE_FILES)
 
 all: directories $(EXE_PATHS)
 
 # Rule to make directories
 directories:
-	mkdir -p $(OBJ_DIR) $(BIN_DIR)
+	mkdir -p $(OBJ_DIR)
 
 # General rule for making object files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Rule for making mipd executable
-$(BIN_DIR)/mipd: $(OBJ_DIR)/mipd.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o
+mipd: $(OBJ_DIR)/mipd.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for making ping_client executable
-$(BIN_DIR)/ping_client: $(OBJ_DIR)/ping_client.o $(OBJ_DIR)/utils.o
+ping_client: $(OBJ_DIR)/ping_client.o $(OBJ_DIR)/utils.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for making ping_server executable
-$(BIN_DIR)/ping_server: $(OBJ_DIR)/ping_server.o $(OBJ_DIR)/utils.o
+ping_server: $(OBJ_DIR)/ping_server.o $(OBJ_DIR)/utils.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for cleaning the project
