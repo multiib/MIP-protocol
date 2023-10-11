@@ -20,7 +20,7 @@ void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_uppe
 
 int main(int argc, char *argv[]) {
     // Declaration of variables
-
+    printf("Starting MIP daemon...\n");
     struct epoll_event events[MAX_EVENTS]; // Epoll events
     int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
 
