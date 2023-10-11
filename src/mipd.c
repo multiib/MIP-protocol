@@ -82,10 +82,12 @@ int main(int argc, char *argv[]) {
 		} else if (events->data.fd == listening_fd) {
 
             unix_fd = accept(listening_fd, NULL, NULL);
+
             if (unix_fd == -1) {
                 perror("accept");
                 exit(EXIT_FAILURE);
             }
+            printf("New connection\n");
 
             rc = add_to_epoll_table(epoll_fd, unix_fd);
             if (rc == -1) {
