@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
     
     struct sockaddr_un addr;
     char   buf[256];
+    char read_buf[256];
 
     sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (sd < 0) {
@@ -46,22 +47,26 @@ int main(int argc, char *argv[]) {
 
 
 
-    do {
-            memset(buf, 0, sizeof(buf));
 
-            fgets(buf, sizeof(buf), stdin);
+    fill_ping_buf(buf, sizeof(buf), destination_host, message);
 
-            //print buffer
-            printf("Sending: %s\n", buf);
 
-            rc = write(sd, buf, strlen(buf));
-            if (rc < 0) {
-                    perror("write");
-                    close(sd);
-                    exit(EXIT_FAILURE);
-            }
-    } while (1);
-    
+    rc = write(sd, buf, strlen(buf));
+    if (rc < 0) {
+            perror("write");
+            close(sd);
+            exit(EXIT_FAILURE);
+    }
+
+    // Read from socket
+    rc = read(sd, read_buf, sizeof(read_buf) - 1);
+    if (rc < 0) {
+        perror("read");
+        close(sd);
+        exit(EXIT_FAILURE);
+    }
+
+    close(sd);
     return 0;
 }
 

@@ -27,5 +27,7 @@ void init_ifs(struct ifs_data *, int, uint8_t);
 u_int32_t create_sdu_miparp(int, uint8_t);
 int add_to_epoll_table(int, int);
 void handle_client(int);
+void fill_ping_buf(char *, size_t, const char *, const char *);
+
 
 #endif

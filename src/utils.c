@@ -147,3 +147,21 @@ void handle_client(int fd)
 
 		printf("<%d>: %s\n", fd, buf);
 }
+
+void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message) {
+    // Initialize the buffer to zeros
+    memset(buf, 0, buf_size);
+
+    // Add destination_host to buf
+    if (destination_host != NULL) {
+        strcpy(buf, destination_host);
+    }
+
+    // Add "PING:"
+    strcat(buf, "PING:");
+
+    // Then add message
+    if (message != NULL) {
+        strcat(buf, message);
+    }
+}
