@@ -51,6 +51,9 @@ int main(int argc, char *argv[]) {
 
             fgets(buf, sizeof(buf), stdin);
 
+            //print buffer
+            printf("Sending: %s\n", buf);
+
             rc = write(sd, buf, strlen(buf));
             if (rc < 0) {
                     perror("write");
