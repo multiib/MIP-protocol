@@ -15,14 +15,14 @@ struct pdu * alloc_pdu(void)
     struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));
     
     pdu->ethhdr = (struct eth_hdr *)malloc(sizeof(struct eth_hdr));
-    pdu->ethhdr->ethertype = htons(0xFFFF);
+    pdu->ethhdr->ethertype = htons(ETH_P_MIP);
     
     pdu->miphdr = (struct mip_hdr *)malloc(sizeof(struct mip_hdr));
-        pdu->miphdr->dst = MIP_DST_ADDR;
-        pdu->miphdr->src = MIP_DST_ADDR ;
+        pdu->miphdr->dst = 0;
+        pdu->miphdr->src = 0 ;
         pdu->miphdr->ttl = 1;
-        pdu->miphdr->sdu_len = NULL;
-        pdu->miphdr->sdu_type = NULL;
+        pdu->miphdr->sdu_len = 0;
+        pdu->miphdr->sdu_type = 0;
 
     return pdu;
 }

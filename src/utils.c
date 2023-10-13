@@ -188,13 +188,19 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs)
 
     }else if (pdu->miphdr->sdu_type == SDU_TYPE_PING){
     
-        if (strncmp(pdu->sdu + 1, "PING:", 5) == 0) {
+        if (strncmp((const char *)(pdu->sdu + 1), "PING:", 5) == 0) {
             mip_type = MIP_PING;
 
-        } else if (strncmp(pdu->sdu + 1, "PONG:", 5) == 0) {
+        } else if (strncmp((const char *)(pdu->sdu + 1), "PONG:", 5) == 0) {
             mip_type = MIP_PONG;
         }
     }
+
+
+
+
+
+
     
 
     printf("Receiving PDU with content (size %zu) :\n", rcv_len);
