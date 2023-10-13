@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     char *destination_host = NULL;
     char *message = NULL;
 
-	int sd, rc;
+    int sd, rc;
 
     // Call the function to parse arguments
     parse_arguments(argc, argv, &socket_lower, &destination_host, &message);

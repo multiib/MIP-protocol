@@ -5,29 +5,53 @@
 #include <unistd.h>
 #include <linux/if_packet.h>
 
+
+
 #define MAX_EVENTS	10
 #define MAX_IF		3
 
 #define MAC_ADDR_SIZE 6
 
-#define SDU_TYPE_LOOKUP 0
-#define SDU_TYPE_MATCH  1
+#define SDU_ARP_TYPE_LOOKUP 0
+#define SDU_ARP_TYPE_MATCH  1
 
 struct ifs_data {
-	struct sockaddr_ll addr[MAX_IF];
-	int rsock;
-	int ifn;
+    struct sockaddr_ll addr[MAX_IF];
+    int rsock;
+    int ifn;
     uint8_t local_mip_addr;
 };
+
+typedef enum {
+    MIP_PING,
+    MIP_PONG,
+    MIP_ARP_REQUEST,
+    MIP_ARP_REPLY
+} MIP_handle;
+
+typedef enum {
+    APP_PING,
+    APP_PONG
+} APP_handle;
 
 void print_mac_addr(uint8_t *, size_t);
 int create_raw_socket(void);
 void get_mac_from_ifaces(struct ifs_data *);
 void init_ifs(struct ifs_data *, int, uint8_t);
-u_int32_t create_sdu_miparp(int, uint8_t);
+const char* create_sdu_miparp(int arp_type, uint8_t mip_addr);
 int add_to_epoll_table(int, int);
-void handle_client(int);
 void fill_ping_buf(char *, size_t, const char *, const char *);
+void handle_mip_packet(int, struct ifs_data *);
+int send_mip_packet(struct ifs_data *ifs,
+                    uint8_t *src_mac_addr,
+                    uint8_t *dst_mac_addr,
+                    uint8_t src_mip_addr,
+                    uint8_t dst_mip_addr,
+                    uint8_t ttl,
+                    uint8_t sdu_type,
+                    const char *sdu);
+//HANDLE
+APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg);
 
 
 #endif
