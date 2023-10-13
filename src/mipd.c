@@ -101,7 +101,6 @@ int main(int argc, char *argv[]) {
             }
             printf("Added to epoll table\n");
 
-            new_app = 1;
 
 
 
