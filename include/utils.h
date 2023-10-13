@@ -15,7 +15,7 @@
 #define MAX_EVENTS	10
 #define MAX_IF		3
 
-#define MAC_ADDR_SIZE 6
+
 
 #define SDU_ARP_TYPE_LOOKUP 0
 #define SDU_ARP_TYPE_MATCH  1

@@ -243,10 +243,11 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
 
     // Set the destination_mip to the first byte of the buffer
     *dst_mip_addr = (uint8_t) buf[0];
+    printf("Destination MIP: %d\n", *dst_mip_addr); //////DEBUG
 
     // Initialize an offset for the message
     int offset = 1; // Skip the first byte (destination_mip)
-
+    printf("Buffer content at offset: %s\n", buf + offset);
     // Set app_type
     if (strncmp(buf + offset, "PING:", 5) == 0) {
         app_type = APP_PING;
