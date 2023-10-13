@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define ARP_CACHE_SIZE 10
-#define ARP_BROADCAST {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
+#define ARP_BROADCAST {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
 
 #define ARP_TYPE_REQUEST 0
 #define ARP_TYPE_REPLY   1

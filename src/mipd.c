@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
 
 
 
-                        for (int interface = 0; i < ifs.num_ifs; interface++) {
+                        for (int interface = 0; interface < ifs.ifn; interface++) {
                             send_mip_packet(&ifs, ifs.addr[interface], ARP_BROADCAST, ifs.local_mip_addr, 1, SDU_TYPE_MIPARP, sdu);
                         }
                     }

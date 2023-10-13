@@ -156,8 +156,7 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
 }
 
 
-
-MIP_handle handle_mip_packet(raw_fd, &ifs)
+MIP_handle handle_mip_packet(int raw_fd, ifs_data *ifs)
 {
 
     MIP_handle mip_type;

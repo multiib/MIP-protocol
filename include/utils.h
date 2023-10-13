@@ -41,7 +41,7 @@ void init_ifs(struct ifs_data *, int, uint8_t);
 const char* create_sdu_miparp(int arp_type, uint8_t mip_addr);
 int add_to_epoll_table(int, int);
 void fill_ping_buf(char *, size_t, const char *, const char *);
-void handle_mip_packet(int, struct ifs_data *);
+MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs);
 int send_mip_packet(struct ifs_data *ifs,
                     uint8_t *src_mac_addr,
                     uint8_t *dst_mac_addr,
