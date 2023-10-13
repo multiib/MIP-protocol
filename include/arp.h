@@ -23,8 +23,8 @@ typedef struct {
 void print_arp_cache(ArpEntry *);
 void arp_init();
 uint8_t* arp_lookup(uint8_t);
-uint8_t* arp_lookup_interface(uint8_t);
-void arp_insert(uint8_t, uint8_t[6]);
+uint8_t arp_lookup_interface(uint8_t);
+void arp_insert(uint8_t, uint8_t[6], int interface);
 void arp_broadcast(uint8_t);
 
 #endif // ARP_H

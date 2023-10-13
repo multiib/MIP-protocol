@@ -156,7 +156,7 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
 }
 
 
-MIP_handle handle_mip_packet(int raw_fd, ifs_data *ifs)
+MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs)
 {
 
     MIP_handle mip_type;
@@ -205,11 +205,11 @@ MIP_handle handle_mip_packet(int raw_fd, ifs_data *ifs)
     return mip_type;
 }
 
-void send_broadcast(struct ifs_data *ifs, uint8_t *src_mac_addr, uint8_t src_mip_addr, const char *sdu)
-{
-    uint8_t broadcast_mac_addr[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-    send_mip_packet(ifs, src_mac_addr, broadcast_mac_addr, src_mip_addr, 0, sdu, 0);
-}
+// void send_broadcast(struct ifs_data *ifs, uint8_t *src_mac_addr, uint8_t src_mip_addr, const char *sdu)
+// {
+//     uint8_t broadcast_mac_addr[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+//     send_mip_packet(ifs, src_mac_addr, broadcast_mac_addr, src_mip_addr, 0, sdu, 0);
+// }
 
 
 /// HANDLE ERA
@@ -280,7 +280,7 @@ int send_mip_packet(struct ifs_data *ifs,
 
     /* Send the serialized buffer via RAW socket */
 
-    uint8_t *interface = arp_lookup_interface(dst_mip_addr);
+    uint8_t interface = arp_lookup_interface(dst_mip_addr);
     
     if (sendto(ifs->rsock, snd_buf, snd_len, 0,
            (struct sockaddr *) &(ifs->addr[interface]),

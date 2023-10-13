@@ -29,7 +29,7 @@ uint8_t* arp_lookup(uint8_t mip) {
     return NULL;
 }
 
-uint8_t* arp_lookup_interface(uint8_t mip) {
+uint8_t arp_lookup_interface(uint8_t mip) {
     for (int i = 0; i < arp_count; ++i) {
         if (arp_cache[i].mip == mip) {
             return arp_cache[i].interface;
@@ -42,22 +42,12 @@ uint8_t* arp_lookup_interface(uint8_t mip) {
 
 
 
-void arp_insert(uint8_t mip, uint8_t mac[6]) {
+void arp_insert(uint8_t mip, uint8_t mac[6], uint8_t interface) {
     if (arp_count < ARP_CACHE_SIZE) {
         arp_cache[arp_count].mip = mip;
         memcpy(arp_cache[arp_count].mac, mac, 6);
+        arp_cache[arp_count].interface = interface;
         arp_count++;
     }
     // TODO: Handle cache eviction if needed
 }
-
-
-void arp_insert_interface(uint8_t mip, uint8_t interface[6]) {
-    if (arp_count < ARP_CACHE_SIZE) {
-        arp_cache[arp_count].mip = mip;
-        memcpy(arp_cache[arp_count].interface, interface, 6);
-        arp_count++;
-    }
-    // TODO: Handle cache eviction if needed
-}
-
