@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     // Declaration of variables
     printf("Starting MIP daemon...\n");
     struct epoll_event events[MAX_EVENTS]; // Epoll events
-    int raw_fd, listening_fd, unix_fd, epoll_fd, rc, new_app, app_type, waiting_for_arp_reply = 0;
+    int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
 
     // To be set by CLI
     int debug_mode = 0;        // Debug flag
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    char msg[256];
+
 
     while(1) {
         // Wait for events
@@ -174,11 +174,12 @@ int main(int argc, char *argv[]) {
 
                         const char* sdu = create_sdu_miparp(ARP_TYPE_REQUEST, dst_mip_addr);
 
-
+                        // Create Broadcast MAC address
+                        uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
-                            send_mip_packet(&ifs, ifs.addr[interface], ARP_BROADCAST, ifs.local_mip_addr, 1, SDU_TYPE_MIPARP, sdu);
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu);
                         }
                     }
                     break;

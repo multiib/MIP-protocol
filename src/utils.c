@@ -176,8 +176,11 @@ MIP_handle handle_mip_packet(int raw_fd, ifs_data *ifs)
 
     size_t rcv_len = mip_deserialize_pdu(pdu, rcv_buf);
 
+    // Create Broadcast MAC address
+    uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
     if (pdu->miphdr->sdu_type == SDU_TYPE_MIPARP){
-        if (pdu->ethhdr->dst_mac == ARP_BROADCAST){
+        if (pdu->ethhdr->dst_mac == broadcast_mac){
             mip_type = MIP_ARP_REQUEST; 
         } else {
             mip_type = MIP_ARP_REPLY;
