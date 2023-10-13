@@ -35,14 +35,14 @@ uint8_t arp_lookup_interface(uint8_t mip) {
             return arp_cache[i].interface;
         }
     }
-    return NULL;
+    return -1;
 }
 
 
 
 
 
-void arp_insert(uint8_t mip, uint8_t mac[6], uint8_t interface) {
+void arp_insert(uint8_t mip, uint8_t mac[6], int interface) {
     if (arp_count < ARP_CACHE_SIZE) {
         arp_cache[arp_count].mip = mip;
         memcpy(arp_cache[arp_count].mac, mac, 6);
