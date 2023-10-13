@@ -8,6 +8,7 @@
 #include <sys/un.h>		/* definitions for UNIX domain sockets */
 #include "ipc.h"
 #include "utils.h"
+#include "pdu.h"
 
 // Declaration of the parse_arguments function
 void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message);

@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+#include "ipc.h"
+#include "utils.h"
+#include "pdu.h"
 // Declaration of the parse_arguments function
 void parse_arguments(int argc, char *argv[], char **socket_lower);
 
