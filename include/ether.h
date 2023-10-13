@@ -10,6 +10,8 @@
 #define ETH_P_MIP 0x88B5
 #define ETH_HDR_LEN sizeof(struct eth_hdr)
 
+#define MAC_ADDR_SIZE 6
+
 
 struct eth_hdr {
     uint8_t  dst_mac[MAC_ADDR_SIZE];
