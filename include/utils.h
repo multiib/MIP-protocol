@@ -5,6 +5,11 @@
 #include <unistd.h>
 #include <linux/if_packet.h>
 
+#include "ether.h"
+#include "mip.h"
+#include "arp.h"
+#include "pdu.h"
+
 
 
 #define MAX_EVENTS	10

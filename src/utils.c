@@ -15,6 +15,8 @@
 #include "arp.h"
 #include "ether.h"
 #include "pdu.h"
+#include "mip.h"
+
 
 
 
@@ -296,12 +298,7 @@ int send_mip_packet(struct ifs_data *ifs,
     }
 
 
-    if (sendto(ifs->rsock, snd_buf, snd_len, 0,
-           (struct sockaddr *) &(ifs->addr[0]),
-           sizeof(struct sockaddr_ll)) <= 0) {
-        perror("sendto()");
-        close(ifs->rsock);
-    }
+
 
     printf("Sending PDU with content (size %zu):\n", snd_len);
     print_pdu_content(pdu);
