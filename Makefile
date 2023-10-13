@@ -37,11 +37,11 @@ mipd: $(OBJ_DIR)/mipd.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(O
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for making ping_client executable
-ping_client: $(OBJ_DIR)/ping_client.o $(OBJ_DIR)/utils.o
+ping_client: $(OBJ_DIR)/ping_client.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o $(OBJ_DIR)/arp.o 
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for making ping_server executable
-ping_server: $(OBJ_DIR)/ping_server.o $(OBJ_DIR)/utils.o
+ping_server: $(OBJ_DIR)/ping_server.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o $(OBJ_DIR)/arp.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for cleaning the project
