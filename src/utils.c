@@ -143,10 +143,7 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
     // Initialize the buffer to zeros
     memset(buf, 0, buf_size);
 
-    // Add destination_host to buf
-    if (destination_host != NULL) {
-        strcpy(buf, destination_host);
-    }
+    buf[0] = atoi(destination_host);
 
     // Add "PING:"
     strcat(buf, "PING:");
