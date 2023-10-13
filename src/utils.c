@@ -157,7 +157,8 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
 
 
 
-MIP_handle handle_mip_packet(raw_fd, &ifs){
+MIP_handle handle_mip_packet(raw_fd, &ifs)
+{
 
     MIP_handle mip_type;
     struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));
@@ -184,12 +185,13 @@ MIP_handle handle_mip_packet(raw_fd, &ifs){
         }
 
     }else if (pdu->miphdr->sdu_type == SDU_TYPE_PING){
-    {
+    
         if (strncmp(pdu->buf + 1, "PING:", 5) == 0) {
             mip_type = MIP_PING;
 
         } else if (strncmp(pdu->buf + 1, "PONG:", 5) == 0) {
             mip_type = MIP_PONG;
+        }
     }
     
 

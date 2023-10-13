@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
                     // Check if we have the MAC address of the destination MIP
 
                     // Check if we have the MAC address of the destination MIP
-                    uint8_t * mac_addr = arp_lookup_mac(dst_mip_addr);
+                    uint8_t * mac_addr = arp_lookup(dst_mip_addr);
                     if (mac_addr) {
                         printf("We have the MAC address for MIP %u\n", dst_mip_addr);
                         // SEND MIP PING
