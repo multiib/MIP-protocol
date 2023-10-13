@@ -188,10 +188,10 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs)
 
     }else if (pdu->miphdr->sdu_type == SDU_TYPE_PING){
     
-        if (strncmp(pdu->buf + 1, "PING:", 5) == 0) {
+        if (strncmp(pdu->sdu + 1, "PING:", 5) == 0) {
             mip_type = MIP_PING;
 
-        } else if (strncmp(pdu->buf + 1, "PONG:", 5) == 0) {
+        } else if (strncmp(pdu->sdu + 1, "PONG:", 5) == 0) {
             mip_type = MIP_PONG;
         }
     }
