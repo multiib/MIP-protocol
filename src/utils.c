@@ -184,7 +184,7 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs)
 
         // Print mac address
         printf("Recieved MAC address: ");
-        print_mac_address(pdu->ethhdr->dst_mac,6);
+        print_mac_addr(pdu->ethhdr->dst_mac,6);
         if (pdu->ethhdr->dst_mac == broadcast_mac){
             mip_type = MIP_ARP_REQUEST; 
         } else {
