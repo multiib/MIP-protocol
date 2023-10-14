@@ -106,7 +106,12 @@ void init_ifs(struct ifs_data *ifs, int rsock, uint8_t mip_addr)
     ifs->local_mip_addr = mip_addr;
 }
 
-uint32_t create_sdu_miparp(int arp_type, uint8_t mip_addr) {
+uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr) {
+    uint32_t *sdu_array = (uint32_t*) malloc(sizeof(uint32_t));
+    if (sdu_array == NULL) {
+        return NULL; // Failed to allocate memory
+    }
+
     uint32_t sdu = 0;
 
     if (arp_type) {
@@ -115,9 +120,10 @@ uint32_t create_sdu_miparp(int arp_type, uint8_t mip_addr) {
 
     sdu |= (mip_addr << 23);
 
-    return sdu;
-}
+    sdu_array[0] = sdu;
 
+    return sdu_array;
+}
 int add_to_epoll_table(int efd, int fd)
 {
         int rc = 0;

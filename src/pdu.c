@@ -51,14 +51,12 @@ void fill_pdu(struct pdu *pdu,
 ;
 
 
-    slen = strlen(sdu) + 1;
+    slen = sizeof(sdu) / sizeof(sdu[0]);
 
-    /* SDU length must be divisible by 4 */
-    if (slen % 4 != 0)
-        slen = slen + (4 - (slen % 4));
 
-    /* to get the real SDU length in bytes, the len value is multiplied by 4 */
-        pdu->miphdr->sdu_len = slen / 4;
+
+    /* to get the real SDU length in bytes, the slen value is multiplied by 4 */
+    pdu->miphdr->sdu_len = slen * 4;
 
     pdu->sdu = (uint8_t *)calloc(1, slen);
     memcpy(pdu->sdu, sdu, slen);
@@ -87,8 +85,8 @@ size_t mip_serialize_pdu(struct pdu *pdu, uint8_t *snd_buf)
     snd_len += MIP_HDR_LEN;
 
     /* Attach SDU */
-    memcpy(snd_buf + snd_len, pdu->sdu, pdu->miphdr->sdu_len * 4);
-    snd_len += pdu->miphdr->sdu_len * 4;
+    memcpy(snd_buf + snd_len, pdu->sdu, pdu->miphdr->sdu_len);
+    snd_len += pdu->miphdr->sdu_len;
 
     return snd_len;
 }

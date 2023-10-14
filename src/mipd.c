@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
                         // Create SDU
 
 
-                        uint32_t sdu = create_sdu_miparp(ARP_TYPE_REQUEST, dst_mip_addr);
+                        uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, dst_mip_addr);
 
                         // Print SDU in binary
                         printf("SDU: ");

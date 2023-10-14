@@ -43,7 +43,7 @@ void print_mac_addr(uint8_t *, size_t);
 int create_raw_socket(void);
 void get_mac_from_ifaces(struct ifs_data *);
 void init_ifs(struct ifs_data *, int, uint8_t);
-uint32_t create_sdu_miparp(int arp_type, uint8_t mip_addr);
+uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr);
 int add_to_epoll_table(int, int);
 void fill_ping_buf(char *, size_t, const char *, const char *);
 MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs);
