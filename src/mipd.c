@@ -164,6 +164,12 @@ int main(int argc, char *argv[]) {
                     if (mac_addr) {
                         printf("We have the MAC address for MIP %u\n", dst_mip_addr);
                         // SEND MIP PING
+
+                        // send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu);
+
+
+
+
                     } else {
                         printf("MAC address for MIP %u not found in cache\n", dst_mip_addr);
                         // SEND ARP REQUEST
@@ -176,9 +182,12 @@ int main(int argc, char *argv[]) {
                         // Create Broadcast MAC address
                         uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
+                        // Create broadcast MIP address
+                        uint8_t broadcast_mip_addr = 0xff;
+
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu);
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu);
                         }
                     }
                     break;

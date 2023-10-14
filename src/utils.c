@@ -286,14 +286,17 @@ int send_mip_packet(struct ifs_data *ifs,
 
     /* Send the serialized buffer via RAW socket */
 
-    uint8_t interface = arp_lookup_interface(dst_mip_addr);
-    
+
+
+    //uint8_t interface = arp_lookup_interface(dst_mip_addr);
     if (sendto(ifs->rsock, snd_buf, snd_len, 0,
-           (struct sockaddr *) &(ifs->addr[interface]),
-           sizeof(struct sockaddr_ll)) <= 0) {
+        (struct sockaddr *) &(ifs->addr[interface]),
+        sizeof(struct sockaddr_ll)) <= 0) {
         perror("sendto()");
         close(ifs->rsock);
     }
+
+
 
 
 
@@ -304,3 +307,4 @@ int send_mip_packet(struct ifs_data *ifs,
     destroy_pdu(pdu);
     return 0;
 }
+
