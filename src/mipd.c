@@ -129,10 +129,14 @@ int main(int argc, char *argv[]) {
                 case MIP_ARP_REQUEST:
                     printf("Received ARP request\n");
                     // CHECK IF THE REQUEST IS FOR US
+                    if (pdu->miphdr->dst == ifs.local_mip_addr) {
 
                         // IF YES, SEND ARP REPLY
-
+                        printf("ARP request for us\n");
                         // IF NO, IGNORE
+                    } else {
+                        printf("ARP request not for us\n");
+                    }
                     break;
 
                 case MIP_ARP_REPLY:
