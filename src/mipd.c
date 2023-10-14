@@ -179,11 +179,9 @@ int main(int argc, char *argv[]) {
 
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, dst_mip_addr);
 
-                        // Print SDU in binary
-                        printf("SDU: ");
-                        for (int i = 0; i < 4; i++) {
-                            printf("%02x ", ((uint8_t *)&sdu)[i]);
-                        }
+                        // Print int
+                        printf("SDU int: %u\n", sdu);
+
 
                         // Create Broadcast MAC address
                         uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
