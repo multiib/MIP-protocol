@@ -24,6 +24,7 @@ struct pdu * alloc_pdu(void)
         pdu->miphdr->sdu_len = 0;
         pdu->miphdr->sdu_type = 0;
 
+
     return pdu;
 }
 
@@ -34,7 +35,7 @@ void fill_pdu(struct pdu *pdu,
           uint8_t dst_mip_addr,
           uint8_t ttl,
           uint8_t sdu_type,
-          const char *sdu)
+          const uint32_t *sdu)
 {
     size_t slen = 0;
     
@@ -134,7 +135,10 @@ void print_pdu_content(struct pdu *pdu)
     printf("\t SDU length: %d\n", pdu->miphdr->sdu_len * 4);
     printf("\t SDU type: %d\n", pdu->miphdr->sdu_type);
 
-    printf("\t SDU: %s\n", pdu->sdu);
+    // Print SDU in uint32 numbers
+    printf("\t SDU: ");
+    for (int i = 0; i < pdu->miphdr->sdu_len; i++)
+        printf("%u ", pdu->sdu[i]);
     printf("====================================================\n");
 }
 

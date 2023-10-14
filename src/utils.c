@@ -106,9 +106,8 @@ void init_ifs(struct ifs_data *ifs, int rsock, uint8_t mip_addr)
     ifs->local_mip_addr = mip_addr;
 }
 
-const char* create_sdu_miparp(int arp_type, uint8_t mip_addr) {
-    u_int32_t sdu = 0;
-    static char sdu_buffer[sizeof(u_int32_t)]; // Made static to preserve data after function returns
+uint32_t create_sdu_miparp(int arp_type, uint8_t mip_addr) {
+    uint32_t sdu = 0;
 
     if (arp_type) {
         sdu |= (1 << 31);
@@ -116,10 +115,7 @@ const char* create_sdu_miparp(int arp_type, uint8_t mip_addr) {
 
     sdu |= (mip_addr << 23);
 
-    // Copy the u_int32_t value into the buffer
-    memcpy(sdu_buffer, &sdu, sizeof(u_int32_t));
-
-    return sdu_buffer;
+    return sdu;
 }
 
 int add_to_epoll_table(int efd, int fd)
@@ -272,7 +268,7 @@ int send_mip_packet(struct ifs_data *ifs,
             uint8_t dst_mip_addr,
             uint8_t ttl,
             uint8_t sdu_type,
-                const char *sdu)
+                const uint32_t *sdu)
 {
     struct pdu *pdu = alloc_pdu();
     uint8_t snd_buf[MAX_BUF_SIZE];
@@ -324,4 +320,26 @@ struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_ma
     }
 
     return NULL; // Return NULL if not found
+}
+
+// This function will convert a string into an array of uint32_t
+uint32_t* stringToUint32Array(const char* str, size_t *length) {
+    size_t str_length = strlen(str);
+    *length = (str_length + 3) / 4 + 1; // Calculate the number of uint32_t elements needed, +1 for the length
+    uint32_t *arr = (uint32_t*)calloc(*length, sizeof(uint32_t));
+
+    if (arr == NULL) {
+        return NULL; // Failed to allocate memory
+    }
+
+    arr[0] = (uint32_t)str_length; // Store the length in the first uint32_t
+
+    for (size_t i = 0; i < str_length; i++) {
+        size_t arr_idx = i / 4 + 1; // Start from index 1
+        size_t shift = (3 - (i % 4)) * 8;
+
+        arr[arr_idx] |= (uint32_t)str[i] << shift;
+    }
+
+    return arr;
 }
