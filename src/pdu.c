@@ -51,7 +51,7 @@ void fill_pdu(struct pdu *pdu,
 
     pdu->miphdr->sdu_len = sdu_len;
 
-    pdu->sdu = (uint8_t *)calloc(1, sdu_len);
+    pdu->sdu = (uint32_t *)calloc(1, sdu_len/4);
     memcpy(pdu->sdu, sdu, sdu_len);
 }
 
@@ -104,7 +104,7 @@ size_t mip_deserialize_pdu(struct pdu *pdu, uint8_t *rcv_buf)
     pdu->miphdr->sdu_type = (uint8_t) (header & 0xf);
     rcv_len += MIP_HDR_LEN;
 
-    pdu->sdu = (uint8_t *)calloc(1, pdu->miphdr->sdu_len * 4);
+    pdu->sdu = (uint32_t *)calloc(1, pdu->miphdr->sdu_len/4);
     memcpy(pdu->sdu, rcv_buf + rcv_len, pdu->miphdr->sdu_len * 4);
     rcv_len += pdu->miphdr->sdu_len * 4;
 
