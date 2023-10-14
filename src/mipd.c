@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, dst_mip_addr);
 
                         // Print int
-                        printf("SDU int: %u\n", sdu);
+                        printf("SDU int: %u\n", sdu[0]);
 
 
                         // Create Broadcast MAC address
