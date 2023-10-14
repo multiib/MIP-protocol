@@ -128,12 +128,18 @@ void print_pdu_content(struct pdu *pdu)
 
     // Print SDU in uint32 numbers
     printf("\t SDU: ");
-    for (int j = 0; j < pdu->miphdr->sdu_len; j++) {
-        printf("\n\t\tUint32 number %d: ", j);
-        for (int i = 3; i >= 0; i--) {
-            uint8_t byte = (pdu->sdu[j] >> (i * 8)) & 0xFF;
-            printf("%u ", byte);
-        }
+    for (size_t i = 0; i < pdu->miphdr->sdu_len/4; ++i) {
+        uint32_t num = pdu->sdu[i];
+        printf("uint32_t number: 0x%08X\n", num);
+
+        // Break the uint32_t into 4 uint8_t numbers
+        uint8_t byte1 = (num & 0xFF000000) >> 24;
+        uint8_t byte2 = (num & 0x00FF0000) >> 16;
+        uint8_t byte3 = (num & 0x0000FF00) >> 8;
+        uint8_t byte4 = (num & 0x000000FF);
+
+        printf("As uint8_t numbers: 0x%02X 0x%02X 0x%02X 0x%02X\n", byte1, byte2, byte3, byte4);
+        printf("\n");
     }
 
     printf("====================================================\n");
