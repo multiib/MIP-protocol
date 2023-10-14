@@ -181,6 +181,10 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs)
     uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
     if (pdu->miphdr->sdu_type == SDU_TYPE_MIPARP){
+
+        // Print mac address
+        printf("Recieved MAC address: ");
+        print_mac_address(pdu->ethhdr->dst_mac,6);
         if (pdu->ethhdr->dst_mac == broadcast_mac){
             mip_type = MIP_ARP_REQUEST; 
         } else {
