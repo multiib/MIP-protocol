@@ -185,10 +185,13 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs)
         // Print mac address
         printf("Recieved MAC address: ");
         print_mac_addr(pdu->ethhdr->dst_mac,6);
-        if (pdu->ethhdr->dst_mac == broadcast_mac){
+        if ((pdu->sdu[0] >> 31) & ARP_TYPE_REQUEST){
             mip_type = MIP_ARP_REQUEST; 
-        } else {
+        } else if ((pdu->sdu[0] >> 31) & ARP_TYPE_REPLY){
             mip_type = MIP_ARP_REPLY;
+        }else{
+            printf("Error: Unknown ARP type\n");
+            return -1;
         }
 
     }else if (pdu->miphdr->sdu_type == SDU_TYPE_PING){
