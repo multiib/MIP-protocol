@@ -191,9 +191,11 @@ int main(int argc, char *argv[]) {
                         // Create broadcast MIP address
                         uint8_t broadcast_mip_addr = 0xff;
 
+                        // Create SDU length
+                        uint8_t sdu_len = 4;
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu);
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
                         }
                     }
                     break;

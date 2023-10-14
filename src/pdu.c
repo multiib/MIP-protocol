@@ -35,9 +35,9 @@ void fill_pdu(struct pdu *pdu,
           uint8_t dst_mip_addr,
           uint8_t ttl,
           uint8_t sdu_type,
-          const uint32_t *sdu)
+          const uint32_t *sdu,
+          uint8_t sdu_len)
 {
-    size_t slen = 0;
     
     memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
     memcpy(pdu->ethhdr->src_mac, src_mac_addr, 6);
@@ -48,18 +48,11 @@ void fill_pdu(struct pdu *pdu,
     pdu->miphdr->ttl = ttl;
 
     pdu->miphdr->sdu_type = sdu_type;
-;
 
+    pdu->miphdr->sdu_len = sdu_len;
 
-    slen = sizeof(sdu) / sizeof(sdu[0]);
-
-
-
-    /* to get the real SDU length in bytes, the slen value is multiplied by 4 */
-    pdu->miphdr->sdu_len = slen * 4;
-
-    pdu->sdu = (uint8_t *)calloc(1, slen);
-    memcpy(pdu->sdu, sdu, slen);
+    pdu->sdu = (uint8_t *)calloc(1, sdu_len);
+    memcpy(pdu->sdu, sdu, sdu_len);
 }
 
 size_t mip_serialize_pdu(struct pdu *pdu, uint8_t *snd_buf)

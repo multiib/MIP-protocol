@@ -274,7 +274,8 @@ int send_mip_packet(struct ifs_data *ifs,
             uint8_t dst_mip_addr,
             uint8_t ttl,
             uint8_t sdu_type,
-                const uint32_t *sdu)
+            const uint32_t *sdu,
+            size_t sdu_len)
 {
     struct pdu *pdu = alloc_pdu();
     uint8_t snd_buf[MAX_BUF_SIZE];
@@ -282,7 +283,7 @@ int send_mip_packet(struct ifs_data *ifs,
     if (NULL == pdu)
         return -ENOMEM;
 
-    fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu);
+    fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
 
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
