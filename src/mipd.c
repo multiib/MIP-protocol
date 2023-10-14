@@ -179,6 +179,12 @@ int main(int argc, char *argv[]) {
 
                         const char* sdu = create_sdu_miparp(ARP_TYPE_REQUEST, dst_mip_addr);
 
+                        // Print SDU
+                        printf("SDU: ");
+                        for (int i = 0; i < 8; i++) {
+                            printf("%02x ", sdu[i]);
+                        }
+
                         // Create Broadcast MAC address
                         uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
