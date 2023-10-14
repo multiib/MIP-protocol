@@ -107,8 +107,12 @@ int main(int argc, char *argv[]) {
 
         // If event is from RAW socket
         } else if (events->data.fd == raw_fd) {
+            // Data to be read from RAW socket
+            struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));    
 
-            MIP_handle type = handle_mip_packet(raw_fd, &ifs);
+    
+            MIP_handle type = handle_mip_packet(raw_fd, &ifs, pdu);
+
             switch (type){
                 case MIP_PING:
                     printf("Received PING\n");
@@ -143,6 +147,9 @@ int main(int argc, char *argv[]) {
                     printf("Received unknown MIP packet\n");
                     break;
             }
+            
+
+            destroy_pdu(pdu);
 
         } else {
             // If event is from application

@@ -157,64 +157,52 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
 }
 
 
-MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs)
+MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu)
 {
+    // Make sure pdu is not NULL
+    if (pdu == NULL) {
+        perror("NULL pdu argument");
+        return -EINVAL;
+    }
 
     MIP_handle mip_type;
-    struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));
-    if (NULL == pdu) {
-        perror("malloc");
-        return -ENOMEM;
-    }
-    
+
     uint8_t rcv_buf[256];
     
     /* Recv the serialized buffer via RAW socket */
     if (recvfrom(ifs->rsock, rcv_buf, 256, 0, NULL, NULL) <= 0) {
         perror("recvfrom()");
         close(ifs->rsock);
+        return -1;
     }
 
     size_t rcv_len = mip_deserialize_pdu(pdu, rcv_buf);
 
-
-
-    if (pdu->miphdr->sdu_type == SDU_TYPE_MIPARP){
+    if (pdu->miphdr->sdu_type == SDU_TYPE_MIPARP) {
         int arp_type = (pdu->sdu[0] >> 31) & 1;
-       
-        if (arp_type == ARP_TYPE_REQUEST){
+
+        if (arp_type == ARP_TYPE_REQUEST) {
             mip_type = MIP_ARP_REQUEST; 
-        } else if (arp_type == ARP_TYPE_REPLY){
+        } else if (arp_type == ARP_TYPE_REPLY) {
             mip_type = MIP_ARP_REPLY;
-        }else{
+        } else {
             printf("Error: Unknown ARP type\n");
             return -1;
         }
-
-    }else if (pdu->miphdr->sdu_type == SDU_TYPE_PING){
-    
+    } else if (pdu->miphdr->sdu_type == SDU_TYPE_PING) {
         if (strncmp((const char *)(pdu->sdu + 1), "PING:", 5) == 0) {
             mip_type = MIP_PING;
-
         } else if (strncmp((const char *)(pdu->sdu + 1), "PONG:", 5) == 0) {
             mip_type = MIP_PONG;
         }
     }
 
-
-
-
-
-
-    
-
     printf("Receiving PDU with content (size %zu) :\n", rcv_len);
     print_pdu_content(pdu);
-
-    destroy_pdu(pdu);
     
     return mip_type;
 }
+
 
 // void send_broadcast(struct ifs_data *ifs, uint8_t *src_mac_addr, uint8_t src_mip_addr, const char *sdu)
 // {
