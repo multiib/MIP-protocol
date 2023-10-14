@@ -286,11 +286,12 @@ int send_mip_packet(struct ifs_data *ifs,
 
     /* Send the serialized buffer via RAW socket */
 
+    // Find matching interface
+    struct sockaddr_ll *interface = find_matching_sockaddr(ifs, src_mac_addr);
 
 
-    //uint8_t interface = arp_lookup_interface(dst_mip_addr);
     if (sendto(ifs->rsock, snd_buf, snd_len, 0,
-        (struct sockaddr *) &(ifs->addr[interface]),
+        (struct sockaddr *)interface,
         sizeof(struct sockaddr_ll)) <= 0) {
         perror("sendto()");
         close(ifs->rsock);
@@ -308,3 +309,19 @@ int send_mip_packet(struct ifs_data *ifs,
     return 0;
 }
 
+
+struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_mac_addr) {
+    if (ifs == NULL || dst_mac_addr == NULL) {
+        return NULL;
+    }
+
+    for (int i = 0; i < ifs->ifn; ++i) {
+        uint8_t *mac_addr = ifs->addr[i].sll_addr;
+
+        if (memcmp(mac_addr, dst_mac_addr, 6) == 0) {
+            return &(ifs->addr[i]);
+        }
+    }
+
+    return NULL; // Return NULL if not found
+}
