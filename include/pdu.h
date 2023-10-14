@@ -28,7 +28,7 @@ void fill_pdu(struct pdu *pdu,
               uint8_t ttl,
               uint8_t sdu_type,
               const uint32_t *sdu,
-              sdu_len sdu_len);
+              uint8_t sdu_len);
 size_t mip_serialize_pdu(struct pdu *, uint8_t *);
 size_t mip_deserialize_pdu(struct pdu *, uint8_t *);
 void print_pdu_content(struct pdu *);

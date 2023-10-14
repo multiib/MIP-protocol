@@ -275,7 +275,7 @@ int send_mip_packet(struct ifs_data *ifs,
             uint8_t ttl,
             uint8_t sdu_type,
             const uint32_t *sdu,
-            sdu_len sdu_len)
+            uint8_t sdu_len)
 {
     struct pdu *pdu = alloc_pdu();
     uint8_t snd_buf[MAX_BUF_SIZE];
