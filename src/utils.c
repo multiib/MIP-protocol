@@ -177,17 +177,14 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs)
 
     size_t rcv_len = mip_deserialize_pdu(pdu, rcv_buf);
 
-    // Create Broadcast MAC address
-    uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
 
     if (pdu->miphdr->sdu_type == SDU_TYPE_MIPARP){
-
-        // Print mac address
-        printf("Recieved MAC address: ");
-        print_mac_addr(pdu->ethhdr->dst_mac,6);
-        if ((pdu->sdu[0] >> 31) & ARP_TYPE_REQUEST){
+        int arp_type = (pdu->sdu[0] >> 31) & 1;
+       
+        if (arp_type == ARP_TYPE_REQUEST){
             mip_type = MIP_ARP_REQUEST; 
-        } else if ((pdu->sdu[0] >> 31) & ARP_TYPE_REPLY){
+        } else if (arp_type == ARP_TYPE_REPLY){
             mip_type = MIP_ARP_REPLY;
         }else{
             printf("Error: Unknown ARP type\n");
