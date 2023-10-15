@@ -131,6 +131,7 @@ void print_pdu_content(struct pdu *pdu)
     for (int i = 0; i < pdu->miphdr->sdu_len/4; i++) {
         printf("%u ", pdu->sdu[i]);
     }
+    printf("\n");
     printf("====================================================\n");
 }
 

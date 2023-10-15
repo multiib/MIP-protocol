@@ -57,10 +57,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Initialize network data
-    //print local mip addr
-    printf("Local MIP addr: %d\n", local_mip_addr);
     init_ifs(&ifs, raw_fd, local_mip_addr);
-    printf("Local MIP addr: %d\n", ifs.local_mip_addr);
+
 
 
     // Create UNIX listening socket for accepting connections from applications
@@ -153,6 +151,7 @@ int main(int argc, char *argv[]) {
                         arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, interface);
 
                         // Send ARP reply
+                        printf("Sending MIP_ARP_REPLY to MIP: %u\n", pdu->miphdr->src);
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, pdu->miphdr->src, 1, SDU_TYPE_MIPARP, sdu, 4);
 
 
@@ -182,15 +181,11 @@ int main(int argc, char *argv[]) {
 
                         uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
-                        printf("DEBUG SDU length: \n");
-                        for (int i = 0; i < sdu_len/4; i++) {
-                            printf("%u ", sdu[i]);
-                        }
 
                         uint8_t *dst_mac_addr = arp_lookup(ping_data.dst_mip_addr);
                         uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                         
-                        printf("ANSJOS\n");
+                        printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl, SDU_TYPE_PING, sdu, sdu_len);
 
                     } else {
@@ -257,6 +252,7 @@ int main(int argc, char *argv[]) {
                         
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
+                            printf("Sending MIP_BROADCAST to MIP: %u\n", broadcast_mip_addr);
                             send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
                         }
 
