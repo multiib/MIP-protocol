@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
                         // Send MIP packet
 
                         
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, pdu->miphdr->src, pdu->miphdr->src, 1, SDU_TYPE_MIPARP, sdu);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, pdu->miphdr->src, pdu->miphdr->src, 1, SDU_TYPE_MIPARP, sdu, 4);
                         // IF NO, IGNORE
                     } else {
                         printf("ARP request not for us\n");
