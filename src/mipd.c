@@ -265,7 +265,11 @@ int main(int argc, char *argv[]) {
                 case APP_PONG:
                     printf("Received APP_PONG\n");
 
-                    // Send MIP PONG
+                    uint8_t sdu_len;
+                    //stringToUint32Array(ping_data.msg, &sdu_len);
+                    // print ping data msg
+                    printf("Ping data msg: %s\n", ping_data.msg);
+                    uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
                     break;
                 

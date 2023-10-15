@@ -63,20 +63,18 @@ int main(int argc, char *argv[]) {
     // char destination_host[3] = {0};
     // char message[256] = {0};
     
+    //create string "hello"
+    char *message = "PONG:succesful";
+    char *destination_host = "0"; // Filler value, the MIP deamon will fill this in
+    decode_fill_ping_buf(read_buf, sizeof(read_buf), destination_host, message);
 
-    // decode_fill_ping_buf(read_buf, sizeof(read_buf), destination_host, message);
-
-
-
-    // fill_ping_buf(buf, sizeof(buf), destination_host, message);
-
-
-    // rc = write(sd, buf, strlen(buf));
-    // if (rc < 0) {
-    //         perror("write");
-    //         close(sd);
-    //         exit(EXIT_FAILURE);
-    // }
+    // Write back
+    rc = write(sd, read_buf, sizeof(read_buf));
+    if (rc < 0) {
+        perror("write");
+        close(sd);
+        exit(EXIT_FAILURE);
+    }
 
 
 
