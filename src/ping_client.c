@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     
     struct sockaddr_un addr;
     char   buf[256];
-    char read_buf[256];
+    uint32_t read_buf[64];
 
     sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (sd < 0) {
