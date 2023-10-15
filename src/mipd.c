@@ -137,6 +137,9 @@ int main(int argc, char *argv[]) {
                     // Mask the least-significant 8 bits
                     uint8_t isolatedValue = shiftedValue & 0xFF;
 
+                    printf("Isolated value: %d\n", isolatedValue);
+                    printf("Isolated value: %d\n", ifs.local_mip_addr);
+
 
                     if (isolatedValue == ifs.local_mip_addr) {
 
