@@ -137,10 +137,13 @@ int main(int argc, char *argv[]) {
                 case MIP_PONG:
                     printf("Received PONG\n");
                     
-                    for (int i = 0; i < pdu->miphdr->sdu_len/4; i++) {
-                        printf("%u ", pdu->sdu[i]);
+                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
+                    if (rc == -1) {
+                        perror("write");
+                        exit(EXIT_FAILURE);
                     }
-                    printf("Received PONG\n");
+
+                    mip_return = 0;
 
                     break;
 

@@ -60,12 +60,18 @@ int main(int argc, char *argv[]) {
     }
 
     // Read from socket
-    rc = read(sd, read_buf, sizeof(read_buf) - 1);
+    rc = read(sd, read_buf, sizeof(read_buf));
     if (rc < 0) {
         perror("read");
         close(sd);
         exit(EXIT_FAILURE);
     }
+
+    for (int i = 0; i < 3; i++) {
+        printf("%u ", read_buf[i]);
+    }
+    char *str = uint32ArrayToString(read_buf);
+    printf("%s\n", str);
 
     close(sd);
     return 0;
