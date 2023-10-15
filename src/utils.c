@@ -403,3 +403,37 @@ void decode_fill_ping_buf(const char *buf, size_t buf_size, char *destination_ho
         strncpy(message, ping_start + strlen("PING:"), buf_size - (ping_start + strlen("PING:") - buf));
     }
 }
+
+// Reverse function without length parameter
+char* uint32ArrayToString(uint32_t* arr) {
+    if (arr == NULL) {
+        return NULL;
+    }
+
+    uint32_t str_length = arr[0];
+    char *str = (char*)calloc(str_length + 1, sizeof(char));
+
+    if (str == NULL) {
+        return NULL;
+    }
+
+    uint8_t num_elements = (str_length + 3) / 4 + 1;
+
+    for (uint8_t i = 1; i < num_elements; i++) {
+        uint32_t val = arr[i];
+
+        for (int j = 3; j >= 0; j--) {
+            uint8_t shift = j * 8;
+            char ch = (char)((val >> shift) & 0xFF);
+
+            if (str_length > 0) {
+                *str = ch;
+                str++;
+                str_length--;
+            }
+        }
+    }
+
+    *str = '\0';
+    return str - arr[0];
+}

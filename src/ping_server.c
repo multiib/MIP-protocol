@@ -56,6 +56,9 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < 3; i++) {
         printf("%u ", read_buf[i]);
     }
+    char *str = uint32ArrayToString(read_buf);
+    printf("%s\n", str);
+
 
     // char destination_host[3] = {0};
     // char message[256] = {0};
