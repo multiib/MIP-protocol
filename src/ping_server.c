@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 
     struct sockaddr_un addr;
     char   buf[256];
-    char read_buf[256];
+    uint32_t read_buf[64];
 
     sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (sd < 0) {
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
     }
 
     for (int i = 0; i < 3; i++) {
-        printf("%u ", pdu->sdu[i]);
+        printf("%u ", read_buf[i]);
     }
 
     // char destination_host[3] = {0};
