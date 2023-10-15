@@ -172,7 +172,7 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
     socklen_t from_addr_len = sizeof(from_addr);
     
     /* Recv the serialized buffer via RAW socket */
-    if (recvfrom(ifs->rsock, rcv_buf, 256, (struct sockaddr *)&from_addr, &from_addr_len); <= 0) {
+    if (recvfrom(ifs->rsock, rcv_buf, 256, 0, (struct sockaddr *)&from_addr, &from_addr_len) <= 0) {
         perror("recvfrom()");
         close(ifs->rsock);
         return -1;
