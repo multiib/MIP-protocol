@@ -145,7 +145,7 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
     // Initialize the buffer to zeros
     memset(buf, 0, buf_size);
 
-    buf[0] = (uint8_t)atoi(destination_host);
+    buf[0] = atoi(destination_host);
 
     // Then add message
     if (message != NULL) {
