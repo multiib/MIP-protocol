@@ -132,7 +132,13 @@ int main(int argc, char *argv[]) {
                 case MIP_ARP_REQUEST:
                     printf("Received ARP request\n");
                     // CHECK IF THE REQUEST IS FOR US
-                    if (pdu->miphdr->dst == ifs.local_mip_addr) {
+                    uint32_t shiftedValue = pdu->sdu[0] >> 16;
+
+                    // Mask the least-significant 8 bits
+                    uint8_t isolatedValue = shiftedValue & 0xFF;
+
+
+                    if (isolatedValue == ifs.local_mip_addr) {
 
                         // IF YES, SEND ARP REPLY
                         printf("ARP request for us\n");
