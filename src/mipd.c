@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     printf("Starting MIP daemon...\n");
 
     struct epoll_event events[MAX_EVENTS]; // Epoll events
-    int raw_fd, listening_fd, unix_fd, epoll_fd, rc, send_ping_on_arp_reply = 0;
+    int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
 
     // To be set by CLI
     int debug_mode = 0;        // Debug flag
@@ -32,6 +32,9 @@ int main(int argc, char *argv[]) {
     uint8_t local_mip_addr;    // MIP Adress
 
     struct ping_data ping_data; // Ping data
+
+    int arp_type;
+    uint8_t mip_addr;
 
     // Deamon network data
     struct ifs_data ifs;
@@ -132,8 +135,7 @@ int main(int argc, char *argv[]) {
                 case MIP_ARP_REQUEST:
                     printf("Received ARP request\n");
 
-                    int arp_type;
-                    uint8_t mip_addr;
+
                     
                     // Set type of MIP-ARP message and contained MIP address
                     decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
@@ -164,8 +166,6 @@ int main(int argc, char *argv[]) {
                 case MIP_ARP_REPLY:
 
 
-                    int arp_type;
-                    uint8_t mip_addr;
 
                     // Set type of MIP-ARP message and contained MIP address
                     decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
