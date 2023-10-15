@@ -385,3 +385,21 @@ void decode_sdu_miparp(uint32_t* sdu_array, int* arp_type, uint8_t* mip_addr) {
     // Extract mip_addr from bits 23-30
     *mip_addr = (sdu >> 23) & 0xFF;
 }
+
+void decode_fill_ping_buf(const char *buf, size_t buf_size, char *destination_host, char *message) {
+    // Check for NULL pointers and empty buffer
+    if (buf == NULL || buf_size == 0 || destination_host == NULL || message == NULL) {
+        return;
+    }
+
+    // Extract ASCII code for destination_host
+    char ascii_code = buf[0];
+    sprintf(destination_host, "%c", ascii_code);
+
+    // Find the start of the message after "PING:"
+    const char *ping_start = strstr(buf, "PING:");
+    if (ping_start != NULL) {
+        // Extract the message
+        strncpy(message, ping_start + strlen("PING:"), buf_size - (ping_start + strlen("PING:") - buf));
+    }
+}

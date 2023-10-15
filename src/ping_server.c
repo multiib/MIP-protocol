@@ -1,23 +1,83 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <stdio.h>		/* standard input/output library functions */
+#include <stdlib.h>		/* standard library definitions (macros) */
+#include <unistd.h>		/* standard symbolic constants and types */
+#include <string.h>		/* string operations (strncpy, memset..) */
+
+#include <sys/epoll.h>	/* epoll */
+#include <sys/socket.h>	/* sockets operations */
+#include <sys/un.h>		/* definitions for UNIX domain sockets */
 #include "ipc.h"
 #include "utils.h"
 #include "pdu.h"
+
+
 // Declaration of the parse_arguments function
 void parse_arguments(int argc, char *argv[], char **socket_lower);
 
 int main(int argc, char *argv[]) {
     char *socket_lower = NULL;
 
+    int sd, rc;
+
     // Call the function to parse arguments
     parse_arguments(argc, argv, &socket_lower);
 
-    // Now you can use 'socket_lower' in your program
+    struct sockaddr_un addr;
+    char   buf[256];
+    char read_buf[256];
 
-    // Example: Print the value
-    printf("Socket lower: %s\n", socket_lower);
+    sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    if (sd < 0) {
+            perror("socket");
+            exit(EXIT_FAILURE);
+    }
 
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, socket_lower, sizeof(addr.sun_path) - 1);
+
+    rc = connect(sd, (struct sockaddr *)&addr, sizeof(addr));
+    if ( rc < 0) {
+            perror("connect");
+            close(sd);
+            exit(EXIT_FAILURE);
+    }
+    printf("Connected to %s\n", socket_lower);
+
+
+    // Read from socket
+    rc = read(sd, read_buf, sizeof(read_buf));
+    if (rc < 0) {
+        perror("read");
+        close(sd);
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        printf("%u ", pdu->sdu[i]);
+    }
+
+    // char destination_host[3] = {0};
+    // char message[256] = {0};
+    
+
+    // decode_fill_ping_buf(read_buf, sizeof(read_buf), destination_host, message);
+
+
+
+    // fill_ping_buf(buf, sizeof(buf), destination_host, message);
+
+
+    // rc = write(sd, buf, strlen(buf));
+    // if (rc < 0) {
+    //         perror("write");
+    //         close(sd);
+    //         exit(EXIT_FAILURE);
+    // }
+
+
+
+    close(sd);
     return 0;
 }
 
@@ -43,3 +103,4 @@ void parse_arguments(int argc, char *argv[], char **socket_lower) {
 
     *socket_lower = argv[optind];
 }
+

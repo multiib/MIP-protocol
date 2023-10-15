@@ -32,6 +32,7 @@ int main(int argc, char *argv[]) {
     uint8_t local_mip_addr;    // MIP Adress
 
     struct ping_data ping_data; // Ping data
+    
 
     int arp_type;
     uint8_t mip_addr;
@@ -121,6 +122,8 @@ int main(int argc, char *argv[]) {
                 case MIP_PING:
                     printf("Received PING\n");
                     // SEND PING TO APP (ping_server)
+                    rc = write(unix_fd, pdu->sdu, pdu->sdu_len);
+
 
                     break;
 
