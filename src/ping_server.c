@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     
     //create string "hello"
     char *message = "succesful";
-    char *destination_host = "0"; // Filler value
+    char *destination_host = "11"; // Filler value
     
     // Fill the buffer with the pong message
     fill_pong_buf(buf, sizeof(buf), destination_host, message);
