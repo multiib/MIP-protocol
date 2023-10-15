@@ -145,7 +145,7 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
     // Initialize the buffer to zeros
     memset(buf, 0, buf_size);
 
-    buf[0] = atoi(destination_host);
+    buf[0] = (uint8_t)atoi(destination_host);
 
     // Then add message
     if (message != NULL) {
@@ -259,6 +259,7 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
     int offset = 1; // Skip the first byte (destination_mip)
     printf("Buffer content at offset: %s\n", buf + offset);
     // Set app_type
+    
     if (strncmp(buf + offset, "PING:", 5) == 0) {
         app_type = APP_PING;
         offset += 5;
