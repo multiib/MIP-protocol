@@ -194,10 +194,13 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
             return -1;
         }
     } else if (pdu->miphdr->sdu_type == SDU_TYPE_PING) {
-        if (strncmp((const char *)(pdu->sdu + 1), "PING:", 5) == 0) {
+        if (pdu->sdu[1] == 0x50494E47) {
             mip_type = MIP_PING;
-        } else if (strncmp((const char *)(pdu->sdu + 1), "PONG:", 5) == 0) {
+        } else if (pdu->sdu[1] == 0x504F4E47) {
             mip_type = MIP_PONG;
+        } else {
+            printf("Error: Unknown SDU\n");
+            return -1;
         }
     }
 
