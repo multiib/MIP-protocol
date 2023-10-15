@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     // char message[256] = {0};
     
     //create string "hello"
-    char *message = "PONG:succesful";
+    char *message = "succesful";
     char *destination_host = "0"; // Filler value
     
     // Fill the buffer with the pong message
