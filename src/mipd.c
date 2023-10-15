@@ -260,7 +260,6 @@ int main(int argc, char *argv[]) {
                             send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
                         }
 
-                        send_ping_on_arp_reply = 1;
                     }
                     break;
 
