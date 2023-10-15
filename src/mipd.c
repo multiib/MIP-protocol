@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
                 case MIP_PING:
                     printf("Received PING\n");
                     // SEND PING TO APP (ping_server)
-                    rc = write(unix_fd, pdu->sdu, pdu->sdu_len);
+                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
 
 
                     break;
