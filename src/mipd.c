@@ -110,8 +110,10 @@ int main(int argc, char *argv[]) {
             // Data to be read from RAW socket
             struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));    
 
-    
-            MIP_handle type = handle_mip_packet(raw_fd, &ifs, pdu);
+            // Index of recieving interface
+            int interface;
+
+            MIP_handle type = handle_mip_packet(raw_fd, &ifs, pdu, &interface);
 
             switch (type){
                 case MIP_PING:
@@ -133,6 +135,12 @@ int main(int argc, char *argv[]) {
 
                         // IF YES, SEND ARP REPLY
                         printf("ARP request for us\n");
+                        // Create SDU
+                        uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REPLY, pdu->miphdr->src);
+                        // Send MIP packet
+
+                        
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, pdu->miphdr->src, pdu->miphdr->src, 1, SDU_TYPE_MIPARP, sdu);
                         // IF NO, IGNORE
                     } else {
                         printf("ARP request not for us\n");

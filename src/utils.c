@@ -157,7 +157,7 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
 }
 
 
-MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu)
+MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, int *recv_ifs_index)
 {
     // Make sure pdu is not NULL
     if (pdu == NULL) {
@@ -168,13 +168,17 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu)
     MIP_handle mip_type;
 
     uint8_t rcv_buf[256];
+    struct sockaddr_ll from_addr;
+    socklen_t from_addr_len = sizeof(from_addr);
     
     /* Recv the serialized buffer via RAW socket */
-    if (recvfrom(ifs->rsock, rcv_buf, 256, 0, NULL, NULL) <= 0) {
+    if (recvfrom(ifs->rsock, rcv_buf, 256, (struct sockaddr *)&from_addr, &from_addr_len); <= 0) {
         perror("recvfrom()");
         close(ifs->rsock);
         return -1;
     }
+
+    recv_ifs_index = find_matching_if_index(ifs, &from_addr);
 
     size_t rcv_len = mip_deserialize_pdu(pdu, rcv_buf);
 
@@ -341,4 +345,13 @@ uint32_t* stringToUint32Array(const char* str, size_t *length) {
     }
 
     return arr;
+}
+
+int find_matching_if_index(struct ifs_data *ifs, struct sockaddr_ll *from_addr) {
+    for (int i = 0; i < ifs->ifn; i++) {
+        if (ifs->addr[i].sll_ifindex == from_addr->sll_ifindex) {
+            return i;
+        }
+    }
+    return -1;
 }
