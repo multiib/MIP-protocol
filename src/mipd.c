@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
             // Index of recieving interface
             int interface;
 
-            // Type of MIP packet
+            // Handle incoming MIP packet and determine type of packet
             MIP_handle type = handle_mip_packet(raw_fd, &ifs, pdu, &interface);
 
             switch (type){
@@ -135,57 +135,69 @@ int main(int argc, char *argv[]) {
                     int arp_type;
                     uint8_t mip_addr;
                     
-                    // Reverse sdu_array
+                    // Set type of MIP-ARP message and contained MIP address
                     decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
 
 
-
-
+                    // Check if ARP request is for this MIP daemon by comparing target MIP address with local MIP address
                     if (mip_addr == ifs.local_mip_addr) {
 
-                        // IF YES, SEND ARP REPLY
                         printf("ARP request for us\n");
-                        // Create SDU
-                        uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REPLY, pdu->miphdr->src);
+
+                        // Create SDU for ARP reply containing matching MIP address
+                        uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REPLY, ifs.local_mip_addr);
 
                         // Update ARP table
                         arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, interface);
 
-
-                        // Send MIP packet
-
-                        
+                        // Send ARP reply
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, pdu->miphdr->src, 1, SDU_TYPE_MIPARP, sdu, 4);
-                        // IF NO, IGNORE
+
+
+                        // If ARP request is not for this MIP daemon, throw packet away
                     } else {
                         printf("ARP request not for us\n");
                     }
                     break;
 
+
                 case MIP_ARP_REPLY:
+
+
+                    int arp_type;
+                    uint8_t mip_addr;
+
+                    // Set type of MIP-ARP message and contained MIP address
+                    decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
                     printf("Received ARP reply\n");
+
 
                     // Update ARP table
                     arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, interface);
                     // CHECK IF WE ARE WAITING FOR THIS REPLY
-                    if (send_ping_on_arp_reply){
+                    if (ping_data.dst_mip_addr == mip_addr){
 
                         // Create SDU
                         uint8_t sdu_len;
-                        // Creat arr
-                        
+
                         uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
-                        uint8_t *dst_mac_adr = arp_lookup(ping_data.dst_mip_addr);
+                        printf("DEBUG SDU length: \n");
+                        for (int i = 0; i < sdu_len/4; i++) {
+                            printf("%u ", sdu[i]);
+                        }
+
+                        uint8_t *dst_mac_addr = arp_lookup(ping_data.dst_mip_addr);
+                        uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                         
                         printf("ANSJOS\n");
-                        send_mip_packet(&ifs, dst_mac_adr, pdu->ethhdr->src_mac, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl-1, SDU_TYPE_PING, sdu, sdu_len);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl, SDU_TYPE_PING, sdu, sdu_len);
 
                         send_ping_on_arp_reply = 0;
+                    } else {
+                        printf("Not waiting for this ARP reply\n");
                     }
-                        // IF YES, SEND PING
 
-                        // IF NO, IGNORE
                     break;
                 default:
                     printf("Received unknown MIP packet\n");
