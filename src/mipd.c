@@ -158,13 +158,13 @@ int main(int argc, char *argv[]) {
                     if (send_ping_on_arp_reply){
 
                         // Create SDU
-                        uint8_t sdu_len;
+                        uint8_t *sdu_len;
                         // Creat arr
-                        uint32_t *sdu;
-                        *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
+                        
+                        uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
                         uint8_t *dst_mac_adr = arp_lookup(ping_data.dst_mip_addr);
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl-1, SDU_TYPE_PING, sdu, sdu_len);
+                        send_mip_packet(&ifs, dst_mac_adr, pdu->ethhdr->src_mac, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl-1, SDU_TYPE_PING, sdu, sdu_len);
 
                         send_ping_on_arp_reply = 0;
                     }
@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
             
 
             // Type of application packet
-            APP_handle type = handle_app_message(events->data.fd, &ping_data.dst_mip_addr, &ping_data.msg);
+            APP_handle type = handle_app_message(events->data.fd, &ping_data.dst_mip_addr, ping_data.msg);
 
             switch (type){
                 case APP_PING:
@@ -197,9 +197,9 @@ int main(int argc, char *argv[]) {
                     // Check if we have the MAC address of the destination MIP
 
                     // Check if we have the MAC address of the destination MIP
-                    uint8_t * mac_addr = arp_lookup(dst_mip_addr);
+                    uint8_t * mac_addr = arp_lookup(ping_data.dst_mip_addr);
                     if (mac_addr) {
-                        printf("We have the MAC address for MIP %u\n", dst_mip_addr);
+                        printf("We have the MAC address for MIP %u\n", ping_data.dst_mip_addr);
                         // SEND MIP PING
 
                         // send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu);
@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
                         uint8_t sdu_len = 4;
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, ping_data.dst_mip_add, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, ping_data.dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
                         }
 
                         send_ping_on_arp_reply = 1;
