@@ -141,14 +141,6 @@ int main(int argc, char *argv[]) {
 
 
 
-                    // CHECK IF THE REQUEST IS FOR US
-                    uint32_t shiftedValue = pdu->sdu[0] >> 16;
-
-                    // Mask the least-significant 8 bits
-                    uint8_t isolatedValue = shiftedValue & 0xFF;
-
-
-
                     if (mip_addr == ifs.local_mip_addr) {
 
                         // IF YES, SEND ARP REPLY
@@ -163,7 +155,7 @@ int main(int argc, char *argv[]) {
                         // Send MIP packet
 
                         
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, pdu->miphdr->src, pdu->miphdr->src, 1, SDU_TYPE_MIPARP, sdu, 4);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, mip_addr, 1, SDU_TYPE_MIPARP, sdu, 4);
                         // IF NO, IGNORE
                     } else {
                         printf("ARP request not for us\n");
