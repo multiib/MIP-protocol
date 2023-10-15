@@ -161,7 +161,9 @@ int main(int argc, char *argv[]) {
                         uint8_t sdu_len;
                         // Creat arr
                         uint32_t *sdu;
-                        *sdu = stringToUint32Array(ping_data.msg, &sdu_len;
+                        *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
+
+                        uint8_t *dst_mac_adr = arp_lookup(ping_data.dst_mip_addr);
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl-1, SDU_TYPE_PING, sdu, sdu_len);
 
                         send_ping_on_arp_reply = 0;

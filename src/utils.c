@@ -326,8 +326,8 @@ struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_ma
 }
 
 // This function will convert a string into an array of uint32_t
-uint32_t* stringToUint32Array(const char* str, size_t *length) {
-    size_t str_length = strlen(str);
+uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
+    uint8_t str_length = strlen(str);
     *length = (str_length + 3) / 4 + 1; // Calculate the number of uint32_t elements needed, +1 for the length
     uint32_t *arr = (uint32_t*)calloc(*length, sizeof(uint32_t));
 
@@ -337,9 +337,9 @@ uint32_t* stringToUint32Array(const char* str, size_t *length) {
 
     arr[0] = (uint32_t)str_length; // Store the length in the first uint32_t
 
-    for (size_t i = 0; i < str_length; i++) {
-        size_t arr_idx = i / 4 + 1; // Start from index 1
-        size_t shift = (3 - (i % 4)) * 8;
+    for (uint8_t i = 0; i < str_length; i++) {
+        uint8_t arr_idx = i / 4 + 1; // Start from index 1
+        uint8_t shift = (3 - (i % 4)) * 8;
 
         arr[arr_idx] |= (uint32_t)str[i] << shift;
     }
