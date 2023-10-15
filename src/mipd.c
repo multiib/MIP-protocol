@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
                     uint8_t mip_addr;
                     
                     // Reverse sdu_array
-                    reverse_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
+                    decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
 
 
 
