@@ -147,29 +147,26 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
 
     buf[0] = atoi(destination_host);
 
-    // Add "PING:"
-    strcat(buf, "PING:");
-
     // Then add message
     if (message != NULL) {
         strcat(buf, message);
     }
 }
 
-void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, const char *message) {
-    // Initialize the buffer to zeros
-    memset(buf, 0, buf_size);
+// void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, const char *message) {
+//     // Initialize the buffer to zeros
+//     memset(buf, 0, buf_size);
 
-    buf[0] = atoi(destination_host);
+//     buf[0] = atoi(destination_host);
 
-    // Add "PING:"
-    strcat(buf, "PONG:");
+//     // Add "PING:"
+//     strcat(buf, "PONG:");
 
-    // Then add message
-    if (message != NULL) {
-        strcat(buf, message);
-    }
-}
+//     // Then add message
+//     if (message != NULL) {
+//         strcat(buf, message);
+//     }
+// }
 
 
 MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, int *recv_ifs_index)

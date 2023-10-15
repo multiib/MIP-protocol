@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
     // char message[256] = {0};
     
     //create string "hello"
-    char *message = "succesful";
+    char *message = "PONG:succesful";
     char *destination_host = "0"; // Filler value, the MIP deamon will fill this in
     
     // Fill the buffer with the ping message
