@@ -169,6 +169,7 @@ int main(int argc, char *argv[]) {
 
                         uint8_t *dst_mac_adr = arp_lookup(ping_data.dst_mip_addr);
                         
+                        printf("ANSJOS\n");
                         send_mip_packet(&ifs, dst_mac_adr, pdu->ethhdr->src_mac, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl-1, SDU_TYPE_PING, sdu, sdu_len);
 
                         send_ping_on_arp_reply = 0;
@@ -233,9 +234,10 @@ int main(int argc, char *argv[]) {
 
                         // Create SDU length
                         uint8_t sdu_len = 4;
+                        
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, ping_data.dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
                         }
 
                         send_ping_on_arp_reply = 1;
