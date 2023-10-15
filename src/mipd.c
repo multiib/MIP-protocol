@@ -193,7 +193,6 @@ int main(int argc, char *argv[]) {
                         printf("ANSJOS\n");
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl, SDU_TYPE_PING, sdu, sdu_len);
 
-                        send_ping_on_arp_reply = 0;
                     } else {
                         printf("Not waiting for this ARP reply\n");
                     }
