@@ -105,8 +105,8 @@ size_t mip_deserialize_pdu(struct pdu *pdu, uint8_t *rcv_buf)
     rcv_len += MIP_HDR_LEN;
 
     pdu->sdu = (uint32_t *)calloc(1, pdu->miphdr->sdu_len/4);
-    memcpy(pdu->sdu, rcv_buf + rcv_len, pdu->miphdr->sdu_len * 4);
-    rcv_len += pdu->miphdr->sdu_len * 4;
+    memcpy(pdu->sdu, rcv_buf + rcv_len, pdu->miphdr->sdu_len);
+    rcv_len += pdu->miphdr->sdu_len;
 
     return rcv_len;
 }
