@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
 
     struct ping_data ping_data; // Ping data
     
+    uint8_t mip_return = 0;
 
     int arp_type;
     uint8_t mip_addr;
@@ -122,14 +123,24 @@ int main(int argc, char *argv[]) {
                 case MIP_PING:
                     printf("Received PING\n");
                     // SEND PING TO APP (ping_server)
-                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
 
+
+                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
+                    if (rc == -1) {
+                        perror("write");
+                        exit(EXIT_FAILURE);
+                    }
+                    mip_return = pdu->miphdr->src;
 
                     break;
 
                 case MIP_PONG:
                     printf("Received PONG\n");
-                    // SEND PONG TO APP (ping_client)
+                    
+                        for (int i = 0; i < pdu->miphdr->sdu_len/4; i++) {
+                            printf("%u ", pdu->sdu[i]);
+                        }
+
 
                     break;
 
@@ -265,12 +276,13 @@ int main(int argc, char *argv[]) {
                 case APP_PONG:
                     printf("Received APP_PONG\n");
 
+
                     uint8_t sdu_len;
-                    //stringToUint32Array(ping_data.msg, &sdu_len);
-                    // print ping data msg
-                    printf("Ping data msg: %s\n", ping_data.msg);
                     uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
+                    uint8_t *dst_mac_addr = arp_lookup(mip_return);
+                    uint8_t interface = arp_lookup_interface(mip_return);
+                    send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, 1, SDU_TYPE_PING, sdu, sdu_len);
                     break;
                 
                 default:
