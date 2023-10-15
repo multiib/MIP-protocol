@@ -54,7 +54,11 @@ int main(int argc, char *argv[]) {
     }
 
     // Initialize network data
+    //print local mip addr
+    printf("Local MIP addr: %d\n", local_mip_addr);
     init_ifs(&ifs, raw_fd, local_mip_addr);
+    printf("Local MIP addr: %d\n", ifs.local_mip_addr);
+
 
     // Create UNIX listening socket for accepting connections from applications
     listening_fd = create_unix_sock(socket_upper);
@@ -164,6 +168,7 @@ int main(int argc, char *argv[]) {
                         uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
                         uint8_t *dst_mac_adr = arp_lookup(ping_data.dst_mip_addr);
+                        
                         send_mip_packet(&ifs, dst_mac_adr, pdu->ethhdr->src_mac, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl-1, SDU_TYPE_PING, sdu, sdu_len);
 
                         send_ping_on_arp_reply = 0;
