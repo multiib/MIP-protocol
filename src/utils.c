@@ -178,7 +178,7 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
         return -1;
     }
 
-    recv_ifs_index = find_matching_if_index(ifs, &from_addr);
+    *recv_ifs_index = find_matching_if_index(ifs, &from_addr);
 
     size_t rcv_len = mip_deserialize_pdu(pdu, rcv_buf);
 
