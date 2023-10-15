@@ -158,13 +158,13 @@ int main(int argc, char *argv[]) {
                     if (send_ping_on_arp_reply){
 
                         // Create SDU
-                        uint8_t *sdu_len;
+                        uint8_t sdu_len;
                         // Creat arr
                         
-                        uint32_t *sdu = stringToUint32Array(ping_data.msg, sdu_len);
+                        uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
                         uint8_t *dst_mac_adr = arp_lookup(ping_data.dst_mip_addr);
-                        send_mip_packet(&ifs, dst_mac_adr, pdu->ethhdr->src_mac, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl-1, SDU_TYPE_PING, sdu, *sdu_len);
+                        send_mip_packet(&ifs, dst_mac_adr, pdu->ethhdr->src_mac, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl-1, SDU_TYPE_PING, sdu, sdu_len);
 
                         send_ping_on_arp_reply = 0;
                     }
