@@ -19,6 +19,11 @@ struct pdu {
     uint32_t        *sdu;
 } __attribute__((packed));
 
+struct ping_data {
+    uint8_t dst_mip_addr;
+    char   msg[256];
+};
+
 struct pdu * alloc_pdu(void);
 void fill_pdu(struct pdu *pdu,
               uint8_t *src_mac_addr,

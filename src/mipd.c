@@ -20,19 +20,23 @@
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *local_mip_addr);
 
 int main(int argc, char *argv[]) {
-    // Declaration of variables
+
     printf("Starting MIP daemon...\n");
+
     struct epoll_event events[MAX_EVENTS]; // Epoll events
-    int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
+    int raw_fd, listening_fd, unix_fd, epoll_fd, rc, send_ping_on_arp_reply = 0;
 
     // To be set by CLI
     int debug_mode = 0;        // Debug flag
     char *socket_upper;        // UNIX socket path
-    uint8_t local_mip_addr;       // MIP Adress
+    uint8_t local_mip_addr;    // MIP Adress
 
-    struct ifs_data ifs; // Struct to hold MAC addresses
+    struct ping_data ping_data; // Ping data
 
-    // Parse arguments
+    // Deamon network data
+    struct ifs_data ifs;
+
+    // Parse arguments from CLI
     parse_arguments(argc, argv, &debug_mode, &socket_upper, &local_mip_addr);
 
     // Create epoll instance
@@ -42,21 +46,18 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
     }
 
-    // Create RAW socket
+    // Create RAW socket for MIP traffic
     raw_fd = create_raw_socket();
     if (raw_fd == -1) {
         perror("create_raw_socket");
         exit(EXIT_FAILURE);
     }
 
-    // Get MAC addresses from interfaces
+    // Initialize network data
     init_ifs(&ifs, raw_fd, local_mip_addr);
 
-
-    // Create UNIX listening socket
+    // Create UNIX listening socket for accepting connections from applications
     listening_fd = create_unix_sock(socket_upper);
-
-
 
     // Add RAW socket to epoll instance
     rc = add_to_epoll_table(epoll_fd, raw_fd);
@@ -75,7 +76,7 @@ int main(int argc, char *argv[]) {
 
 
     while(1) {
-        // Wait for events
+        // Wait for incoming events
         rc = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
         if (rc == -1) {
             perror("epoll_wait");
@@ -83,29 +84,24 @@ int main(int argc, char *argv[]) {
 
 
         }
-        // If event is from listening socket
+        // Add new application connection to epoll instance
         if (events->data.fd == listening_fd) {
 
             unix_fd = accept(listening_fd, NULL, NULL);
-
             if (unix_fd == -1) {
                 perror("accept");
                 exit(EXIT_FAILURE);
             }
-            printf("New connection\n");
+            printf("Application connected\n");
 
             rc = add_to_epoll_table(epoll_fd, unix_fd);
             if (rc == -1) {
                 perror("add_to_epoll_table");
                 exit(EXIT_FAILURE);
             }
-            printf("Added to epoll table\n");
 
 
-
-
-
-        // If event is from RAW socket
+        // If incoming MIP traffic
         } else if (events->data.fd == raw_fd) {
             // Data to be read from RAW socket
             struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));    
@@ -113,6 +109,7 @@ int main(int argc, char *argv[]) {
             // Index of recieving interface
             int interface;
 
+            // Type of MIP packet
             MIP_handle type = handle_mip_packet(raw_fd, &ifs, pdu, &interface);
 
             switch (type){
@@ -137,6 +134,11 @@ int main(int argc, char *argv[]) {
                         printf("ARP request for us\n");
                         // Create SDU
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REPLY, pdu->miphdr->src);
+
+                        // Update ARP table
+                        arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, interface);
+
+
                         // Send MIP packet
 
                         
@@ -149,8 +151,21 @@ int main(int argc, char *argv[]) {
 
                 case MIP_ARP_REPLY:
                     printf("Received ARP reply\n");
-                    // CHECK IF WE ARE WAITING FOR THIS REPLY
 
+                    // Update ARP table
+                    arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, interface);
+                    // CHECK IF WE ARE WAITING FOR THIS REPLY
+                    if (send_ping_on_arp_reply){
+
+                        // Create SDU
+                        uint8_t sdu_len;
+                        // Creat arr
+                        uint32_t *sdu;
+                        *sdu = stringToUint32Array(ping_data.msg, &sdu_len;
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl-1, SDU_TYPE_PING, sdu, sdu_len);
+
+                        send_ping_on_arp_reply = 0;
+                    }
                         // IF YES, SEND PING
 
                         // IF NO, IGNORE
@@ -164,14 +179,15 @@ int main(int argc, char *argv[]) {
             destroy_pdu(pdu);
 
         } else {
-            // If event is from application
+            // If incoming application traffic
 
             // Data to be read from application
-            uint8_t dst_mip_addr;
-            char msg[256];
+            
+            
 
+            // Type of application packet
+            APP_handle type = handle_app_message(events->data.fd, &ping_data.dst_mip_addr, &ping_data.msg);
 
-            APP_handle type = handle_app_message(events->data.fd, &dst_mip_addr, msg);
             switch (type){
                 case APP_PING:
                     printf("Received APP_PING\n");
@@ -190,13 +206,13 @@ int main(int argc, char *argv[]) {
 
 
                     } else {
-                        printf("MAC address for MIP %u not found in cache\n", dst_mip_addr);
+                        printf("MAC address for MIP %u not found in cache\n", ping_data.dst_mip_add);
                         // SEND ARP REQUEST
 
                         // Create SDU
 
 
-                        uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, dst_mip_addr);
+                        uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ping_data.dst_mip_add);
 
                         // Print int
                         printf("SDU int: %u\n", sdu[0]);
@@ -212,8 +228,10 @@ int main(int argc, char *argv[]) {
                         uint8_t sdu_len = 4;
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, ping_data.dst_mip_add, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
                         }
+
+                        send_ping_on_arp_reply = 1;
                     }
                     break;
 
@@ -241,106 +259,6 @@ int main(int argc, char *argv[]) {
 
 
             
-            // //OLD CODE
-            // // If this we have not read the message from application
-            // if (new_app){
-            //     int app_type, rc;
-
-            //     new_app = 0; 
-                
-            //     // Buffer to hold message from application
-            //     char buf[256];
-
-            //     // Clear buffer
-            //     memset(buf, 0, sizeof(buf));
-
-            //     // Read message from application
-            //     rc = read(events->data.fd, buf, sizeof(buf));
-            //     if (rc <= 0) {
-            //         perror("read");
-            //         exit(EXIT_FAILURE);
-            //     }
-
-            //     // Set the destination_mip to the first byte of the buffer
-            //     dst_mip_addr = (uint8_t) buf[0];
-
-            //     // Initialize an offset for the message
-            //     int offset = 1; // Skip the first byte (destination_mip)
-
-            //     // Set app_type
-            //     if (strncmp(buf + offset, "PING:", 5) == 0) {
-            //         app_type = CLIENT;
-            //         offset += 5;
-            //     } else if (strncmp(buf + offset, "PONG:", 5) == 0) {
-            //         app_type = SERVER;
-            //         offset += 5;
-            //     } else {
-            //         perror("Unknown message type");
-            //         close(fd);
-            //         exit(EXIT_FAILURE);
-            //     }
-            //     // Copy the rest of the buffer to msg
-            //     strcpy(msg, buf + offset);
-            // }
-
-
-
-
-            // if (app_type == CLIENT) {
-            //     struct sockaddr_ll *dst_mac_entry = arp_lookup_mac(dst_mip_addr);
-                
-            //     if (dst_mac_entry == NULL) {
-            //         // Send ARP request
-            //         uint32_t sdu = create_sdu_miparp(SDU_ARP_TYPE_LOOKUP, dst_mip_addr);
-
-            //         if (!waiting_for_arp_reply) {
-            //             // Iterate over all interfaces and send ARP request
-            //             for (int i = 0; i < ifs.num_ifs; i++){
-            //                 send_mip_packet(&ifs, &ifs.addr[i].sll_addr, ARP_BROADCAST, ifs.local_mip_addr, dst_mip_addr, (const char*)&sdu, 0x01);
-            //             }
-            //         }
-            //         waiting_for_arp_reply = 1;
-            //     } else {
-            //         // Send PING
-            //         struct sockaddr_ll *src_mac_entry = arp_lookup_interface(dst_mip_addr);
-            //         if (src_mac_entry) {
-            //             send_mip_packet(&ifs, src_mac_entry->sll_addr, dst_mac_entry->sll_addr, ifs.local_mip_addr, dst_mip_addr, msg, 0x00);
-            //         } else {
-            //             perror("Could not find interface");
-            //             exit(EXIT_FAILURE);
-            //         }
-            //     }
-            // }
-
-
-
-
-            // if (app_type == SERVER) {
-            //     // Print the message
-            //     printf("Received PONG: %s\n", msg);
-            // }
-            // else {
-            //     perror("Unknown message type");
-
-            //     exit(EXIT_FAILURE);
-            // }
-
-
-
-            // // Check ARP cache for MAC address matching the destination IP
-            // // uint8_t *mac = arp_lookup(destination_mip);
-            
-            // // if (mac == NULL) {
-            // //     // MAC address not in ARP cache, send ARP request
-            // //     send_raw_packet(raw_fd, ARP_BROADCAST, NULL);
-            // //     // In the next iteration, the ARP reply will be processed when events->data.fd == raw_fd
-            // // } else {
-            // //     // MAC address found in ARP cache, forward the ping message
-            // //     send_raw_packet(raw_fd, mac, msg);
-            // // }
-
-
-
 
         }
     }

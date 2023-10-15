@@ -347,11 +347,20 @@ uint32_t* stringToUint32Array(const char* str, size_t *length) {
     return arr;
 }
 
-int find_matching_if_index(struct ifs_data *ifs, struct sockaddr_ll *from_addr) {
+uint32_t find_matching_if_index(struct ifs_data *ifs, struct sockaddr_ll *from_addr) {
     for (int i = 0; i < ifs->ifn; i++) {
         if (ifs->addr[i].sll_ifindex == from_addr->sll_ifindex) {
             return i;
         }
     }
     return -1;
+}
+
+// Function to clear the ping_data struct
+void clear_ping_data(struct ping_data *data) {
+    if (data == NULL) {
+        return;
+    }
+    data->dst_mip_addr = 0;
+    memset(data->msg, 0, sizeof(data->msg));
 }
