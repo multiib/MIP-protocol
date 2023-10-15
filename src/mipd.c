@@ -131,19 +131,25 @@ int main(int argc, char *argv[]) {
 
                 case MIP_ARP_REQUEST:
                     printf("Received ARP request\n");
+
+                    int arp_type;
+                    uint8_t mip_addr;
+                    
+                    // Reverse sdu_array
+                    reverse_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
+
+
+
+
                     // CHECK IF THE REQUEST IS FOR US
                     uint32_t shiftedValue = pdu->sdu[0] >> 16;
 
                     // Mask the least-significant 8 bits
                     uint8_t isolatedValue = shiftedValue & 0xFF;
 
-                    printf("sdu[0]: %d\n", pdu->sdu[0]);
-                    printf("shiftedValue: %d\n", shiftedValue);
-                    printf("Isolated value: %d\n", isolatedValue);
-                    printf("Target value: %d\n", ifs.local_mip_addr);
 
 
-                    if (isolatedValue == ifs.local_mip_addr) {
+                    if (mip_addr == ifs.local_mip_addr) {
 
                         // IF YES, SEND ARP REPLY
                         printf("ARP request for us\n");

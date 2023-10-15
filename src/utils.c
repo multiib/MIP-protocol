@@ -364,3 +364,17 @@ void clear_ping_data(struct ping_data *data) {
     data->dst_mip_addr = 0;
     memset(data->msg, 0, sizeof(data->msg));
 }
+
+void decode_sdu_miparp(uint32_t* sdu_array, int* arp_type, uint8_t* mip_addr) {
+    if (sdu_array == NULL || arp_type == NULL || mip_addr == NULL) {
+        return; // Error, some pointer is NULL
+    }
+    
+    uint32_t sdu = sdu_array[0];
+    
+    // Extract arp_type from bit 31
+    *arp_type = (sdu >> 31) & 1;
+    
+    // Extract mip_addr from bits 23-30
+    *mip_addr = (sdu >> 23) & 0xFF;
+}
