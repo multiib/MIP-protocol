@@ -264,10 +264,10 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
     // Set app_type
     if (strncmp(buf + offset, "PING:", 5) == 0) {
         app_type = APP_PING;
-        offset += 5;
+
     } else if (strncmp(buf + offset, "PONG:", 5) == 0) {
         app_type = APP_PONG;
-        offset += 5;
+
     } else {
         perror("Unknown message type");
         close(fd);
