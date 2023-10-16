@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 #include "ether.h"
 #include "mip.h"
