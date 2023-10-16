@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
 
 
     end = clock();
-    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC //* 1000; // Convert to milliseconds
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC; //* 1000; // Convert to milliseconds
     char *str = uint32ArrayToString(read_buf);
     printf("%s\n", str);
     printf("time=%f ms\n", cpu_time_used);
