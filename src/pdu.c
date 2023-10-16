@@ -69,7 +69,7 @@ size_t mip_serialize_pdu(struct pdu *pdu, uint8_t *snd_buf)
     uint32_t miphdr = 0;
     miphdr |= (uint32_t) pdu->miphdr->dst << 24;
     miphdr |= (uint32_t) pdu->miphdr->src << 16;
-    miphdr |= (uint32_t) (pdu->miphdr->ttl & 0xf) << 12;
+    miphdr |= (uint32_t) (pdu->miphdr->ttl & 0xff) << 12;
     miphdr |= (uint32_t) (pdu->miphdr->sdu_len & 0xff) << 3;
     miphdr |= (uint32_t) (pdu->miphdr->sdu_type & 0xf);
 
