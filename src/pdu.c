@@ -45,6 +45,8 @@ void fill_pdu(struct pdu *pdu,
     
     pdu->miphdr->dst = dst_mip_addr;
     pdu->miphdr->src = src_mip_addr;
+    printf("TTL2: %d\n", ttl);
+
     pdu->miphdr->ttl = ttl;
 
     pdu->miphdr->sdu_type = sdu_type;
@@ -80,6 +82,8 @@ size_t mip_serialize_pdu(struct pdu *pdu, uint8_t *snd_buf)
     /* Attach SDU */
     memcpy(snd_buf + snd_len, pdu->sdu, pdu->miphdr->sdu_len);
     snd_len += pdu->miphdr->sdu_len;
+
+
 
     return snd_len;
 }
