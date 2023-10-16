@@ -314,7 +314,7 @@ int main(int argc, char *argv[]) {
                     } else {
                         printf("TTL = 0, dropping packet\n");
                     }
-                
+                    break;
                 default:
                     printf("Received unknown APP message\n");
                     break;
