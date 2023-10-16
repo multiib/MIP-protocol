@@ -436,7 +436,7 @@ uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
     // Calculate length in bytes and set the output parameter
     *length = num_elements * sizeof(uint32_t);
     
-    uint32_t *arr = (uint32_t*)calloc(num_elements, sizeof(uint32_t));
+    uint32_t *arr = (uint32_t*)calloc(num_elements*2, sizeof(uint32_t));
 
     if (arr == NULL) {
         return NULL; // Failed to allocate memory
@@ -450,6 +450,7 @@ uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
 
         arr[arr_idx] |= (uint32_t)str[i] << shift;
     }
+    
 
     return arr;
 }
@@ -504,7 +505,7 @@ void decode_fill_ping_buf(const char *buf, size_t buf_size, char *destination_ho
     }
 }
 
-// Reverse function without length parameter
+
 char* uint32ArrayToString(uint32_t* arr) {
     if (arr == NULL) {
         return NULL;

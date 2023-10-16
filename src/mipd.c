@@ -134,7 +134,6 @@ int main(int argc, char *argv[]) {
                     }
                     mip_return = pdu->miphdr->src;
                     ttl_return = pdu->miphdr->ttl;
-                    printf("DEBUGp1\n");
                     break;
 
                 case MIP_PONG:
