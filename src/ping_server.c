@@ -55,15 +55,14 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
+        prinf("DEBUGp2\n");
+
         char *str = uint32ArrayToString(read_buf);
         printf("%s\n", str);
 
+        prinf("DEBUGp3\n");
 
-        // char destination_host[3] = {0};
-        // char message[256] = {0};
-        
-        //create string "hello"
-        char *message = "succesful";
+
         char *destination_host = "11"; // Filler value
         
         // Fill the buffer with the pong message
