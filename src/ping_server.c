@@ -55,12 +55,12 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
-        prinf("DEBUGp2\n");
+        printf("DEBUGp2\n");
 
         char *str = uint32ArrayToString(read_buf);
         printf("%s\n", str);
 
-        prinf("DEBUGp3\n");
+        printf("DEBUGp3\n");
 
 
         char *destination_host = "11"; // Filler value
