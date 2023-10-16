@@ -21,7 +21,7 @@ struct pdu {
 
 struct ping_data {
     uint8_t dst_mip_addr;
-    char   msg[256];
+    char   msg[512];
 };
 
 struct pdu * alloc_pdu(void);
