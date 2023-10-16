@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
                         uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                         
                         printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl, SDU_TYPE_PING, sdu, sdu_len);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, 4, SDU_TYPE_PING, sdu, sdu_len);
 
 
 
