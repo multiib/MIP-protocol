@@ -10,7 +10,6 @@
 #define ARP_TYPE_REPLY   1
 
 
-
 #define CLIENT 0
 #define SERVER 1
 

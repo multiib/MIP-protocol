@@ -20,7 +20,7 @@ struct pdu * alloc_pdu(void)
     pdu->miphdr = (struct mip_hdr *)malloc(sizeof(struct mip_hdr));
         pdu->miphdr->dst = 0;
         pdu->miphdr->src = 0 ;
-        pdu->miphdr->ttl = 0;
+        pdu->miphdr->ttl = 0x00;
         pdu->miphdr->sdu_len = 0;
         pdu->miphdr->sdu_type = 0;
 
