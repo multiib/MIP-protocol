@@ -344,7 +344,7 @@ int main(int argc, char *argv[]) {
                     printf("TTl65: %u\n", ttl_return);
                     if (ttl_return){
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, ttl_return-1, SDU_TYPE_PING, sdu, sdu_len);
-                    } else if{
+                    } else if (debug_mode){
                         printf("TTL = 0, dropping packet\n");
                     }
                     break;
