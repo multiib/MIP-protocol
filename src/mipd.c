@@ -144,6 +144,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     mip_return = 0;
+                    close(unix_fd);
 
                     break;
 
