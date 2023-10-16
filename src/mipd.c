@@ -235,6 +235,7 @@ int main(int argc, char *argv[]) {
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len);
 
                         free(sdu);
+                        sdu = NULL;
                     } else if (debug_mode){
                         printf("Not waiting for this reply\n");
                     }
@@ -292,6 +293,7 @@ int main(int argc, char *argv[]) {
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len);
 
                         free(sdu);
+                        sdu = NULL;
 
 
                     } else {
@@ -350,6 +352,7 @@ int main(int argc, char *argv[]) {
                         printf("TTL = 0, dropping packet\n");
                     }
                     free(sdu);
+                    sdu = NULL;
                     break;
                 default:
                     if (debug_mode){

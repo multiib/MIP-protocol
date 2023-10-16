@@ -68,7 +68,8 @@ int main(int argc, char *argv[]) {
         
         // Fill the buffer with the pong message
         fill_pong_buf(buf, sizeof(buf), destination_host, strcpy(str, str + 5));
-
+        free(str);
+        str = NULL;
         // Write back
         rc = write(sd, buf, sizeof(buf));
         if (rc < 0) {
