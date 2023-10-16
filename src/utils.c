@@ -18,7 +18,7 @@
 #include "mip.h"
 
 
-
+extern int debug_mode;
 
 
 // Print MAC address in hex format
@@ -219,8 +219,11 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
         }
     }
 
-    printf("Receiving PDU with content (size %zu) :\n", rcv_len);
-    print_pdu_content(pdu);
+    if (debug_mode){
+        printf("Receiving PDU with content (size %zu) :\n", rcv_len);
+        print_pdu_content(pdu);
+    }
+
     
     return mip_type;
 }
@@ -321,9 +324,11 @@ int send_mip_packet(struct ifs_data *ifs,
 
 
 
+    if (debug_mode){
+        printf("Sending PDU with content (size %zu):\n", snd_len);
+        print_pdu_content(pdu);
+    }
 
-    printf("Sending PDU with content (size %zu):\n", snd_len);
-    print_pdu_content(pdu);
 
     destroy_pdu(pdu);
     return 0;
