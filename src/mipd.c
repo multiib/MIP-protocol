@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 
     struct ping_data ping_data; // Ping data
     
-    uint8_t set_ttl = 64;
+    uint8_t set_ttl = 15;
     uint8_t set_ttl_broadcast = 1;
 
     uint8_t mip_return = 0;
