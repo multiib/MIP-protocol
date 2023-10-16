@@ -297,7 +297,10 @@ int send_mip_packet(struct ifs_data *ifs,
     if (NULL == pdu)
         return -ENOMEM;
 
+    //print ttl
+    printf("TTL1: %d\n", ttl);
     fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
+    printf("TTL4: %d\n", ttl);
 
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
