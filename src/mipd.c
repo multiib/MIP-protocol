@@ -126,6 +126,7 @@ int main(int argc, char *argv[]) {
 
             switch (type){
                 case MIP_PING:
+                    wait(1);
                     if (debug_mode){
                         printf("Received MIP_PING\n");
                     }
