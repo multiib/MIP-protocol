@@ -2,7 +2,7 @@
 #include <stdlib.h>		/* standard library definitions (macros) */
 #include <unistd.h>		/* standard symbolic constants and types */
 #include <string.h>		/* string operations (strncpy, memset..) */
-
+#include <time.h>        /* time functions */
 #include <sys/epoll.h>	/* epoll */
 #include <sys/socket.h>	/* sockets operations */
 #include <sys/un.h>		/* definitions for UNIX domain sockets */
