@@ -15,7 +15,7 @@
 #include "mip.h"
 #include "ipc.h"
 
-
+int debug_mode = 0;        // Debug flag
 
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *local_mip_addr);
 
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
 
     // To be set by CLI
-    int debug_mode = 0;        // Debug flag
+
     char *socket_upper;        // UNIX socket path
     uint8_t local_mip_addr;    // MIP Adress
 
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
     // Parse arguments from CLI
     parse_arguments(argc, argv, &debug_mode, &socket_upper, &local_mip_addr);
-    printf("Debug mode: %d\n", debug_mode);
+
     // Create epoll instance
     epoll_fd = epoll_create1(0);
     if (epoll_fd == -1) {
@@ -64,7 +64,6 @@ int main(int argc, char *argv[]) {
 
     // Initialize network data
     init_ifs(&ifs, raw_fd, local_mip_addr);
-
 
 
     // Create UNIX listening socket for accepting connections from applications
