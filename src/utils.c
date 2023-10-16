@@ -205,7 +205,9 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
         } else if (arp_type == ARP_TYPE_REPLY) {
             mip_type = MIP_ARP_REPLY;
         } else {
-            printf("Error: Unknown ARP type\n");
+            if (debug_mode) {
+                printf("Error: Unknown ARP type\n");
+            }
             return -1;
         }
     } else if (pdu->miphdr->sdu_type == SDU_TYPE_PING) {
@@ -214,7 +216,9 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
         } else if (pdu->sdu[1] == 0x504F4E47) {
             mip_type = MIP_PONG;
         } else {
-            printf("Error: Unknown SDU\n");
+            if (debug_mode) {
+                printf("Error: Unknown PING type\n");
+            }
             return -1;
         }
     }
@@ -259,11 +263,11 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
 
     // Set the destination_mip to the first byte of the buffer
     *dst_mip_addr = (uint8_t) buf[0];
-    printf("Destination MIP: %d\n", *dst_mip_addr); //////DEBUG
+
 
     // Initialize an offset for the message
     int offset = 1; // Skip the first byte (destination_mip)
-    printf("Buffer content at offset: %s\n", buf + offset);
+
     // Set app_type
     if (strncmp(buf + offset, "PING:", 5) == 0) {
         app_type = APP_PING;
@@ -300,10 +304,9 @@ int send_mip_packet(struct ifs_data *ifs,
     if (NULL == pdu)
         return -ENOMEM;
 
-    //print ttl
-    printf("TTL1: %d\n", ttl);
+
     fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
-    printf("TTL4: %d\n", pdu->miphdr->ttl);
+
 
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 

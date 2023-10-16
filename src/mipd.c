@@ -21,7 +21,6 @@ void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_uppe
 
 int main(int argc, char *argv[]) {
 
-    printf("Starting MIP daemon...\n");
 
     struct epoll_event events[MAX_EVENTS]; // Epoll events
     int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
@@ -102,7 +101,10 @@ int main(int argc, char *argv[]) {
                 perror("accept");
                 exit(EXIT_FAILURE);
             }
-            printf("Application connected\n");
+            if (debug_mode){
+                printf("Application connected\n");
+            }
+
 
             rc = add_to_epoll_table(epoll_fd, unix_fd);
             if (rc == -1) {
@@ -124,7 +126,10 @@ int main(int argc, char *argv[]) {
 
             switch (type){
                 case MIP_PING:
-                    printf("Received PING\n");
+                    if (debug_mode){
+                        printf("Received MIP_PING\n");
+                    }
+
                     // SEND PING TO APP (ping_server)
 
 
@@ -139,7 +144,10 @@ int main(int argc, char *argv[]) {
                     break;
 
                 case MIP_PONG:
-                    printf("Received PONG\n");
+                    if (debug_mode){
+                        printf("Received MIP_PONG\n");
+                    }
+
                     
                     rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
                     if (rc == -1) {
@@ -154,7 +162,10 @@ int main(int argc, char *argv[]) {
                     break;
 
                 case MIP_ARP_REQUEST:
-                    printf("Received ARP request\n");
+                    if (debug_mode){
+                        printf("Received MIP_ARP_REQUEST\n");
+                    }
+
 
 
                     
@@ -164,8 +175,10 @@ int main(int argc, char *argv[]) {
 
                     // Check if ARP request is for this MIP daemon by comparing target MIP address with local MIP address
                     if (mip_addr == ifs.local_mip_addr) {
+                        if (debug_mode){
+                            printf("ARP request for us\n");
+                        }
 
-                        printf("ARP request for us\n");
 
                         // Create SDU for ARP reply containing matching MIP address
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REPLY, ifs.local_mip_addr);
@@ -174,28 +187,37 @@ int main(int argc, char *argv[]) {
                         arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, interface);
 
                         // Send ARP reply
-                        printf("Sending MIP_ARP_REPLY to MIP: %u\n", pdu->miphdr->src);
+                        if (debug_mode){
+                            printf("Sending MIP_ARP_REPLY to MIP: %u\n", pdu->miphdr->src);
+                        }
+
 
                         if (pdu->miphdr->ttl){
                             send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, pdu->miphdr->src, pdu->miphdr->ttl - 1, SDU_TYPE_MIPARP, sdu, 4);
                         } else {
-                            printf("TTL = 0, dropping packet\n");
+                            if (debug_mode){
+                                printf("TTL = 0, dropping packet\n");
+                            }
                         }
 
                         // If ARP request is not for this MIP daemon, throw packet away
                     } else {
-                        printf("ARP request not for us\n");
+                        if (debug_mode){
+                            printf("ARP request not for us\n");
+                        }
                     }
                     break;
 
 
                 case MIP_ARP_REPLY:
-
+                    if (debug_mode){
+                        printf("Received MIP_ARP_REPLY\n");
+                    }
 
 
                     // Set type of MIP-ARP message and contained MIP address
                     decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
-                    printf("Received ARP reply\n");
+
 
 
                     // Update ARP table
@@ -216,8 +238,8 @@ int main(int argc, char *argv[]) {
 
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len);
 
-                    } else {
-                        printf("Not waiting for this ARP reply\n");
+                    } else if (debug_mode){
+                        printf("Not waiting for this reply\n");
                     }
 
                     break;
@@ -241,14 +263,20 @@ int main(int argc, char *argv[]) {
 
             switch (type){
                 case APP_PING:
-                    printf("Received APP_PING\n");
+                    if (debug_mode){
+                        printf("Received APP_PING\n");
+                    }
+                    
 
                     // Check if we have the MAC address of the destination MIP
 
                     // Check if we have the MAC address of the destination MIP
                     uint8_t * mac_addr = arp_lookup(ping_data.dst_mip_addr);
                     if (mac_addr) {
-                        printf("We have the MAC address for MIP %u\n", ping_data.dst_mip_addr);
+                        if (debug_mode){
+                            printf("We have the MAC address for MIP %u\n", ping_data.dst_mip_addr);
+                        }
+
                         // SEND MIP PING
 
                         // Create SDU
@@ -267,7 +295,9 @@ int main(int argc, char *argv[]) {
 
 
                     } else {
-                        printf("MAC address for MIP %u not found in cache\n", ping_data.dst_mip_addr);
+                        if (debug_mode){
+                            printf("MAC address for MIP %u not found in cache\n", ping_data.dst_mip_addr);
+                        }
                         // SEND ARP REQUEST
 
                         // Create SDU
@@ -275,8 +305,7 @@ int main(int argc, char *argv[]) {
 
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ping_data.dst_mip_addr);
 
-                        // Print int
-                        printf("SDU int: %u\n", sdu[0]);
+
 
 
                         // Create Broadcast MAC address
@@ -290,7 +319,9 @@ int main(int argc, char *argv[]) {
                         
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
-                            printf("Sending MIP_BROADCAST to MIP: %u\n", broadcast_mip_addr);
+                            if (debug_mode){
+                                printf("Sending MIP_BROADCAST to MIP: %u\n", broadcast_mip_addr);
+                            }
                             send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, set_ttl_broadcast, SDU_TYPE_MIPARP, sdu, sdu_len);
                         }
 
@@ -298,7 +329,10 @@ int main(int argc, char *argv[]) {
                     break;
 
                 case APP_PONG:
-                    printf("Received APP_PONG\n");
+                    if (debug_mode){
+                        printf("Received APP_PONG\n");
+                    }
+
 
 
                     uint8_t sdu_len;
@@ -310,12 +344,14 @@ int main(int argc, char *argv[]) {
                     printf("TTl65: %u\n", ttl_return);
                     if (ttl_return){
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, ttl_return-1, SDU_TYPE_PING, sdu, sdu_len);
-                    } else {
+                    } else if{
                         printf("TTL = 0, dropping packet\n");
                     }
                     break;
                 default:
-                    printf("Received unknown APP message\n");
+                    if (debug_mode){
+                        printf("Received unknown APP message\n");
+                    }
                     break;
             }
 
