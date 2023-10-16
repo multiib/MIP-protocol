@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
     struct ping_data ping_data; // Ping data
     
     uint8_t mip_return = 0;
+    uint8_t ttl_return;
 
     int arp_type;
     uint8_t mip_addr;
@@ -144,6 +145,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     mip_return = 0;
+                    ttl_return = pdu->miphdr->ttl;
                     close(unix_fd);
 
                     break;
@@ -170,8 +172,12 @@ int main(int argc, char *argv[]) {
 
                         // Send ARP reply
                         printf("Sending MIP_ARP_REPLY to MIP: %u\n", pdu->miphdr->src);
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, pdu->miphdr->src, 1, SDU_TYPE_MIPARP, sdu, 4);
 
+                        if (pdu->miphdr->ttl){
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, pdu->miphdr->src, pdu->miphdr->ttl - 1, SDU_TYPE_MIPARP, sdu, 4);
+                        } else {
+                            printf("TTL = 0, dropping packet\n");
+                        }
 
                         // If ARP request is not for this MIP daemon, throw packet away
                     } else {
@@ -204,7 +210,7 @@ int main(int argc, char *argv[]) {
                         uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                         
                         printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl, SDU_TYPE_PING, sdu, sdu_len);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, 64, SDU_TYPE_PING, sdu, sdu_len);
 
                     } else {
                         printf("Not waiting for this ARP reply\n");
@@ -251,7 +257,7 @@ int main(int argc, char *argv[]) {
                         uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                         
                         printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, 4, SDU_TYPE_PING, sdu, sdu_len);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, 64, SDU_TYPE_PING, sdu, sdu_len);
 
 
 
@@ -296,7 +302,8 @@ int main(int argc, char *argv[]) {
 
                     uint8_t *dst_mac_addr = arp_lookup(mip_return);
                     uint8_t interface = arp_lookup_interface(mip_return);
-                    send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, 1, SDU_TYPE_PING, sdu, sdu_len);
+                    send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, ttl_return-1, SDU_TYPE_PING, sdu, sdu_len);
+                    
                     break;
                 
                 default:
