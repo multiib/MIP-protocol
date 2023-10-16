@@ -11,7 +11,6 @@
 #define HIP_VERSION	4
 
 
-
 #define MIP_DST_ADDR	0xff
 
 struct mip_hdr {

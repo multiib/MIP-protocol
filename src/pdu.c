@@ -122,9 +122,9 @@ void print_pdu_content(struct pdu *pdu)
 
     printf("\t Source MIP address: %u\n", pdu->miphdr->src);
     printf("\t Destination MIP address: %u\n", pdu->miphdr->dst);
-    printf("\t TTL: %d\n", pdu->miphdr->ttl);
-    printf("\t SDU length: %d\n", pdu->miphdr->sdu_len);
-    printf("\t SDU type: %d\n", pdu->miphdr->sdu_type);
+    printf("\t TTL: %u\n", pdu->miphdr->ttl);
+    printf("\t SDU length: %u\n", pdu->miphdr->sdu_len);
+    printf("\t SDU type: %u\n", pdu->miphdr->sdu_type);
 
     // Print SDU in uint32 numbers
     printf("\t SDU: ");

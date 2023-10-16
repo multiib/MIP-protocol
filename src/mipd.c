@@ -33,6 +33,9 @@ int main(int argc, char *argv[]) {
 
     struct ping_data ping_data; // Ping data
     
+    uint8_t set_ttl = 64;
+    uint8_t set_ttl_broadcast = 1;
+
     uint8_t mip_return = 0;
     uint8_t ttl_return;
 
@@ -210,7 +213,8 @@ int main(int argc, char *argv[]) {
                         uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                         
                         printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, 64, SDU_TYPE_PING, sdu, sdu_len);
+
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len);
 
                     } else {
                         printf("Not waiting for this ARP reply\n");
@@ -257,7 +261,7 @@ int main(int argc, char *argv[]) {
                         uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                         
                         printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, 64, SDU_TYPE_PING, sdu, sdu_len);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len);
 
 
 
@@ -287,7 +291,7 @@ int main(int argc, char *argv[]) {
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
                             printf("Sending MIP_BROADCAST to MIP: %u\n", broadcast_mip_addr);
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, 1, SDU_TYPE_MIPARP, sdu, sdu_len);
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, set_ttl_broadcast, SDU_TYPE_MIPARP, sdu, sdu_len);
                         }
 
                     }
@@ -302,9 +306,12 @@ int main(int argc, char *argv[]) {
 
                     uint8_t *dst_mac_addr = arp_lookup(mip_return);
                     uint8_t interface = arp_lookup_interface(mip_return);
-                    send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, ttl_return-1, SDU_TYPE_PING, sdu, sdu_len);
-                    
-                    break;
+
+                    if (ttl_return){
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, ttl_return-1, SDU_TYPE_PING, sdu, sdu_len);
+                        } else {
+                            printf("TTL = 0, dropping packet\n");
+                        }
                 
                 default:
                     printf("Received unknown APP message\n");
