@@ -241,7 +241,17 @@ int main(int argc, char *argv[]) {
                         printf("We have the MAC address for MIP %u\n", ping_data.dst_mip_addr);
                         // SEND MIP PING
 
-                        // send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, broadcast_mip_addr, dst_mip_addr, 1, SDU_TYPE_MIPARP, sdu);
+                        // Create SDU
+                        uint8_t sdu_len;
+
+                        uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
+
+
+                        uint8_t *dst_mac_addr = arp_lookup(ping_data.dst_mip_addr);
+                        uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
+                        
+                        printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, pdu->miphdr->ttl, SDU_TYPE_PING, sdu, sdu_len);
 
 
 
