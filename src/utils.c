@@ -182,7 +182,7 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
 
     MIP_handle mip_type;
 
-    uint8_t rcv_buf[256];
+    uint8_t rcv_buf[512];
     struct sockaddr_ll from_addr;
     socklen_t from_addr_len = sizeof(from_addr);
     
@@ -249,7 +249,7 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
     APP_handle app_type;
     
     // Buffer to hold message from application
-    char buf[256];
+    char buf[512];
 
     // Clear buffer
     memset(buf, 0, sizeof(buf));

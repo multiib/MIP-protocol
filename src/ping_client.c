@@ -28,8 +28,8 @@ int main(int argc, char *argv[]) {
 
     
     struct sockaddr_un addr;
-    char   buf[256];
-    uint32_t read_buf[64];
+    char   buf[512];
+    uint32_t read_buf[128];
 
     sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (sd < 0) {
