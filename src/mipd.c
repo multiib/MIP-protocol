@@ -335,8 +335,9 @@ int main(int argc, char *argv[]) {
 
 
                     uint8_t sdu_len;
+                    printf("Pong message: %s\n", ping_data.msg);
                     uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
-
+                    printf("Pong message: %s\n", sdu);
                     uint8_t *dst_mac_addr = arp_lookup(mip_return);
                     uint8_t interface = arp_lookup_interface(mip_return);
 
