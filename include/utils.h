@@ -20,6 +20,8 @@
 #define SDU_ARP_TYPE_LOOKUP 0
 #define SDU_ARP_TYPE_MATCH  1
 
+extern int debug_mode;
+
 struct ifs_data {
     struct sockaddr_ll addr[MAX_IF];
     int rsock;

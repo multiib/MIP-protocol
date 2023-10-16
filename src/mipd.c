@@ -15,7 +15,7 @@
 #include "mip.h"
 #include "ipc.h"
 
-int debug_mode = 0;        // Debug flag
+
 
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *local_mip_addr);
 
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
 
     // To be set by CLI
-
+    // int debug_mode = 0;        // Debug flag
     char *socket_upper;        // UNIX socket path
     uint8_t local_mip_addr;    // MIP Adress
 

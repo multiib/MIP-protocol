@@ -18,7 +18,7 @@
 #include "mip.h"
 
 
-extern int debug_mode;
+int debug_mode = 0;
 
 
 // Print MAC address in hex format
