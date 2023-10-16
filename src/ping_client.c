@@ -18,10 +18,7 @@ void sigalrm_handler(int signum);
 volatile sig_atomic_t timed_out = 0;
 jmp_buf env;
 
-void sigalrm_handler(int signum) {
-    timed_out = 1;
-    longjmp(env, 1);
-}
+
 
 // Declaration of the parse_arguments function
 void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message);
@@ -142,6 +139,6 @@ void parse_arguments(int argc, char *argv[], char **socket_lower, char **destina
 
 
 void sigalrm_handler(int signum) {
-    printf("Timeout\n");
-    exit(1);
+    timed_out = 1;
+    longjmp(env, 1);
 }
