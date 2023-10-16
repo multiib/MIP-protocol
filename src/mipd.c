@@ -148,7 +148,9 @@ int main(int argc, char *argv[]) {
                     }
 
                     mip_return = 0;
+                    printf("TTl45: %u\n", pdu->miphdr->ttl);
                     ttl_return = pdu->miphdr->ttl;
+                    printf("TTl55: %u\n", ttl_return);
                     close(unix_fd);
 
                     break;
@@ -307,11 +309,12 @@ int main(int argc, char *argv[]) {
                     uint8_t *dst_mac_addr = arp_lookup(mip_return);
                     uint8_t interface = arp_lookup_interface(mip_return);
 
+                    printf("TTl65: %u\n", ttl_return);
                     if (ttl_return){
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, ttl_return-1, SDU_TYPE_PING, sdu, sdu_len);
-                        } else {
-                            printf("TTL = 0, dropping packet\n");
-                        }
+                    } else {
+                        printf("TTL = 0, dropping packet\n");
+                    }
                 
                 default:
                     printf("Received unknown APP message\n");
