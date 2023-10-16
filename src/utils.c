@@ -21,7 +21,15 @@
 int debug_mode = 0;
 
 
-// Print MAC address in hex format
+/**
+ * Print MAC address in hexadecimal format
+ * addr: pointer to the MAC address array.
+ * len: length of the MAC address array.
+ * 
+ * The function iterates through the MAC address array and prints
+ * each byte in hexadecimal format, separated by a colon.
+ */
+
 void print_mac_addr(uint8_t *addr, size_t len)
 {
     size_t i;
@@ -34,8 +42,7 @@ void print_mac_addr(uint8_t *addr, size_t len)
 
 
 
-
-/* Prepare RAW socket */
+// Prepare a raw socket for receiving and sending MIP packets
 int create_raw_socket(void)
 {
     int sd;
@@ -87,25 +94,20 @@ void get_mac_from_ifaces(struct ifs_data *ifs)
         freeifaddrs(ifaces);
 }
 
-
+// Initialize the interface data structure
 void init_ifs(struct ifs_data *ifs, int rsock, uint8_t mip_addr)
 {
-
     /* Get some info about the local ifaces */
     get_mac_from_ifaces(ifs);
 
     /* We use one RAW socket per node */
     ifs->rsock = rsock;
-    
-    /* One MIP address per node; We name nodes and not interfaces like the
-     * Internet does. Read about RINA Network Architecture for more info
-     * about what's wrong with the current Internet.
-     */
 
-
+    /* Set the local MIP address */
     ifs->local_mip_addr = mip_addr;
 }
 
+// Create a MIP ARP SDU
 uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr) {
     uint32_t *sdu_array = (uint32_t*) malloc(sizeof(uint32_t));
     if (sdu_array == NULL) {
@@ -124,6 +126,8 @@ uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr) {
 
     return sdu_array;
 }
+
+
 int add_to_epoll_table(int efd, int fd)
 {
         int rc = 0;
@@ -140,7 +144,7 @@ int add_to_epoll_table(int efd, int fd)
         return rc;
 }
 
-
+// Fill a buffer with a MIP ARP SDU
 void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message) {
     // Initialize the buffer to zeros
     memset(buf, 0, buf_size);
@@ -171,6 +175,24 @@ void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, con
     }
 }
 
+ /**
+ * Handle received MIP packets and determine their type.
+ *
+ * raw_fd: File descriptor for the raw socket.
+ * ifs: Pointer to the interface data structure.
+ * pdu: Pointer to the protocol data unit structure.
+ * recv_ifs_index: Pointer to store the index of the receiving interface.
+ * 
+ * The function first checks if the pdu is not NULL. It then receives 
+ * the serialized buffer from the raw socket and deserializes it into the PDU structure.
+ * Based on the type of SDU present in the MIP header, the function determines 
+ * if the received packet is of type MIP_ARP_REQUEST, MIP_ARP_REPLY, MIP_PING, or MIP_PONG.
+ * 
+ * If in debug mode, the function will print additional details about the received PDU.
+ * 
+ * Returns the type of the received MIP packet. If there's an error or an unknown type,
+ * the function returns -1.
+ */
 
 MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, int *recv_ifs_index)
 {
@@ -233,15 +255,26 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
 }
 
 
-// void send_broadcast(struct ifs_data *ifs, uint8_t *src_mac_addr, uint8_t src_mip_addr, const char *sdu)
-// {
-//     uint8_t broadcast_mac_addr[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-//     send_mip_packet(ifs, src_mac_addr, broadcast_mac_addr, src_mip_addr, 0, sdu, 0);
-// }
 
-
-/// HANDLE ERA
-
+/**
+ * Handle messages received from an application and determine their type.
+ *
+ * fd: File descriptor from which to read the application message.
+ * dst_mip_addr: Pointer to store the destination MIP address.
+ * msg: Pointer to store the parsed message.
+ * 
+ * The function starts by initializing a buffer to read the message from the application.
+ * It then reads the message and sets the destination MIP address based on the first byte 
+ * of the received buffer.
+ * 
+ * The function identifies the type of application message by checking the prefix 
+ * of the received message. Currently, it only identifies the APP_PING type based 
+ * on the PING: prefix.
+ * 
+ * In case of read errors, the function prints an error message and exits the program.
+ * 
+ * Returns the type of the received application message.
+ */
 
 APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
 {
@@ -287,7 +320,34 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
 
 }
 
-
+/**
+ * Send a MIP packet using a raw socket.
+ *
+ * ifs: Pointer to the interface data structure.
+ * src_mac_addr: Pointer to the source MAC address.
+ * dst_mac_addr: Pointer to the destination MAC address.
+ * src_mip_addr: Source MIP address.
+ * dst_mip_addr: Destination MIP address.
+ * ttl: Time-to-live value for the packet.
+ * sdu_type: Type of service data unit.
+ * sdu: Pointer to the service data unit payload.
+ * sdu_len: Length of the service data unit payload.
+ * 
+ * The function begins by allocating a PDU (Protocol Data Unit) structure. 
+ * It then fills this PDU with the provided details, including MAC addresses, 
+ * MIP addresses, TTL, SDU type, and the SDU payload. Once the PDU is filled, 
+ * it is serialized into a send buffer.
+ * 
+ * The function then finds the appropriate socket address structure 
+ * for the source MAC address and sends the serialized buffer via a raw socket.
+ * 
+ * If in debug mode, the function prints details about the sent PDU.
+ * 
+ * The PDU is destroyed before exiting the function.
+ * 
+ * Returns 0 on successful execution. If there is an error in allocating the PDU, 
+ * the function returns -ENOMEM.
+ */
 int send_mip_packet(struct ifs_data *ifs,
             uint8_t *src_mac_addr,
             uint8_t *dst_mac_addr,
@@ -323,10 +383,6 @@ int send_mip_packet(struct ifs_data *ifs,
         close(ifs->rsock);
     }
 
-
-
-
-
     if (debug_mode){
         printf("Sending PDU with content (size %zu):\n", snd_len);
         print_pdu_content(pdu);
@@ -354,7 +410,25 @@ struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_ma
     return NULL; // Return NULL if not found
 }
 
-// This function will convert a string into an array of uint32_t
+/**
+ * Convert a string to an array of uint32_t values.
+ *
+ * str: Pointer to the input string.
+ * length: Pointer to store the output length in bytes of the resulting array.
+ * 
+ * The function calculates the number of uint32_t elements required to represent the string. 
+ * The first uint32_t in the resulting array stores the length of the input string.
+ * The subsequent uint32_t values store the characters of the string, with up to 
+ * 4 characters packed into each uint32_t.
+ * 
+ * For example, the string "ABCD" would be stored in one uint32_t with 'A' in the most significant byte 
+ * and 'D' in the least significant byte.
+ * 
+ * The function returns a pointer to the dynamically allocated uint32_t array. 
+ * The caller is responsible for freeing this memory when it's no longer needed.
+ * If memory allocation fails, the function returns NULL.
+ */
+
 uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
     uint8_t str_length = strlen(str);
     uint8_t num_elements = (str_length + 3) / 4 + 1; // Calculate the number of uint32_t elements needed, +1 for the length

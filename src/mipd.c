@@ -26,7 +26,6 @@ int main(int argc, char *argv[]) {
     int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
 
     // To be set by CLI
-    // int debug_mode = 0;        // Debug flag
     char *socket_upper;        // UNIX socket path
     uint8_t local_mip_addr;    // MIP Adress
 
@@ -40,6 +39,8 @@ int main(int argc, char *argv[]) {
 
     int arp_type;
     uint8_t mip_addr;
+
+    int app_connected = 0;
 
     // Deamon network data
     struct ifs_data ifs;
@@ -64,7 +65,6 @@ int main(int argc, char *argv[]) {
     // Initialize network data
     init_ifs(&ifs, raw_fd, local_mip_addr);
 
-
     // Create UNIX listening socket for accepting connections from applications
     listening_fd = create_unix_sock(socket_upper);
 
@@ -83,7 +83,6 @@ int main(int argc, char *argv[]) {
     }
 
 
-
     while(1) {
         // Wait for incoming events
         rc = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
@@ -96,6 +95,9 @@ int main(int argc, char *argv[]) {
         // Add new application connection to epoll instance
         if (events->data.fd == listening_fd) {
 
+            if (app_connected){
+                continue;
+            }
             unix_fd = accept(listening_fd, NULL, NULL);
             if (unix_fd == -1) {
                 perror("accept");
@@ -105,12 +107,13 @@ int main(int argc, char *argv[]) {
                 printf("Application connected\n");
             }
 
-
             rc = add_to_epoll_table(epoll_fd, unix_fd);
             if (rc == -1) {
                 perror("add_to_epoll_table");
                 exit(EXIT_FAILURE);
             }
+
+            app_connected = 1;
 
 
         // If incoming MIP traffic
@@ -131,9 +134,6 @@ int main(int argc, char *argv[]) {
                         printf("Received MIP_PING\n");
                     }
 
-                    // SEND PING TO APP (ping_server)
-
-
                     rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
                     if (rc == -1) {
                         perror("write");
@@ -149,7 +149,6 @@ int main(int argc, char *argv[]) {
                         printf("Received MIP_PONG\n");
                     }
 
-                    
                     rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
                     if (rc == -1) {
                         perror("write");
@@ -159,6 +158,7 @@ int main(int argc, char *argv[]) {
                     mip_return = 0;
 
                     close(unix_fd);
+                    app_connected = 0;
 
                     break;
 
@@ -218,7 +218,6 @@ int main(int argc, char *argv[]) {
 
                     // Set type of MIP-ARP message and contained MIP address
                     decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
-
 
 
                     // Update ARP table
@@ -361,20 +360,6 @@ int main(int argc, char *argv[]) {
                     }
                     break;
             }
-
-
-
-
-
-
-
-
-
-
-
-
-            
-
         }
     }
     close(raw_fd);
