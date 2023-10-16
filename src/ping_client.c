@@ -20,6 +20,9 @@ int main(int argc, char *argv[]) {
 
     int sd, rc;
 
+    clock_t start, end;
+    double cpu_time_used;
+
     // Call the function to parse arguments
     parse_arguments(argc, argv, &socket_lower, &destination_host, &message);
 
@@ -51,7 +54,7 @@ int main(int argc, char *argv[]) {
 
     fill_ping_buf(buf, sizeof(buf), destination_host, message);
 
-
+    start = clock();
     rc = write(sd, buf, strlen(buf));
     if (rc < 0) {
             perror("write");
@@ -66,12 +69,11 @@ int main(int argc, char *argv[]) {
         close(sd);
         exit(EXIT_FAILURE);
     }
-
-    for (int i = 0; i < 3; i++) {
-        printf("%u ", read_buf[i]);
-    }
+    end = clock();
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC * 1000; // Convert to milliseconds
     char *str = uint32ArrayToString(read_buf);
     printf("%s\n", str);
+    printf("time=%f ms\n", cpu_time_used);
 
     close(sd);
     return 0;
@@ -101,3 +103,5 @@ void parse_arguments(int argc, char *argv[], char **socket_lower, char **destina
     *destination_host = argv[optind + 1];
     *message = argv[optind + 2];
 }
+
+

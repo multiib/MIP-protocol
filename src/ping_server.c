@@ -42,7 +42,9 @@ int main(int argc, char *argv[]) {
             close(sd);
             exit(EXIT_FAILURE);
     }
-    printf("Connected to %s\n", socket_lower);
+    if (debug_mode){
+        printf("Connected to %s\n", socket_lower);
+    }
 
     while(1){
         // Read from socket
@@ -53,9 +55,6 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
-        for (int i = 0; i < 3; i++) {
-            printf("%u ", read_buf[i]);
-        }
         char *str = uint32ArrayToString(read_buf);
         printf("%s\n", str);
 

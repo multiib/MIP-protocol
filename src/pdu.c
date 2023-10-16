@@ -45,10 +45,10 @@ void fill_pdu(struct pdu *pdu,
     
     pdu->miphdr->dst = dst_mip_addr;
     pdu->miphdr->src = src_mip_addr;
-    printf("TTL2: %d\n", ttl);
+
 
     pdu->miphdr->ttl = ttl;
-    printf("TTL3: %d\n", pdu->miphdr->ttl);
+
     pdu->miphdr->sdu_type = sdu_type;
 
     pdu->miphdr->sdu_len = sdu_len;
