@@ -6,9 +6,13 @@
 #include <sys/epoll.h>	/* epoll */
 #include <sys/socket.h>	/* sockets operations */
 #include <sys/un.h>		/* definitions for UNIX domain sockets */
+#include <signal.h>
+
 #include "ipc.h"
 #include "utils.h"
 #include "pdu.h"
+
+void sigalrm_handler(int signum);
 
 // Declaration of the parse_arguments function
 void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message);
@@ -54,6 +58,8 @@ int main(int argc, char *argv[]) {
 
     fill_ping_buf(buf, sizeof(buf), destination_host, message);
 
+    signal(SIGALRM, sigalrm_handler);
+    alarm(1);
     start = clock();
     rc = write(sd, buf, strlen(buf));
     if (rc < 0) {
@@ -105,3 +111,7 @@ void parse_arguments(int argc, char *argv[], char **socket_lower, char **destina
 }
 
 
+void sigalrm_handler(int signum) {
+    printf("Timeout\n");
+    exit(1);
+}

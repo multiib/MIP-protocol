@@ -537,3 +537,4 @@ char* uint32ArrayToString(uint32_t* arr) {
     *str = '\0';
     return str - arr[0];
 }
+

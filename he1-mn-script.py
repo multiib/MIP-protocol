@@ -94,11 +94,14 @@ def init_he1(self, line):
                           geometry="80x20+0+300",
                           cmd="./ping_client usockA 20 \"Hello IN3230\""))
 
+
     terms.append(openTerm(self,
                           node=C,
                           title="Client [C]",
                           geometry="80x20+0+600",
                           cmd="./ping_client usockC 20 \"Hello IN4230\""))
+
+    time.sleep(1)
 
     # This MUST output 'ping timeout' since A is not able to reach C.
     terms.append(openTerm(self,

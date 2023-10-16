@@ -40,8 +40,6 @@ int main(int argc, char *argv[]) {
     int arp_type;
     uint8_t mip_addr;
 
-    int app_connected = 0;
-
     // Deamon network data
     struct ifs_data ifs;
 
@@ -95,25 +93,20 @@ int main(int argc, char *argv[]) {
         // Add new application connection to epoll instance
         if (events->data.fd == listening_fd) {
 
-            if (!app_connected){
-                unix_fd = accept(listening_fd, NULL, NULL);
-                if (unix_fd == -1) {
-                    perror("accept");
-                    exit(EXIT_FAILURE);
-                }
-                if (debug_mode){
-                    printf("Application connected\n");
-                }
-
-                rc = add_to_epoll_table(epoll_fd, unix_fd);
-                if (rc == -1) {
-                    perror("add_to_epoll_table");
-                    exit(EXIT_FAILURE);
-                }
-
-                app_connected = 1;
+            unix_fd = accept(listening_fd, NULL, NULL);
+            if (unix_fd == -1) {
+                perror("accept");
+                exit(EXIT_FAILURE);
+            }
+            if (debug_mode){
+                printf("Application connected\n");
             }
 
+            rc = add_to_epoll_table(epoll_fd, unix_fd);
+            if (rc == -1) {
+                perror("add_to_epoll_table");
+                exit(EXIT_FAILURE);
+            }
 
 
         // If incoming MIP traffic
@@ -158,7 +151,6 @@ int main(int argc, char *argv[]) {
                     mip_return = 0;
 
                     close(unix_fd);
-                    app_connected = 0;
 
                     break;
 
@@ -218,6 +210,7 @@ int main(int argc, char *argv[]) {
 
                     // Set type of MIP-ARP message and contained MIP address
                     decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
+
 
 
                     // Update ARP table
