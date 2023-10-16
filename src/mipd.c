@@ -95,25 +95,25 @@ int main(int argc, char *argv[]) {
         // Add new application connection to epoll instance
         if (events->data.fd == listening_fd) {
 
-            if (app_connected){
-                continue;
-            }
-            unix_fd = accept(listening_fd, NULL, NULL);
-            if (unix_fd == -1) {
-                perror("accept");
-                exit(EXIT_FAILURE);
-            }
-            if (debug_mode){
-                printf("Application connected\n");
+            if (!app_connected){
+                unix_fd = accept(listening_fd, NULL, NULL);
+                if (unix_fd == -1) {
+                    perror("accept");
+                    exit(EXIT_FAILURE);
+                }
+                if (debug_mode){
+                    printf("Application connected\n");
+                }
+
+                rc = add_to_epoll_table(epoll_fd, unix_fd);
+                if (rc == -1) {
+                    perror("add_to_epoll_table");
+                    exit(EXIT_FAILURE);
+                }
+
+                app_connected = 1;
             }
 
-            rc = add_to_epoll_table(epoll_fd, unix_fd);
-            if (rc == -1) {
-                perror("add_to_epoll_table");
-                exit(EXIT_FAILURE);
-            }
-
-            app_connected = 1;
 
 
         // If incoming MIP traffic
