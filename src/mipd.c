@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
     // Parse arguments from CLI
     parse_arguments(argc, argv, &debug_mode, &socket_upper, &local_mip_addr);
-
+    printf("Debug mode: %d\n", debug_mode);
     // Create epoll instance
     epoll_fd = epoll_create1(0);
     if (epoll_fd == -1) {
