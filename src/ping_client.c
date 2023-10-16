@@ -7,12 +7,21 @@
 #include <sys/socket.h>	/* sockets operations */
 #include <sys/un.h>		/* definitions for UNIX domain sockets */
 #include <signal.h>
+#include <setjmp.h>
 
 #include "ipc.h"
 #include "utils.h"
 #include "pdu.h"
 
 void sigalrm_handler(int signum);
+
+volatile sig_atomic_t timed_out = 0;
+jmp_buf env;
+
+void sigalrm_handler(int signum) {
+    timed_out = 1;
+    longjmp(env, 1);
+}
 
 // Declaration of the parse_arguments function
 void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message);
@@ -68,13 +77,34 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
     }
 
-    // Read from socket
-    rc = read(sd, read_buf, sizeof(read_buf));
-    if (rc < 0) {
-        perror("read");
-        close(sd);
-        exit(EXIT_FAILURE);
+
+
+
+
+
+    if (setjmp(env) == 0) {
+
+
+        // Read from socket
+        rc = read(sd, read_buf, sizeof(read_buf));
+        if (rc < 0) {
+            perror("read");
+            close(sd);
+            exit(EXIT_FAILURE);
+        }
+
+    } else {
+        printf("Operation timed out!\n");
     }
+
+
+
+
+
+
+
+
+
     end = clock();
     cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC * 1000; // Convert to milliseconds
     char *str = uint32ArrayToString(read_buf);
