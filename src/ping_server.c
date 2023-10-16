@@ -44,40 +44,40 @@ int main(int argc, char *argv[]) {
     }
     printf("Connected to %s\n", socket_lower);
 
+    while(1){
+        // Read from socket
+        rc = read(sd, read_buf, sizeof(read_buf));
+        if (rc < 0) {
+            perror("read");
+            close(sd);
+            exit(EXIT_FAILURE);
+        }
 
-    // Read from socket
-    rc = read(sd, read_buf, sizeof(read_buf));
-    if (rc < 0) {
-        perror("read");
-        close(sd);
-        exit(EXIT_FAILURE);
+        for (int i = 0; i < 3; i++) {
+            printf("%u ", read_buf[i]);
+        }
+        char *str = uint32ArrayToString(read_buf);
+        printf("%s\n", str);
+
+
+        // char destination_host[3] = {0};
+        // char message[256] = {0};
+        
+        //create string "hello"
+        char *message = "succesful";
+        char *destination_host = "11"; // Filler value
+        
+        // Fill the buffer with the pong message
+        fill_pong_buf(buf, sizeof(buf), destination_host, message);
+
+        // Write back
+        rc = write(sd, buf, sizeof(buf));
+        if (rc < 0) {
+            perror("write");
+            close(sd);
+            exit(EXIT_FAILURE);
+        }
     }
-
-    for (int i = 0; i < 3; i++) {
-        printf("%u ", read_buf[i]);
-    }
-    char *str = uint32ArrayToString(read_buf);
-    printf("%s\n", str);
-
-
-    // char destination_host[3] = {0};
-    // char message[256] = {0};
-    
-    //create string "hello"
-    char *message = "succesful";
-    char *destination_host = "11"; // Filler value
-    
-    // Fill the buffer with the pong message
-    fill_pong_buf(buf, sizeof(buf), destination_host, message);
-
-    // Write back
-    rc = write(sd, buf, sizeof(buf));
-    if (rc < 0) {
-        perror("write");
-        close(sd);
-        exit(EXIT_FAILURE);
-    }
-
 
 
     close(sd);
