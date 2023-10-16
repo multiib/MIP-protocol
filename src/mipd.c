@@ -135,6 +135,7 @@ int main(int argc, char *argv[]) {
                         exit(EXIT_FAILURE);
                     }
                     mip_return = pdu->miphdr->src;
+                    ttl_return = pdu->miphdr->ttl;
 
                     break;
 
@@ -148,9 +149,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     mip_return = 0;
-                    printf("TTl45: %u\n", pdu->miphdr->ttl);
-                    ttl_return = pdu->miphdr->ttl;
-                    printf("TTl55: %u\n", ttl_return);
+
                     close(unix_fd);
 
                     break;
