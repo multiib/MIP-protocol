@@ -55,7 +55,6 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
 
-        printf("%d\n", read_buf[0]);
         char *str = uint32ArrayToString(read_buf);
         printf("%s\n", str);
 
