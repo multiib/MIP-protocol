@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
     }
     char *str = uint32ArrayToString(read_buf);
     printf("%s\n", str);
-    printf("time=%f ms\n", cpu_time_used);
+
 
     close(sd);
     return 0;
