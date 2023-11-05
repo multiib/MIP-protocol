@@ -29,7 +29,6 @@ int main(int argc, char *argv[]) {
     double elapsed_time;
 
 
-    clock_t start, end;
 
 
     // Call the function to parse arguments
