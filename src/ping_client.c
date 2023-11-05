@@ -85,8 +85,10 @@ int main(int argc, char *argv[]) {
     }
 
 
- // Start the clock
-    start = clock();
+    struct timeval start, end;
+    long mtime, seconds, useconds;
+    
+    gettimeofday(&start, NULL);
 
     // Write to socket
     rc = write(sd, buf, strlen(buf));
@@ -117,14 +119,17 @@ int main(int argc, char *argv[]) {
     }
 
     // Stop the clock
-    end = clock();
-    elapsed_time = (double)(end - start) / CLOCKS_PER_SEC * 1000.0; // Convert to milliseconds
+    gettimeofday(&end, NULL);
+
+    seconds  = end.tv_sec  - start.tv_sec;
+    useconds = end.tv_usec - start.tv_usec;
+    mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
 
     // Check if the elapsed time has passed a certain threshold
     if (elapsed_time > 5000.0) { // Assume a 5-second threshold
-        printf("Operation took too long: %.2f milliseconds.\n", elapsed_time);
+        printf("Operation took too long: %ld milliseconds.\n", mtime);
     } else {
-        printf("Operation completed in time: %.2f milliseconds.\n", elapsed_time);
+        printf("Operation completed in time: %ld milliseconds.\n", mtime);
     }
     char *str = uint32ArrayToString(read_buf);
     printf("%s\n", str);
