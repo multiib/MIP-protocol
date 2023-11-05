@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
 
     clock_t start, end;
-    double cpu_time_used;
+
 
     // Call the function to parse arguments
     parse_arguments(argc, argv, &socket_lower, &destination_host, &message);
