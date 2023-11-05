@@ -94,7 +94,7 @@ def init_he1(self, line):
                           geometry="80x20+0+300",
                           cmd="./ping_client usockA 20 \"Hello IN3230\""))
 
-
+    time.sleep(5) # DEBUG
     terms.append(openTerm(self,
                           node=C,
                           title="Client [C]",
