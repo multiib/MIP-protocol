@@ -259,7 +259,8 @@ int main(int argc, char *argv[]) {
             switch (type){
                 case APP_PING:
                     if (debug_mode){
-                        printf("Received APP_PING\n");
+                        printf("\nReceived APP_PING\n");
+                        printf("Content: %s\n", ping_data.msg);
                     }
                     
 
