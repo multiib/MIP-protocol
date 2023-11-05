@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
             }
             if (debug_mode){
-                printf("Application connected\n");
+                printf("Application connected\n\n");
             }
 
             rc = add_to_epoll_table(epoll_fd, unix_fd);
@@ -156,6 +156,7 @@ int main(int argc, char *argv[]) {
                 case MIP_ARP_REQUEST:
                     if (debug_mode){
                         printf("Received MIP_ARP_REQUEST\n");
+                        print_pdu_content(pdu)
                     }
 
                     // Set type of MIP-ARP message and contained MIP address

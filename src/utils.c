@@ -245,10 +245,11 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
         }
     }
 
-    if (debug_mode){
-        printf("Receiving PDU with content (size %zu) :\n", rcv_len);
-        print_pdu_content(pdu);
-    }
+    // if (debug_mode){
+    //     printf(Recieved)
+    //     printf("Receiving PDU with content (size %zu) :\n", rcv_len);
+    //     print_pdu_content(pdu);
+    // }
 
     
     return mip_type;
