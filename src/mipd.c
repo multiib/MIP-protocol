@@ -124,7 +124,9 @@ int main(int argc, char *argv[]) {
                 case MIP_PING:
 
                     if (debug_mode){
-                        printf("Received MIP_PING\n");
+                        printf("\nReceived MIP_PING\n");
+                        print_pdu_content(pdu);
+                        printf("\n")
                     }
 
                     rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
@@ -138,7 +140,9 @@ int main(int argc, char *argv[]) {
 
                 case MIP_PONG:
                     if (debug_mode){
-                        printf("Received MIP_PONG\n");
+                        printf("\nReceived MIP_PONG\n");
+                        print_pdu_content(pdu);
+                        printf("\n")
                     }
 
                     rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
@@ -149,14 +153,16 @@ int main(int argc, char *argv[]) {
 
                     mip_return = 0;
 
-                    close(unix_fd);
+                    close(unix_fd); //
 
                     break;
 
                 case MIP_ARP_REQUEST:
                     if (debug_mode){
-                        printf("Received MIP_ARP_REQUEST\n");
-                        print_pdu_content(pdu)
+
+                        printf("\nReceived MIP_ARP_REQUEST\n");
+                        print_pdu_content(pdu);
+                        printf("\n")
                     }
 
                     // Set type of MIP-ARP message and contained MIP address
@@ -198,7 +204,9 @@ int main(int argc, char *argv[]) {
 
                 case MIP_ARP_REPLY:
                     if (debug_mode){
-                        printf("Received MIP_ARP_REPLY\n");
+                        printf("\nReceived MIP_ARP_REPLY\n");
+                        print_pdu_content(pdu);
+                        printf("\n")
                     }
 
 
