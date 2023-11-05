@@ -6,6 +6,7 @@
 #include <sys/epoll.h>	/* epoll */
 #include <sys/socket.h>	/* sockets operations */
 #include <sys/un.h>		/* definitions for UNIX domain sockets */
+#include <sys/time.h>
 
 
 #include "ipc.h"
@@ -125,7 +126,7 @@ int main(int argc, char *argv[]) {
     mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
 
     // Check if the elapsed time has passed a certain threshold
-    if (elapsed_time > 5000.0) { // Assume a 5-second threshold
+    if (mtime > 5000.0) { // Assume a 5-second threshold
         printf("Operation took too long: %ld milliseconds.\n", mtime);
     } else {
         printf("Operation completed in time: %ld milliseconds.\n", mtime);
