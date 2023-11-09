@@ -146,6 +146,13 @@ void print_pdu_content(struct pdu *pdu)
 
 void destroy_pdu(struct pdu *pdu)
 {   
+    printf("\t FUCKSDU: ");
+    for (int i = 0; i < pdu->miphdr->sdu_len/4; i++) {
+        printf("%u ", pdu->sdu[i]);
+    }
+    // print pointer val
+    printf("//%p//", pdu->sdu):
+    printf("\n");    
     printf("11\n");
     free(pdu->ethhdr);
     // set to null to avoid double free
