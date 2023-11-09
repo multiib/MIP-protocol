@@ -78,6 +78,7 @@ int main(int argc, char *argv[]) {
             close(sd);
             exit(EXIT_FAILURE);
         }
+        printf("Sent %d bytes\n", rc);
         printf("8\n");
     }
 
