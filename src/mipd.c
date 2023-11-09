@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
                         perror("write");
                         exit(EXIT_FAILURE);
                     }
-
+                    printf("rc: %d\n", rc)
                     printf("1\n");
                     mip_return = pdu->miphdr->src;
                     printf("2\n");

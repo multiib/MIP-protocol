@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
 
     struct sockaddr_un addr;
     char   buf[512];
-    uint32_t read_buf[128];
+    uint32_t read_buf[256];
 
     sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (sd < 0) {
@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
             close(sd);
             exit(EXIT_FAILURE);
         }
+        printf("Received %d bytes\n", rc);
 
         char *str = uint32ArrayToString(read_buf);
         printf("%s\n", str);
