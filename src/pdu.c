@@ -54,8 +54,11 @@ void fill_pdu(struct pdu *pdu,
 
     pdu->miphdr->sdu_len = sdu_len;
 
-    pdu->sdu = (uint32_t *)calloc(1, sdu_len);
-    memcpy(pdu->sdu, sdu, sdu_len);
+    // pdu->sdu = (uint32_t *)calloc(1, sdu_len);
+    pdu->sdu = (uint32_t *)calloc(sdu_len, sizeof(uint32_t));
+    // memcpy(pdu->sdu, sdu, sdu_len);
+    memcpy(pdu->sdu, sdu, sdu_len * sizeof(uint32_t));
+
 }
 
 size_t mip_serialize_pdu(struct pdu *pdu, uint8_t *snd_buf)
