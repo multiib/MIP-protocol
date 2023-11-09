@@ -37,7 +37,7 @@ void fill_pdu(struct pdu *pdu,
           uint8_t ttl,
           uint8_t sdu_type,
           const uint32_t *sdu,
-          uint8_t sdu_len)
+          uint16_t sdu_len)
 {
     
     memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
