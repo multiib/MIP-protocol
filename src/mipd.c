@@ -252,6 +252,7 @@ int main(int argc, char *argv[]) {
                     break;
             }
             printf("9\n");
+            print_pdu_content(pdu);
             destroy_pdu(pdu);
             printf("10\n");
 
