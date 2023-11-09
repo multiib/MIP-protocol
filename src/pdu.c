@@ -154,8 +154,14 @@ void destroy_pdu(struct pdu *pdu)
     free(pdu->miphdr);
     pdu->miphdr = NULL;
     printf("13\n");
-    free(pdu->sdu);
-    pdu->sdu = NULL;
+
+    if (pdu->sdu != NULL){
+        printf("13.5\n");
+        free(pdu->sdu);
+        printf("13.6\n");
+    }
+    // free(pdu->sdu);
+    // pdu->sdu = NULL;
     printf("14\n");
     free(pdu);
     pdu = NULL;
