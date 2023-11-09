@@ -128,14 +128,18 @@ int main(int argc, char *argv[]) {
                         print_pdu_content(pdu);
                         printf("\n");
                     }
-
+                    printf("0\n");
                     rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
                     if (rc == -1) {
                         perror("write");
                         exit(EXIT_FAILURE);
                     }
+
+                    printf("1\n");
                     mip_return = pdu->miphdr->src;
+                    printf("2\n");
                     ttl_return = pdu->miphdr->ttl;
+                    printf("3\n");
                     break;
 
                 case MIP_PONG:
