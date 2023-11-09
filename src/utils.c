@@ -437,7 +437,7 @@ uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
     // Calculate length in bytes and set the output parameter
     *length = num_elements * sizeof(uint32_t);
     
-    uint32_t *arr = (uint32_t*)calloc(num_elements*2, sizeof(uint32_t));
+    uint32_t *arr = (uint32_t*)calloc(num_elements, sizeof(uint32_t));
 
     if (arr == NULL) {
         return NULL; // Failed to allocate memory

@@ -108,7 +108,7 @@ def init_he1(self, line):
                           node=A,
                           title="Client [A]",
                           geometry="80x20+0+300",
-                          cmd="./ping_client usockA 30 \"Hello IN423\""))
+                          cmd="./ping_client usockA 30 \"Hello IN4230\""))
 
     # This time the reported RTT MUST be smaller, ~20ms, since MIP-ARP cache is
     # being used.
@@ -116,7 +116,7 @@ def init_he1(self, line):
                           node=A,
                           title="Client [A]",
                           geometry="80x20+0+300",
-                          cmd="./ping_client usockA 20 \" again IN4230\""))
+                          cmd="./ping_client usockA 20 \"Hello again IN4230\""))
                         # cmd="./ping_client usockA 20 \"Hellfir\""))
 
 
