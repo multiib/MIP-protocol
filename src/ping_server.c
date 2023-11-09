@@ -64,9 +64,13 @@ int main(int argc, char *argv[]) {
         char *destination_host = "11"; // Filler value
         
         // Fill the buffer with the pong message
+        printf("4\n");
         fill_pong_buf(buf, sizeof(buf), destination_host, strcpy(str, str + 5));
+        printf("5\n");
         free(str);
+        printf("6\n");
         str = NULL;
+        printf("7\n");
         // Write back
         rc = write(sd, buf, sizeof(buf));
         if (rc < 0) {
@@ -74,6 +78,7 @@ int main(int argc, char *argv[]) {
             close(sd);
             exit(EXIT_FAILURE);
         }
+        printf("8\n");
     }
 
 
