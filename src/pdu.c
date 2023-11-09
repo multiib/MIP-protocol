@@ -154,6 +154,12 @@ void destroy_pdu(struct pdu *pdu)
     free(pdu->miphdr);
     pdu->miphdr = NULL;
     printf("13\n");
+    printf("\t QQSDU: ");
+    for (int i = 0; i < pdu->miphdr->sdu_len/4; i++) {
+        printf("%u ", pdu->sdu[i]);
+    }
+    // print pointer
+    printf("\n\t PPSDU: %p\n", pdu->sdu);
     free(pdu->sdu);
     pdu->sdu = NULL;
     printf("14\n");
