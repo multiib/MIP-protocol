@@ -251,8 +251,9 @@ int main(int argc, char *argv[]) {
                     printf("Received unknown MIP packet\n");
                     break;
             }
-            
+            printf("9\n");
             destroy_pdu(pdu);
+            printf("10\n");
 
         } else {
             // If incoming application traffic
