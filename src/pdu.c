@@ -151,7 +151,7 @@ void destroy_pdu(struct pdu *pdu)
         printf("%u ", pdu->sdu[i]);
     }
     // print pointer val
-    printf("//%p//", pdu->sdu):
+    printf("//%p//", pdu->sdu);
     printf("\n");    
     printf("11\n");
     free(pdu->ethhdr);
