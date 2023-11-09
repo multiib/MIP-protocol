@@ -54,10 +54,11 @@ void fill_pdu(struct pdu *pdu,
 
     pdu->miphdr->sdu_len = sdu_len;
 
-    // pdu->sdu = (uint32_t *)calloc(1, sdu_len);
-    pdu->sdu = (uint32_t *)calloc(sdu_len, sizeof(uint32_t));
+    printf("QQsdu_len: %d\n", sdu_len);
+    pdu->sdu = (uint32_t *)calloc(1, sdu_len);
+
     // memcpy(pdu->sdu, sdu, sdu_len);
-    memcpy(pdu->sdu, sdu, sdu_len * sizeof(uint32_t));
+    memcpy(pdu->sdu, sdu, sdu_len);
 
 }
 
