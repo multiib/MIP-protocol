@@ -144,12 +144,16 @@ void destroy_pdu(struct pdu *pdu)
 {   
     printf("11\n");
     free(pdu->ethhdr);
-    printf("13\n");
-    free(pdu->sdu);
+    // set to null to avoid double free
+    pdu->ethhdr = NULL;
     printf("12\n");
     free(pdu->miphdr);
-
+    pdu->miphdr = NULL;
+    printf("13\n");
+    free(pdu->sdu);
+    pdu->sdu = NULL;
     printf("14\n");
     free(pdu);
+    pdu = NULL;
     printf("15\n");
 }
