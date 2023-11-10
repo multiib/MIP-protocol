@@ -68,7 +68,7 @@ def init_he1(self, line):
                           node=B,
                           title="Host B",
                           geometry="80x20+550+0",
-                          cmd="./mipd -d usockB 20"))
+                          cmd="valgrind ./mipd -d usockB 20"))
     terms.append(openTerm(self,
                           node=C,
                           title="Host C",
