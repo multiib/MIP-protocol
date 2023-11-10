@@ -441,6 +441,9 @@ uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
     printf("String length: %d\n", str_length);
     printf("String: %s\n", str);
     printf("Number of elements: %d\n", num_elements);
+    printf("Length in bytes: %d\n", *length);
+    // print sizof uint32_t
+    printf("Size of uint32_t: %d\n", sizeof(uint32_t));
 
 
 
