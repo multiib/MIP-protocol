@@ -450,8 +450,9 @@ uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
 
 
 
-
-    uint32_t *arr = (uint32_t*)calloc(num_elements, sizeof(uint32_t));
+    // Define in static memory
+    uint32_t arr[7];
+    //uint32_t *arr = (uint32_t*)calloc(num_elements, sizeof(uint32_t));
 
     if (arr == NULL) {
         return NULL; // Failed to allocate memory
