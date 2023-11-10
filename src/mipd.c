@@ -332,6 +332,9 @@ int main(int argc, char *argv[]) {
                     }
                     uint8_t sdu_len;
 
+                    // print ping data msg
+                    printf("Content: %s\n", ping_data.msg);
+                    printf("sdu_len: %d\n", sdu_len);
                     uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
                     uint8_t *dst_mac_addr = arp_lookup(mip_return);
