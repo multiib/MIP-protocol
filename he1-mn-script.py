@@ -63,17 +63,17 @@ def init_he1(self, line):
                           node=A,
                           title="Host A",
                           geometry="80x20+0+0",
-                          cmd="valgrind --track-origins=yes ./mipd -d usockA 10"))
+                          cmd="./mipd -d usockA 10"))
     terms.append(openTerm(self,
                           node=B,
                           title="Host B",
                           geometry="80x20+550+0",
-                          cmd="valgrind --track-origins=yes ./mipd -d usockB 20"))
+                          cmd="./mipd -d usockB 20"))
     terms.append(openTerm(self,
                           node=C,
                           title="Host C",
                           geometry="80x20+1100+0",
-                          cmd="valgrind --track-origins=yes ./mipd -d usockC 30"))
+                          cmd="./mipd -d usockC 30"))
 
     # Don't launch applications right away
     time.sleep(1)
@@ -94,7 +94,7 @@ def init_he1(self, line):
                           geometry="80x20+0+300",
                           cmd="./ping_client usockA 20 \"Hello IN3230\""))
 
-    time.sleep(5) # DEBUG
+    # time.sleep(5) # DEBUG
     terms.append(openTerm(self,
                           node=C,
                           title="Client [C]",
