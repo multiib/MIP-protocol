@@ -323,6 +323,9 @@ int main(int argc, char *argv[]) {
                             send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, set_ttl_broadcast, SDU_TYPE_MIPARP, sdu, sdu_len);
                         }
 
+                        free(sdu);
+                        sdu = NULL;
+
                     }
                     break;
 

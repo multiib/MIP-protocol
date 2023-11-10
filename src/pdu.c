@@ -148,15 +148,19 @@ void destroy_pdu(struct pdu *pdu)
 {   
 
     free(pdu->ethhdr);
+    pdu->ethhdr = NULL;
     printf("Freed ethhdr\n");
     free(pdu->miphdr);
+    pdu->miphdr = NULL;
     printf("Freed miphdr\n");
 
     if (pdu->sdu != NULL){
         free(pdu->sdu);
+        pdu->sdu = NULL;
         printf("Freed sdu\n");
     }
     free(pdu);
+    pdu = NULL;
     printf("Freed pdu\n");
 }
  
