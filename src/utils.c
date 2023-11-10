@@ -443,7 +443,7 @@ uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
     printf("Number of elements: %d\n", num_elements);
     printf("Length in bytes: %d\n", *length);
     // print sizof uint32_t
-    printf("Size of uint32_t: %d\n", sizeof(uint32_t));
+    printf("Size of uint32_t: %ld\n", sizeof(uint32_t));
 
 
 
