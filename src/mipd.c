@@ -134,12 +134,11 @@ int main(int argc, char *argv[]) {
                         perror("write");
                         exit(EXIT_FAILURE);
                     }
-                    printf("rc: %d\n", rc);
-                    printf("1\n");
+
                     mip_return = pdu->miphdr->src;
-                    printf("2\n");
+
                     ttl_return = pdu->miphdr->ttl;
-                    printf("3\n");
+
                     break;
 
                 case MIP_PONG:
@@ -251,10 +250,9 @@ int main(int argc, char *argv[]) {
                     printf("Received unknown MIP packet\n");
                     break;
             }
-            printf("9\n");
-            print_pdu_content(pdu);
+
             destroy_pdu(pdu);
-            printf("10\n");
+
 
         } else {
             // If incoming application traffic
