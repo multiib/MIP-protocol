@@ -112,7 +112,8 @@ int main(int argc, char *argv[]) {
         // If incoming MIP traffic
         } else if (events->data.fd == raw_fd) {
             // Data to be read from RAW socket
-            struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));    
+            // struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));
+            struct pdu *pdu = alloc_pdu();
 
             // Index of recieving interface
             int interface;
