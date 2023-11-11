@@ -30,12 +30,12 @@ int main(int argc, char *argv[]) {
     char *socket_upper;        // UNIX socket path
     uint8_t local_mip_addr;    // MIP Adress
 
-    struct ping_data ping_data; // Struct for intermediet storage of application data
+    struct ping_data ping_data; // Struct for storing data from application
     
-    uint8_t set_ttl = 15;
+    uint8_t set_ttl = 15; //TODO: Implement user specified TTL
     uint8_t set_ttl_broadcast = 1;
 
-    uint8_t mip_return = 0;
+    uint8_t mip_return = 0; // Flag for returning MIP address
     uint8_t ttl_return;
 
     int arp_type;
@@ -156,9 +156,9 @@ int main(int argc, char *argv[]) {
                         exit(EXIT_FAILURE);
                     }
 
-                    mip_return = 0;
+                    //mip_return = 0;
 
-                    close(unix_fd); //
+                    close(unix_fd);
 
                     break;
 
@@ -363,6 +363,7 @@ int main(int argc, char *argv[]) {
 
                     // Clear ping_data
                     // memset(&ping_data, 0, sizeof(ping_data));
+                    mip_return = 0;
 
                     break;
                 default:
