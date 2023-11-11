@@ -52,3 +52,5 @@ void arp_insert(uint8_t mip, uint8_t mac[6], int interface) {
         arp_count++;
     }
 }
+
+// TODO: Create hash table for ARP cache

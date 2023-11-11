@@ -21,15 +21,16 @@ void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_uppe
 
 int main(int argc, char *argv[]) {
 
-
-    struct epoll_event events[MAX_EVENTS]; // Epoll events
-    int raw_fd, listening_fd, unix_fd, epoll_fd, rc;
+    // VARIABLES
+    struct epoll_event events[MAX_EVENTS];
+    int raw_fd, listening_fd, unix_fd, epoll_fd; // File descriptors
+    int rc; // Return code
 
     // To be set by CLI
     char *socket_upper;        // UNIX socket path
     uint8_t local_mip_addr;    // MIP Adress
 
-    struct ping_data ping_data; // Ping data
+    struct ping_data ping_data; // Struct for intermediet storage of application data
     
     uint8_t set_ttl = 15;
     uint8_t set_ttl_broadcast = 1;
@@ -296,6 +297,10 @@ int main(int argc, char *argv[]) {
                         free(sdu);
                         sdu = NULL;
 
+                        // Clear ping_data
+                        memset(&ping_data, 0, sizeof(ping_data));
+
+
 
                     } else {
                         if (debug_mode){
@@ -355,6 +360,10 @@ int main(int argc, char *argv[]) {
                     }
                     free(sdu);
                     sdu = NULL;
+
+                    // Clear ping_data
+                    memset(&ping_data, 0, sizeof(ping_data));
+
                     break;
                 default:
                     if (debug_mode){
