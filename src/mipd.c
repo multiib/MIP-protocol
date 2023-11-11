@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
                         sdu = NULL;
 
                         // Clear ping_data
-                        memset(&ping_data, 0, sizeof(ping_data));
+                        // memset(&ping_data, 0, sizeof(ping_data));
 
 
 
@@ -362,7 +362,7 @@ int main(int argc, char *argv[]) {
                     sdu = NULL;
 
                     // Clear ping_data
-                    memset(&ping_data, 0, sizeof(ping_data));
+                    // memset(&ping_data, 0, sizeof(ping_data));
 
                     break;
                 default:
