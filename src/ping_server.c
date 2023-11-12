@@ -42,9 +42,7 @@ int main(int argc, char *argv[]) {
             close(sd);
             exit(EXIT_FAILURE);
     }
-    if (debug_mode){
-        printf("Connected to %s\n", socket_lower);
-    }
+
 
     while(1){
         // Read from socket
@@ -59,8 +57,6 @@ int main(int argc, char *argv[]) {
         char *str = uint32ArrayToString(read_buf);
         printf("%s\n", str);
 
-
-        printf("%d\n", read_buf[0]);
         char *destination_host = "11"; // Filler value
         
         // Fill the buffer with the pong message
@@ -81,7 +77,6 @@ int main(int argc, char *argv[]) {
 
 
     }
-
 
     close(sd);
     return 0;

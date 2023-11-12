@@ -514,7 +514,7 @@ char* uint32ArrayToString(uint32_t* arr) {
     }
 
     uint32_t str_length = arr[0];
-    printf("VBVstr_length: %d\n", str_length);
+
     char *str = (char*)calloc(str_length + 1, sizeof(char));
 
     if (str == NULL) {
