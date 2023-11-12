@@ -429,6 +429,9 @@ struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_ma
 uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
     uint8_t str_length = strlen(str);
 
+    // Print string
+    printf("VBVstrmoblen: %s\n", str);
+
     uint8_t num_elements = str_length / 4 + (str_length % 4 != 0) + 1;
     // Allocate memory for the array
     
