@@ -234,12 +234,11 @@ int main(int argc, char *argv[]) {
                     // Check if we are waiting for this reply by comparing target MIP address with local MIP address
                     if (ping_data.dst_mip_addr == target_arp_mip_addr){
 
-                        // Create SDU
+                        // Create SDU 
                         uint8_t sdu_len;
-
                         uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
-
+                        // Get MAC address of destination MIP and what ethernet interface it is on
                         uint8_t *dst_mac_addr = arp_lookup(ping_data.dst_mip_addr);
                         uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                         
@@ -247,7 +246,7 @@ int main(int argc, char *argv[]) {
                             printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
                         }
 
-
+                        // Send to destination MIP daemon
                         send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
 
                         free(sdu);
@@ -259,21 +258,24 @@ int main(int argc, char *argv[]) {
                     }
 
                     break;
+                
+                // RECIEVED UNKNOWN MIP PACKET
                 default:
                     printf("Received unknown MIP packet\n");
                     break;
             }
-
             destroy_pdu(pdu);
 
-
+        // INCOMING APPLICATION TRAFFIC
         } else {
-            // If incoming application traffic
 
-            // Type of application packet
+
+            // Handle incoming application message and determine type of message
             APP_handle type = handle_app_message(events->data.fd, &ping_data.dst_mip_addr, ping_data.msg);
 
             switch (type){
+
+                // RECIEVED MESSAGE FROM PING_CLIENT
                 case APP_PING:
                     if (debug_mode){
                         printf("\nReceived APP_PING\n");
@@ -281,20 +283,21 @@ int main(int argc, char *argv[]) {
                     }
                     
 
-                    // Check if we have the MAC address of the destination MIP
+                    // CHECK IF WE HAVE THE MAC ADDRESS FOR THE DESTINATION MIP ADDRESS
                     uint8_t * mac_addr = arp_lookup(ping_data.dst_mip_addr);
+
+                    // If we have the MAC address, send the MIP packet
                     if (mac_addr) {
                         if (debug_mode){
                             printf("We have the MAC address for MIP %u\n", ping_data.dst_mip_addr);
                         }
 
 
-                        // Create SDU
+                        // Create SDU 
                         uint8_t sdu_len;
-
                         uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
-
+                        // Get MAC address of destination MIP and what ethernet interface it is on
                         uint8_t *dst_mac_addr = arp_lookup(ping_data.dst_mip_addr);
                         uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                         
@@ -308,18 +311,15 @@ int main(int argc, char *argv[]) {
                         free(sdu);
                         sdu = NULL;
 
-                        // Clear ping_data
-                        // memset(&ping_data, 0, sizeof(ping_data));
 
-
-
+                    // If we don't have the MAC address, send an ARP request
                     } else {
                         if (debug_mode){
                             printf("MAC address for MIP %u not found in cache\n", ping_data.dst_mip_addr);
                         }
-                        // SEND ARP REQUEST
 
-                        // Create SDU
+                        // Create SDU  
+                        uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ping_data.dst_mip_addr);
 
                         // Create Broadcast MAC address
@@ -328,10 +328,7 @@ int main(int argc, char *argv[]) {
                         // Create broadcast MIP address
                         uint8_t broadcast_mip_addr = 0xff;
 
-                        // Create SDU length
-                        uint8_t sdu_len = 1 * sizeof(uint32_t);
-                        
-
+                        // Send MIP packet to all interfaces
                         for (int interface = 0; interface < ifs.ifn; interface++) {
                             if (debug_mode){
                                 printf("Sending MIP_BROADCAST to MIP: %u\n", broadcast_mip_addr);
@@ -345,15 +342,18 @@ int main(int argc, char *argv[]) {
                     }
                     break;
 
+
+                // RECIEVED MESSAGE FROM PING_SERVER
                 case APP_PONG:
                     if (debug_mode){
                         printf("Received APP_PONG\n");
                     }
-                    uint8_t sdu_len;
 
+                    // Create SDU
+                    uint8_t sdu_len;
                     uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
-
+                    // Get MAC address of destination MIP and what ethernet interface it is on
                     uint8_t *dst_mac_addr = arp_lookup(mip_return);
                     uint8_t interface = arp_lookup_interface(mip_return);
 
@@ -363,11 +363,11 @@ int main(int argc, char *argv[]) {
                     } else if (debug_mode){
                         printf("TTL = 0, dropping packet\n");
                     }
+
                     free(sdu);
                     sdu = NULL;
 
-                    // Clear ping_data
-                    // memset(&ping_data, 0, sizeof(ping_data));
+                    // Reset mip_return and ttl_return for next ping
                     mip_return = 0;
                     ttl_return = 0;
 
@@ -380,9 +380,10 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+
+    // Close listening socket
     close(raw_fd);
-
-
+    close(listening_fd);
 
     return 0;
 }
