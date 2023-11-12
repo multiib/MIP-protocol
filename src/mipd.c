@@ -35,10 +35,9 @@ int main(int argc, char *argv[]) {
     uint8_t set_ttl = 15; //TODO: Implement user specified TTL
     uint8_t set_ttl_broadcast = 1;
 
-    uint8_t mip_return = 0; // Flag for returning MIP address
-    uint8_t ttl_return;
+    uint8_t mip_return = 0; // Used to store MIP adresses while talking to ping_server
+    uint8_t ttl_return;     // Used to store TTL while talking to ping_server
 
-    int arp_type;
     uint8_t mip_addr;
 
     // Deamon network data
@@ -138,7 +137,6 @@ int main(int argc, char *argv[]) {
                     }
 
                     mip_return = pdu->miphdr->src;
-
                     ttl_return = pdu->miphdr->ttl;
 
                     break;
@@ -170,7 +168,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     // Set type of MIP-ARP message and contained MIP address
-                    decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
+                    decode_sdu_miparp(pdu->sdu, &mip_addr);
 
                     // Check if ARP request is for this MIP daemon by comparing target MIP address with local MIP address
                     if (mip_addr == ifs.local_mip_addr) {
@@ -215,7 +213,7 @@ int main(int argc, char *argv[]) {
 
 
                     // Set type of MIP-ARP message and contained MIP address
-                    decode_sdu_miparp(pdu->sdu, &arp_type, &mip_addr);
+                    decode_sdu_miparp(pdu->sdu, &mip_addr);
 
 
 
@@ -364,6 +362,7 @@ int main(int argc, char *argv[]) {
                     // Clear ping_data
                     // memset(&ping_data, 0, sizeof(ping_data));
                     mip_return = 0;
+                    ttl_return = 0;
 
                     break;
                 default:

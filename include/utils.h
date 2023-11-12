@@ -65,7 +65,7 @@ struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_ma
 uint32_t* stringToUint32Array(const char* str, uint8_t *length);
 uint32_t find_matching_if_index(struct ifs_data *ifs, struct sockaddr_ll *from_addr);
 void clear_ping_data(struct ping_data *data);
-void decode_sdu_miparp(uint32_t* sdu_array, int* arp_type, uint8_t* mip_addr);
+void decode_sdu_miparp(uint32_t* sdu_array, uint8_t* mip_addr);
 void decode_fill_ping_buf(const char *buf, size_t buf_size, char *destination_host, char *message);
 char* uint32ArrayToString(uint32_t* arr);
 
