@@ -17,7 +17,7 @@
 
 
 
-void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *local_mip_addr);
+void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *mip_addr);
 
 int main(int argc, char *argv[]) {
 
@@ -38,14 +38,18 @@ int main(int argc, char *argv[]) {
     uint8_t mip_return = 0; // Used to store MIP adresses while talking to ping_server
     uint8_t ttl_return;     // Used to store TTL while talking to ping_server
 
-    uint8_t mip_addr;
+    uint8_t target_arp_mip_addr; // Used to store MIP address from SDU of ARP request
 
-    // Deamon network data
-    struct ifs_data ifs;
+    struct ifs_data ifs; // Interface data
 
-    // Parse arguments from CLI
+
+
+    // PARSE ARGUMENTS FROM CLI
     parse_arguments(argc, argv, &debug_mode, &socket_upper, &local_mip_addr);
 
+
+
+    // SET UP NETWORKING UTILITIES
     // Create epoll instance
     epoll_fd = epoll_create1(0);
     if (epoll_fd == -1) {
@@ -60,10 +64,10 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    // Initialize network data
+    // Initialize interface data
     init_ifs(&ifs, raw_fd, local_mip_addr);
 
-    // Create UNIX listening socket for accepting connections from applications
+    // Create UNIX listening socket for application traffic
     listening_fd = create_unix_sock(socket_upper);
 
     // Add RAW socket to epoll instance
@@ -81,15 +85,16 @@ int main(int argc, char *argv[]) {
     }
 
 
+    // MAIN LOOP FOR HANDLING TRAFFIC FROM APPLICATION AND MIP
     while(1) {
+
         // Wait for incoming events
         rc = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
         if (rc == -1) {
             perror("epoll_wait");
             exit(EXIT_FAILURE);
-
-
         }
+
         // Add new application connection to epoll instance
         if (events->data.fd == listening_fd) {
 
@@ -98,10 +103,12 @@ int main(int argc, char *argv[]) {
                 perror("accept");
                 exit(EXIT_FAILURE);
             }
+
             if (debug_mode){
                 printf("Application connected\n\n");
             }
 
+            // Add new application connection to epoll instance
             rc = add_to_epoll_table(epoll_fd, unix_fd);
             if (rc == -1) {
                 perror("add_to_epoll_table");
@@ -109,17 +116,17 @@ int main(int argc, char *argv[]) {
             }
 
 
-        // If incoming MIP traffic
+        // INCOMING MIP TRAFFIC
         } else if (events->data.fd == raw_fd) {
-            // Data to be read from RAW socket
-            // struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));
+
+            // Allocate memory for PDU struct
             struct pdu *pdu = alloc_pdu();
 
             // Index of recieving interface
-            int interface;
+            int recv_interface;
 
             // Handle incoming MIP packet and determine type of packet
-            MIP_handle type = handle_mip_packet(raw_fd, &ifs, pdu, &interface);
+            MIP_handle type = handle_mip_packet(raw_fd, &ifs, pdu, &recv_interface);
 
             switch (type){
                 case MIP_PING:
@@ -167,11 +174,11 @@ int main(int argc, char *argv[]) {
                         printf("\n");
                     }
 
-                    // Set type of MIP-ARP message and contained MIP address
-                    decode_sdu_miparp(pdu->sdu, &mip_addr);
+                    // Get target MIP address from SDU of ARP request
+                    decode_sdu_miparp(pdu->sdu, &target_arp_mip_addr);
 
                     // Check if ARP request is for this MIP daemon by comparing target MIP address with local MIP address
-                    if (mip_addr == ifs.local_mip_addr) {
+                    if (target_arp_mip_addr == ifs.local_mip_addr) {
                         if (debug_mode){
                             printf("ARP request for us\n");
                         }
@@ -180,7 +187,7 @@ int main(int argc, char *argv[]) {
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REPLY, ifs.local_mip_addr);
 
                         // Update ARP table
-                        arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, interface);
+                        arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, recv_interface);
 
                         // Send ARP reply
                         if (debug_mode){
@@ -188,7 +195,7 @@ int main(int argc, char *argv[]) {
                         }
 
                         if (pdu->miphdr->ttl){
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, pdu->miphdr->src, pdu->miphdr->ttl - 1, SDU_TYPE_MIPARP, sdu, 4);
+                            send_mip_packet(&ifs, ifs.addr[recv_interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, pdu->miphdr->src, pdu->miphdr->ttl - 1, SDU_TYPE_MIPARP, sdu, 4);
                         } else {
                             if (debug_mode){
                                 printf("TTL = 0, dropping packet\n");
@@ -212,16 +219,16 @@ int main(int argc, char *argv[]) {
                     }
 
 
-                    // Set type of MIP-ARP message and contained MIP address
-                    decode_sdu_miparp(pdu->sdu, &mip_addr);
+                    // Get target MIP address from SDU of ARP request
+                    decode_sdu_miparp(pdu->sdu, &target_arp_mip_addr);
 
 
 
                     // Update ARP table
-                    arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, interface);
+                    arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, recv_interface);
                     
                     // CHECK IF WE ARE WAITING FOR THIS REPLY
-                    if (ping_data.dst_mip_addr == mip_addr){
+                    if (ping_data.dst_mip_addr == target_arp_mip_addr){
 
                         // Create SDU
                         uint8_t sdu_len;
@@ -381,7 +388,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *mip_address) {
+void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *mip_addr) {
     int opt;
     while ((opt = getopt(argc, argv, "dh")) != -1) {
         switch (opt) {
@@ -416,5 +423,5 @@ void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_uppe
         exit(1);
     }
 
-    *mip_address = (uint8_t) mip_tmp;
+    *mip_addr = (uint8_t) mip_tmp;
 }
