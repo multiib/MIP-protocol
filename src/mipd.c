@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     // Write SDU to ping_server
-                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len/sizeof(uint32_t));
+                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
                     if (rc == -1) {
                         perror("write");
                         exit(EXIT_FAILURE);
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     // Write SDU to ping_server
-                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len/sizeof(uint32_t));
+                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
                     if (rc == -1) {
                         perror("write");
                         exit(EXIT_FAILURE);
