@@ -11,56 +11,78 @@
 #include "utils.h"
 #include "arp.h"
 
-struct pdu * alloc_pdu(void)
-{
+struct pdu * alloc_pdu(void) {
     struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));
+    if (!pdu) {
+        // Handle memory allocation failure
+        return NULL;
+    }
     
     pdu->ethhdr = (struct eth_hdr *)malloc(sizeof(struct eth_hdr));
+    if (!pdu->ethhdr) {
+        // Handle memory allocation failure
+        free(pdu);
+        return NULL;
+    }
     pdu->ethhdr->ethertype = htons(ETH_P_MIP);
+    // Initialize MAC addresses to 0
+    memset(pdu->ethhdr->dst_mac, 0, 6);
+    memset(pdu->ethhdr->src_mac, 0, 6);
     
     pdu->miphdr = (struct mip_hdr *)malloc(sizeof(struct mip_hdr));
-        pdu->miphdr->dst = 0;
-        pdu->miphdr->src = 0 ;
-        pdu->miphdr->ttl = 0x00;
-        pdu->miphdr->sdu_len = 0;
-        pdu->miphdr->sdu_type = 0;
+    if (!pdu->miphdr) {
+        // Handle memory allocation failure
+        free(pdu->ethhdr);
+        free(pdu);
+        return NULL;
+    }
+    pdu->miphdr->dst = 0;
+    pdu->miphdr->src = 0;
+    pdu->miphdr->ttl = 0x00;
+    pdu->miphdr->sdu_len = 0;
+    pdu->miphdr->sdu_type = 0;
 
+    pdu->sdu = NULL; // Initialize sdu pointer to NULL
 
     return pdu;
 }
 
+
 void fill_pdu(struct pdu *pdu,
-          uint8_t *src_mac_addr,
-          uint8_t *dst_mac_addr,
-          uint8_t src_mip_addr,
-          uint8_t dst_mip_addr,
-          uint8_t ttl,
-          uint8_t sdu_type,
-          const uint32_t *sdu,
-          uint16_t sdu_len)
-{
-    
+              uint8_t *src_mac_addr,
+              uint8_t *dst_mac_addr,
+              uint8_t src_mip_addr,
+              uint8_t dst_mip_addr,
+              uint8_t ttl,
+              uint8_t sdu_type,
+              const uint32_t *sdu,
+              uint16_t sdu_len) {
+    if (!pdu) {
+        // Handle null pdu pointer
+        return;
+    }
+
     memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
     memcpy(pdu->ethhdr->src_mac, src_mac_addr, 6);
-    pdu->ethhdr->ethertype = htons(ETH_P_MIP);
-    
+
     pdu->miphdr->dst = dst_mip_addr;
     pdu->miphdr->src = src_mip_addr;
-
-
     pdu->miphdr->ttl = ttl;
-
     pdu->miphdr->sdu_type = sdu_type;
-
     pdu->miphdr->sdu_len = sdu_len;
 
-
+    if (pdu->sdu) {
+        free(pdu->sdu); // Free existing sdu memory
+    }
     pdu->sdu = (uint32_t *)calloc(sdu_len, sizeof(uint32_t));
-
-    // memcpy(pdu->sdu, sdu, sdu_len);
-    memcpy(pdu->sdu, sdu, sdu_len);
-
+    if (!pdu->sdu) {
+        // Handle memory allocation failure
+        return;
+    }
+    
+    memcpy(pdu->sdu, sdu, sdu_len * sizeof(uint32_t));
 }
+
 
 size_t mip_serialize_pdu(struct pdu *pdu, uint8_t *snd_buf)
 {
