@@ -383,7 +383,7 @@ int main(int argc, char *argv[]) {
 
     // Close listening socket
     close(raw_fd);
-    close(listening_fd);
+
 
     return 0;
 }

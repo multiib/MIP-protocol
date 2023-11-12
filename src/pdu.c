@@ -173,7 +173,7 @@ void print_pdu_content(struct pdu *pdu)
 
     // Print SDU in uint32 numbers
     printf("\t SDU: ");
-    for (int i = 0; i < pdu->miphdr->sdu_len; i++) {
+    for (int i = 0; i < pdu->miphdr->sdu_len/4; i++) {
         printf("%u ", pdu->sdu[i]);
     }
     printf("\n");
@@ -182,11 +182,13 @@ void print_pdu_content(struct pdu *pdu)
 
 void destroy_pdu(struct pdu *pdu)
 {   
+
     free(pdu->ethhdr);
     pdu->ethhdr = NULL;
 
     free(pdu->miphdr);
     pdu->miphdr = NULL;
+
 
     if (pdu->sdu != NULL){
         free(pdu->sdu);
@@ -195,5 +197,6 @@ void destroy_pdu(struct pdu *pdu)
     }
     free(pdu);
     pdu = NULL;
+
 }
  
