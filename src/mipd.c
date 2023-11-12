@@ -144,12 +144,14 @@ int main(int argc, char *argv[]) {
                         perror("write");
                         exit(EXIT_FAILURE);
                     }
-
+                    
+                    // Store MIP address and TTL for return packet
                     mip_return = pdu->miphdr->src;
                     ttl_return = pdu->miphdr->ttl;
 
                     break;
 
+                // RECIEVED MIP PONG FROM OTHER MIP DAEMON
                 case MIP_PONG:
                     if (debug_mode){
                         printf("\nReceived MIP_PONG\n");
@@ -157,18 +159,20 @@ int main(int argc, char *argv[]) {
                         printf("\n");
                     }
 
+                    // Write SDU to ping_server
                     rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len/sizeof(uint32_t));
                     if (rc == -1) {
                         perror("write");
                         exit(EXIT_FAILURE);
                     }
 
-                    //mip_return = 0;
 
+                    // We are done with the ping_client, close the connection
                     close(unix_fd);
 
                     break;
 
+                // RECIEVED MIP ARP REQUEST FROM OTHER MIP DAEMON
                 case MIP_ARP_REQUEST:
                     if (debug_mode){
                         printf("\nReceived MIP_ARP_REQUEST\n");
@@ -196,6 +200,7 @@ int main(int argc, char *argv[]) {
                             printf("Sending MIP_ARP_REPLY to MIP: %u\n", pdu->miphdr->src);
                         }
 
+                        // Send ARP reply back to source
                         if (pdu->miphdr->ttl){
                             send_mip_packet(&ifs, ifs.addr[recv_interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, pdu->miphdr->src, pdu->miphdr->ttl - 1, SDU_TYPE_MIPARP, sdu, 4);
                         } else {
@@ -212,7 +217,7 @@ int main(int argc, char *argv[]) {
                     }
                     break;
 
-
+                // RECIEVED MIP ARP REPLY FROM OTHER MIP DAEMON
                 case MIP_ARP_REPLY:
                     if (debug_mode){
                         printf("\nReceived MIP_ARP_REPLY\n");
@@ -220,16 +225,13 @@ int main(int argc, char *argv[]) {
                         printf("\n");
                     }
 
-
                     // Get target MIP address from SDU of ARP request
                     decode_sdu_miparp(pdu->sdu, &target_arp_mip_addr);
-
-
 
                     // Update ARP table
                     arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, recv_interface);
                     
-                    // CHECK IF WE ARE WAITING FOR THIS REPLY
+                    // Check if we are waiting for this reply by comparing target MIP address with local MIP address
                     if (ping_data.dst_mip_addr == target_arp_mip_addr){
 
                         // Create SDU
@@ -246,10 +248,12 @@ int main(int argc, char *argv[]) {
                         }
 
 
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
 
                         free(sdu);
                         sdu = NULL;
+
+
                     } else if (debug_mode){
                         printf("Not waiting for this reply\n");
                     }
@@ -299,7 +303,7 @@ int main(int argc, char *argv[]) {
                         }
 
                         // Send to ping_server
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
 
                         free(sdu);
                         sdu = NULL;
@@ -325,7 +329,7 @@ int main(int argc, char *argv[]) {
                         uint8_t broadcast_mip_addr = 0xff;
 
                         // Create SDU length
-                        uint8_t sdu_len = 4;
+                        uint8_t sdu_len = 1 * sizeof(uint32_t);
                         
 
                         for (int interface = 0; interface < ifs.ifn; interface++) {
@@ -347,21 +351,15 @@ int main(int argc, char *argv[]) {
                     }
                     uint8_t sdu_len;
 
-                    // print ping data msg
-                    printf("Content: %s\n", ping_data.msg);
-                    printf("sdu_len: %d\n", sdu_len);
                     uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
-                    printf("new sdu_len: %d\n", sdu_len);
-                    printf("sdu: %d\n", sdu[0]);
-                    printf("sdu: %d\n", sdu[1]);
-                    printf("sdu: %d\n", sdu[2]);
+
 
                     uint8_t *dst_mac_addr = arp_lookup(mip_return);
                     uint8_t interface = arp_lookup_interface(mip_return);
 
                     // Send MIP packet back to source
                     if (ttl_return){
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, ttl_return-1, SDU_TYPE_PING, sdu, sdu_len);
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, mip_return, ttl_return-1, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
                     } else if (debug_mode){
                         printf("TTL = 0, dropping packet\n");
                     }
