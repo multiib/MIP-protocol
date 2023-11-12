@@ -122,22 +122,24 @@ int main(int argc, char *argv[]) {
             // Allocate memory for PDU struct
             struct pdu *pdu = alloc_pdu();
 
-            // Index of recieving interface
+            // Index of recieving ethernet interface
             int recv_interface;
 
             // Handle incoming MIP packet and determine type of packet
             MIP_handle type = handle_mip_packet(raw_fd, &ifs, pdu, &recv_interface);
 
             switch (type){
-                case MIP_PING:
 
+                // RECIEVED MIP PING FROM OTHER MIP DAEMON
+                case MIP_PING:
                     if (debug_mode){
                         printf("\nReceived MIP_PING\n");
                         print_pdu_content(pdu);
                         printf("\n");
                     }
-                    printf("0\n");
-                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
+
+                    // Write SDU to ping_server
+                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len/sizeof(uint32_t));
                     if (rc == -1) {
                         perror("write");
                         exit(EXIT_FAILURE);
@@ -155,7 +157,7 @@ int main(int argc, char *argv[]) {
                         printf("\n");
                     }
 
-                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len);
+                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len/sizeof(uint32_t));
                     if (rc == -1) {
                         perror("write");
                         exit(EXIT_FAILURE);
