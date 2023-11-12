@@ -115,32 +115,46 @@ size_t mip_serialize_pdu(struct pdu *pdu, uint8_t *snd_buf)
     return snd_len;
 }
 
-size_t mip_deserialize_pdu(struct pdu *pdu, uint8_t *rcv_buf)
-{
-    /* pdu = (struct pdu *)malloc(sizeof(struct pdu)); */
+size_t mip_deserialize_pdu(struct pdu *pdu, uint8_t *rcv_buf) {
     size_t rcv_len = 0;
 
-    /* Unpack ethernet header */
+    // Unpack ethernet header
     pdu->ethhdr = (struct eth_hdr *)malloc(ETH_HDR_LEN);
+    if (!pdu->ethhdr) {
+        // Handle memory allocation failure
+        return 0;
+    }
     memcpy(pdu->ethhdr, rcv_buf + rcv_len, ETH_HDR_LEN);
     rcv_len += ETH_HDR_LEN;
 
     pdu->miphdr = (struct mip_hdr *)malloc(MIP_HDR_LEN);
+    if (!pdu->miphdr) {
+        // Handle memory allocation failure
+        free(pdu->ethhdr);
+        return 0;
+    }
     uint32_t *tmp = (uint32_t *) (rcv_buf + rcv_len);
     uint32_t header = ntohl(*tmp);
     pdu->miphdr->dst = (uint8_t) (header >> 24);
     pdu->miphdr->src = (uint8_t) (header >> 16);
-    pdu->miphdr->ttl = (size_t) (((header >> 12) & 0xf));
+    pdu->miphdr->ttl = (uint8_t) (((header >> 12) & 0xf));
     pdu->miphdr->sdu_len = (uint8_t) ((header >> 3) & 0x3f);
     pdu->miphdr->sdu_type = (uint8_t) (header & 0xf);
     rcv_len += MIP_HDR_LEN;
 
-    pdu->sdu = (uint32_t *)calloc(1, pdu->miphdr->sdu_len/4);
-    memcpy(pdu->sdu, rcv_buf + rcv_len, pdu->miphdr->sdu_len);
-    rcv_len += pdu->miphdr->sdu_len;
+    pdu->sdu = (uint32_t *)calloc(pdu->miphdr->sdu_len, sizeof(uint32_t));
+    if (!pdu->sdu) {
+        // Handle memory allocation failure
+        free(pdu->miphdr);
+        free(pdu->ethhdr);
+        return 0;
+    }
+    memcpy(pdu->sdu, rcv_buf + rcv_len, pdu->miphdr->sdu_len * sizeof(uint32_t));
+    rcv_len += pdu->miphdr->sdu_len * sizeof(uint32_t);
 
     return rcv_len;
 }
+
 
 void print_pdu_content(struct pdu *pdu)
 {
