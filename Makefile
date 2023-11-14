@@ -11,13 +11,13 @@ SRC_DIR = ./src
 OBJ_DIR = ./obj
 
 # Source files
-SRC_FILES = arp.c mipd.c ping_client.c ping_server.c utils.c pdu.c ipc.c
+SRC_FILES = arp.c mipd.c ping_client.c ping_server.c routingd.c utils.c pdu.c ipc.c
 
 # Object files
 OBJ_FILES = $(SRC_FILES:%.c=$(OBJ_DIR)/%.o)
 
 # Executables
-EXE_FILES = mipd ping_client ping_server
+EXE_FILES = mipd ping_client ping_server routingd
 
 # Executable paths (now just the names, so they'll be in the WD)
 EXE_PATHS = $(EXE_FILES)
@@ -42,6 +42,11 @@ ping_client: $(OBJ_DIR)/ping_client.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_
 
 # Rule for making ping_server executable
 ping_server: $(OBJ_DIR)/ping_server.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o $(OBJ_DIR)/arp.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+
+# Rule for making routingd executable
+routingd: $(OBJ_DIR)/routingd.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o $(OBJ_DIR)/arp.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for cleaning the project

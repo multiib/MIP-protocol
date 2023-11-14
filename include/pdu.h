@@ -12,6 +12,7 @@
 
 #define SDU_TYPE_MIPARP 0x01
 #define SDU_TYPE_PING   0x02
+#define SDU_TYPE_ROUTE  0x04
 
 struct pdu {
     struct eth_hdr *ethhdr;

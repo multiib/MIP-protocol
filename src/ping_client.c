@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     int sd, rc;
     int epfd, nfds;
     struct epoll_event event, events[1];  // We'll just wait for one event
-    double elapsed_time;
+
 
 
 
