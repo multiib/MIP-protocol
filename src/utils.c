@@ -305,6 +305,9 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
     } else if (strncmp(buf + offset, "PONG:", 5) == 0) {
         app_type = APP_PONG;
 
+    } else if (strncmp(buf + offset, "ROUTE:", 6) == 0) {
+        app_type = APP_ROUTE;
+
     } else {
         perror("Unknown message type");
         close(fd);

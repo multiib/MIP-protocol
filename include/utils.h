@@ -4,11 +4,15 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <linux/if_packet.h>
+#include <limits.h>
 
 #include "ether.h"
 #include "mip.h"
 #include "arp.h"
 #include "pdu.h"
+
+
+#define INFINITY INT_MAX
 
 
 
@@ -38,8 +42,17 @@ typedef enum {
 
 typedef enum {
     APP_PING,
-    APP_PONG
+    APP_PONG,
+    APP_ROUTE
 } APP_handle;
+
+typedef enum {
+    ROUTING_HELLO,
+    ROUTING_UPDATE,
+    ROUTING_REQUEST,
+    ROUTING_RESPONSE
+} ROUTING_handle;
+
 
 void print_mac_addr(uint8_t *, size_t);
 int create_raw_socket(void);

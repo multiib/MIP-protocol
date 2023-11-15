@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 
     // VARIABLES
     struct epoll_event events[MAX_EVENTS];
-    int raw_fd, listening_fd, unix_fd, epoll_fd; // File descriptors
+    int raw_fd, listening_fd, epoll_fd; // File descriptors
     int rc; // Return code
 
     // To be set by CLI
@@ -41,6 +41,9 @@ int main(int argc, char *argv[]) {
     uint8_t target_arp_mip_addr; // Used to store MIP address from SDU of ARP request
 
     struct ifs_data ifs; // Interface data
+
+    int route_fd = -1; // File descriptor for routing daemon
+    int app_fd   = -1; // File descriptor for application
 
 
 
@@ -97,19 +100,39 @@ int main(int argc, char *argv[]) {
 
         // Add new application connection to epoll instance
         if (events->data.fd == listening_fd) {
+            
+            // Accept new connection
+            // We assume that the routing daemon always connects first for now
+            if (route_fd == -1){
+                route_fd = accept(listening_fd, NULL, NULL);
+                if (app_fd == -1) {
+                    perror("accept");
+                    exit(EXIT_FAILURE);
+                }
 
-            unix_fd = accept(listening_fd, NULL, NULL);
-            if (unix_fd == -1) {
-                perror("accept");
-                exit(EXIT_FAILURE);
+                // Send local MIP address to routing daemon
+                rc = write(route_fd, &local_mip_addr, 1);
+                if (rc == -1) {
+                    perror("write");
+                    exit(EXIT_FAILURE);
+                }
+
+
+            } else {
+                app_fd = accept(listening_fd, NULL, NULL);
+                if (app_fd == -1) {
+                    perror("accept");
+                    exit(EXIT_FAILURE);
+                }
             }
+
 
             if (debug_mode){
                 printf("Application connected\n\n");
             }
 
             // Add new application connection to epoll instance
-            rc = add_to_epoll_table(epoll_fd, unix_fd);
+            rc = add_to_epoll_table(epoll_fd, app_fd);
             if (rc == -1) {
                 perror("add_to_epoll_table");
                 exit(EXIT_FAILURE);
@@ -139,7 +162,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     // Write SDU to ping_server
-                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
+                    rc = write(app_fd, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
                     if (rc == -1) {
                         perror("write");
                         exit(EXIT_FAILURE);
@@ -160,7 +183,7 @@ int main(int argc, char *argv[]) {
                     }
 
                     // Write SDU to ping_server
-                    rc = write(unix_fd, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
+                    rc = write(app_fd, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
                     if (rc == -1) {
                         perror("write");
                         exit(EXIT_FAILURE);
@@ -168,7 +191,7 @@ int main(int argc, char *argv[]) {
 
 
                     // We are done with the ping_client, close the connection
-                    close(unix_fd);
+                    close(app_fd);
 
                     break;
 
@@ -267,8 +290,7 @@ int main(int argc, char *argv[]) {
             destroy_pdu(pdu);
 
         // INCOMING APPLICATION TRAFFIC
-        } else {
-
+        } else if (events->data.fd == app_fd){
 
             // Handle incoming application message and determine type of message
             APP_handle type = handle_app_message(events->data.fd, &ping_data.dst_mip_addr, ping_data.msg);
@@ -372,12 +394,26 @@ int main(int argc, char *argv[]) {
                     ttl_return = 0;
 
                     break;
+
+                case APP_ROUTE:
+                    if (debug_mode){
+                        printf("Received ROUTE\n");
+                    }
+
+
+                    break;
+
                 default:
                     if (debug_mode){
                         printf("Received unknown APP message\n");
                     }
                     break;
             }
+        } else if (events->data.fd == route_fd){
+            printf("Received ROUTE\n");
+        } else {
+            printf("Received unknown event\n");
+
         }
     }
 
