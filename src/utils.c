@@ -674,7 +674,7 @@ void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip
     free(sdu);
 }
 
-void fill_forward_data(forward_data_t *forward_data, uint8_t *next_hop_MIP, pdu_t *pdu, int *waiting_to_forward) {
+void fill_forward_data(forward_data_t *forward_data, uint8_t *next_hop_MIP, pdu *pdu, int *waiting_to_forward) {
 
     // Set waiting_to_forward to 1
     *waiting_to_forward = 1;

@@ -14,7 +14,7 @@
 #include "utils.h"
 #include "mip.h"
 #include "ipc.h"
-#include "queue.h"
+
 
 
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *mip_addr);
