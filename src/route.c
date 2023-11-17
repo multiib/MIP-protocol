@@ -46,18 +46,7 @@ void updateRoutingTable(int sourceMIP, RoutingEntry receivedTable[MAX_NODES]) {
     }
 }
 
-void sendRoutingInformation(int destinationMIP, RoutingEntry table[MAX_NODES]) {
-    RoutingEntry tempTable[MAX_NODES];
-    memcpy(tempTable, table, sizeof(tempTable));
 
-    for (int i = 0; i < MAX_NODES; i++) {
-        if (tempTable[i].next_hop == destinationMIP) {
-            tempTable[i].distance = INFINITY;
-        }
-    }
-
-    // Send tempTable to the destinationMIP...
-}
 
 void handleHelloMessage(int MIPgreeter) {
 

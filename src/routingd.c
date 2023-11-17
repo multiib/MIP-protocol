@@ -8,6 +8,7 @@
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <sys/un.h>		/* definitions for UNIX domain sockets */
 
 #include "arp.h"
 #include "ether.h"
@@ -32,27 +33,7 @@ RoutingEntry routingTable[MAX_NODES];
 
 int routingTableHasChanged = 0; // Global flag for routing table chan
 
-void *sendMessagesThread(void *arg) {
-    int socket_fd = *((int *)arg);
-    while (1) {
-        sendHelloMessage(socket_fd, localMIP);
-        if (updateTable()) {
-            sendRoutingUpdate(socket_fd, routingTable);
-            routingTableHasChanged = 0; // Reset the flag
-        }
-        sleep(HELLO_INTERVAL); // Adjust based on desired frequency
-    }
-    return NULL;
-}
 
-
-void *receiveMessagesThread(void *arg) {
-    int socket_fd = *((int *)arg);
-    while (1) {
-        handleIncomingMessages(socket_fd);
-    }
-    return NULL;
-}
 
 // Declaration of the parse_arguments function
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_lower);
@@ -71,7 +52,7 @@ int main(int argc, char *argv[]) {
 
     // Set up the UNIX domain socket
     int sd, rc;
-    int epfd, nfds;
+
 
 
     struct sockaddr_un addr;
