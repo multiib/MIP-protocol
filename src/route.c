@@ -51,7 +51,6 @@ void updateRoutingTable(int sourceMIP, struct RoutingEntry receivedTable[MAX_NOD
 
 void handleHelloMessage(int MIPgreeter) {
 
-
     // Check if the senderMIP is within valid range
     if (MIPgreeter >= 0 && MIPgreeter < MAX_NODES) {
         // Mark this MIP address as a neighbor
@@ -159,6 +158,11 @@ void handleIncomingMessages(int socket_fd) {
         handleRequestMessage(socket_fd, read_buf, rc);
     } else {
         printf("Invalid message type.\n");
+
+        // Quit if the message type is invalid
+        close(socket_fd);
+        exit(EXIT_FAILURE);
+
     }
 
 }
