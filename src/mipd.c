@@ -115,13 +115,16 @@ int main(int argc, char *argv[]) {
                     exit(EXIT_FAILURE);
                 }
 
+                printf("Routing daemon connected\n\n"); //TODO: Remove
+                printf("Local MIP address: %u\n", local_mip_addr); //TODO: Remove
+
                 // Send local MIP address to routing daemon
                 rc = write(route_fd, &local_mip_addr, 1);
                 if (rc == -1) {
                     perror("write");
                     exit(EXIT_FAILURE);
                 }
-
+                printf("Sent local MIP address to routing daemon\n\n"); //TODO: Remove
 
             } else {
                 app_fd = accept(listening_fd, NULL, NULL);
