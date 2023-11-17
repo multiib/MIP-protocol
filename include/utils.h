@@ -37,7 +37,9 @@ typedef enum {
     MIP_PING,
     MIP_PONG,
     MIP_ARP_REQUEST,
-    MIP_ARP_REPLY
+    MIP_ARP_REPLY,
+    MIP_ROUTE_HELLO,
+    MIP_ROUTE_UPDATE
 } MIP_handle;
 
 typedef enum {
@@ -47,11 +49,10 @@ typedef enum {
 } APP_handle;
 
 typedef enum {
-    ROUTING_HELLO,
-    ROUTING_UPDATE,
-    ROUTING_REQUEST,
-    ROUTING_RESPONSE
-} ROUTING_handle;
+    ROUTE_HELLO,
+    ROUTE_UPDATE,
+    ROUTE_RESPONSE
+} ROUTE_handle;
 
 
 void print_mac_addr(uint8_t *, size_t);
@@ -81,6 +82,7 @@ void clear_ping_data(struct ping_data *data);
 void decode_sdu_miparp(uint32_t* sdu_array, uint8_t* mip_addr);
 void decode_fill_ping_buf(const char *buf, size_t buf_size, char *destination_host, char *message);
 char* uint32ArrayToString(uint32_t* arr);
-
-
+uint8_t routing_lookup(uint8_t host_mip_addr, int *route_fd);
+void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip_addr, int debug_mode);
+void fill_forward_data(forward_data_t *forward_data, uint8_t *next_hop_MIP, pdu_t *pdu, int *waiting_to_forward);
 #endif

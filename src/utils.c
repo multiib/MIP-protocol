@@ -17,6 +17,8 @@
 #include "pdu.h"
 #include "mip.h"
 
+#define REQUEST_MSG_LEN 6
+#define RESPONSE_MSG_LEN 6
 
 int debug_mode = 0;
 
@@ -243,7 +245,25 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
             }
             return -1;
         }
-    }
+
+    // TODO: Fix type for ROUTE
+    } else if (pdu->miphdr->sdu_type == SDU_TYPE_ROUTE) {
+        if (pdu->sdu[1] == 0x524F5554) {
+            mip_type = MIP_ROUTE_HELLO;
+        } else if (pdu->sdu[1] == 0x524F5555) {
+            mip_type = MIP_ROUTE_UPDATE;
+        } else {
+            if (debug_mode) {
+                printf("Error: Unknown ROUTE type\n");
+            }
+            return -1;
+        }
+    } else {
+        if (debug_mode) {
+            printf("Error: Unknown SDU type\n");
+        }
+        return -1;
+    }   
 
 
 
@@ -308,6 +328,52 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
     } else if (strncmp(buf + offset, "ROUTE:", 6) == 0) {
         app_type = APP_ROUTE;
 
+    } else {
+        perror("Unknown message type");
+        close(fd);
+        exit(EXIT_FAILURE);
+    }
+    // Copy the rest of the buffer to msg
+    strcpy(msg, buf + offset);
+
+    return app_type;
+
+}
+
+
+
+
+APP_handle handle_route_message(int fd, uint8_t *dst_mip_addr, uint8_t *msg)
+{
+    int rc;
+    ROUTE_handle route_type;
+    
+    // Buffer to hold message from application
+    uint8_t read_buf[512];
+
+    // Clear buffer
+    memset(buf, 0, sizeof(buf));
+
+    // Read message from application
+    rc = read(fd, buf, sizeof(buf));
+    if (rc <= 0) {
+        perror("read");
+        exit(EXIT_FAILURE);
+    }
+
+    // Set the destination_mip to the first byte of the buffer
+    *dst_mip_addr =  buf[0];
+
+
+    // Initialize an offset for the message
+    int offset = 2; // Skip the first byte (MIP) and the second byte (TTL) TODO: Check if this is correct
+
+    if (read_buf[2] == 0x48 && read_buf[3] == 0x45 && read_buf[4] == 0x4C) {
+        route_type = ROUTE_HELLO;
+    } else if (read_buf[2] == 0x55 && read_buf[3] == 0x50 && read_buf[4] == 0x44) {
+        route_type = ROUTE_UPDATE;
+    } else if (read_buf[2] == 0x52 && read_buf[3] == 0x45 && read_buf[4] == 0x53) {
+        route_type = ROUTE_RESPONSE;
     } else {
         perror("Unknown message type");
         close(fd);
@@ -545,3 +611,109 @@ char* uint32ArrayToString(uint32_t* arr) {
     return str - arr[0];
 }
 
+uint8_t routing_lookup(uint8_t host_mip_addr, int *route_fd) {
+    uint8_t next_hop;
+
+    // Request message format
+    uint8_t request_msg[REQUEST_MSG_LEN] = {
+        host_mip_addr,
+        0x00, // TTL
+        0x52, // 'R'
+        0x45, // 'E'
+        0x51, // 'Q'
+        host_mip_addr // MIP address to look up
+    };
+
+    // Send request to routing daemon
+    ssize_t sent_bytes = send(*route_fd, request_msg, REQUEST_MSG_LEN, 0);
+    if (sent_bytes < 0) {
+        perror("send");
+        return 0; // 0 could signify an error
+    }
+
+    // Receive response from routing daemon
+    uint8_t response_msg[RESPONSE_MSG_LEN];
+    ssize_t received_bytes = recv(*route_fd, response_msg, RESPONSE_MSG_LEN, 0);
+    if (received_bytes < 0) {
+        perror("recv");
+        return 0; // 0 could signify an error
+    }
+
+    // Validate the response
+    if (received_bytes != RESPONSE_MSG_LEN || 
+        response_msg[2] != 0x52 || response_msg[3] != 0x53 || response_msg[4] != 0x50) {
+        fprintf(stderr, "Invalid response format.\n");
+        return 0; // 0 could signify an error
+    }
+
+    // Extract the next hop MIP address
+    next_hop = response_msg[5];
+    return next_hop;
+}
+
+// Function to send ARP request to all interfaces
+void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip_addr, int debug_mode) {
+    // Create SDU for ARP request
+    uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
+    uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, target_mip_addr);
+
+    // Create Broadcast MAC address
+    uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
+    // Create broadcast MIP address
+    uint8_t broadcast_mip_addr = 0xff;
+
+    // Send MIP packet to all interfaces
+    for (int interface = 0; interface < ifs->ifn; interface++) {
+        if (debug_mode) {
+            printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
+        }
+        send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, broadcast_mip_addr, set_ttl_broadcast, SDU_TYPE_MIPARP, sdu, sdu_len);
+    }
+
+    free(sdu);
+}
+
+void fill_forward_data(forward_data_t *forward_data, uint8_t *next_hop_MIP, pdu_t *pdu, int *waiting_to_forward) {
+
+    // Set waiting_to_forward to 1
+    *waiting_to_forward = 1;
+
+
+    forward_data->next_hop_MIP = *next_hop_MIP;
+    forward_data->ttl = pdu->miphdr->ttl;
+    forward_data->sdu_type = pdu->sdu_type;
+
+    // Calculate the number of elements in the SDU array
+    size_t sdu_elements = pdu->miphdr->sdu_len;
+
+    // Allocate memory for the SDU and initialize it to zero
+    forward_data->sdu = (uint32_t *)calloc(sdu_elements, sizeof(uint32_t));
+    if (forward_data->sdu == NULL) {
+        perror("Failed to allocate memory for SDU");
+        exit(EXIT_FAILURE);
+    }
+
+    // Copy the SDU content
+    memcpy(forward_data->sdu, pdu->sdu, sdu_elements * sizeof(uint32_t));
+    forward_data->sdu_len = pdu->miphdr->sdu_len;
+}
+
+void clear_forward_data(forward_data_t *forward_data, int *waiting_to_forward) {
+
+    // Set waiting_to_forward to 0
+    *waiting_to_forward = 0;
+
+
+    // Free the dynamically allocated memory for the SDU
+    if (forward_data->sdu != NULL) {
+        free(forward_data->sdu);
+        forward_data->sdu = NULL; // Set pointer to NULL to avoid dangling pointer
+    }
+
+    // Reset other fields to default values
+    forward_data->next_hop_MIP = 0;
+    forward_data->ttl = 0;
+    forward_data->sdu_type = 0;
+    forward_data->sdu_len = 0;
+}

@@ -25,6 +25,14 @@ struct ping_data {
     char   msg[512];
 };
 
+typedef struct {
+    uint8_t next_hop_MIP;       // Next hop MIP address
+    uint8_t ttl;                // Time To Live
+    uint8_t sdu_type;           // Service Data Unit type
+    uint32_t *sdu;              // Pointer to Service Data Unit array
+    size_t sdu_len;             // Length of the SDU array
+} forward_data_t;
+
 struct pdu * alloc_pdu(void);
 void fill_pdu(struct pdu *pdu,
               uint8_t *src_mac_addr,

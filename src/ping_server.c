@@ -44,6 +44,23 @@ int main(int argc, char *argv[]) {
     }
 
 
+    uint8_t localMIP;
+    rc = read(sd, &localMIP, 1); // Read a single byte for the MIP address
+    if (rc < 0) {
+        perror("read");
+        close(sd);
+        exit(EXIT_FAILURE);
+    }
+    else if (rc == 0) {
+        printf("No data read, possible disconnection.\n");
+        close(sd);
+        exit(EXIT_FAILURE);
+    }
+    else {
+        printf("Received MIP address: %u\n", localMIP);
+    }
+
+
     while(1){
         // Read from socket
         rc = read(sd, read_buf, sizeof(read_buf));
