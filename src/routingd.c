@@ -33,6 +33,7 @@ RoutingEntry routingTable[MAX_NODES];
 
 int routingTableHasChanged = 0; // Global flag for routing table chan
 
+int neighborTable[MAX_NODES]; // 1 indicates a neighbor, 0 otherwise
 
 
 // Declaration of the parse_arguments function
@@ -46,8 +47,8 @@ int main(int argc, char *argv[]) {
 
     parse_arguments(argc, argv, &debug_mode, &socket_lower);
 
-    RoutingEntry routingTable[MAX_NODES];
-    int neighborTable[MAX_NODES]; // 1 indicates a neighbor, 0 otherwise
+
+
 
 
     // Set up the UNIX domain socket
