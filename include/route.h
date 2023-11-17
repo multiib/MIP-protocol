@@ -34,7 +34,7 @@ void updateRoutingTable(int sourceMIP, RoutingEntry receivedTable[MAX_NODES]);
 
 void handleHelloMessage(int MIPgreeter);
 
-void sendRoutingUpdate(int socket_fd, int localMIP)
+void sendRoutingUpdate(int socket_fd, int localMIP);
 
 void receiveAndUpdateRoutingTable(uint8_t *updateMessage, int messageLength);
 
