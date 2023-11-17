@@ -27,11 +27,11 @@ void initializeRoutingTable(RoutingEntry* table, int size) {
 }
 
 
-RoutingEntry lookupRoutingEntry(int mipAddress, RoutingEntry* routingTable) {
+struct RoutingEntry lookupRoutingEntry(int mipAddress, struct RoutingEntry* routingTable) {
     if (mipAddress >= 0 && mipAddress < MAX_NODES) {
         return routingTable[mipAddress];
     } else {
-        RoutingEntry invalidEntry = {mipAddress, -1, INFINITY};
+        struct RoutingEntry invalidEntry = {mipAddress, -1, INFINITY};
         return invalidEntry;
     }
 }

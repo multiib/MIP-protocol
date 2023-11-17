@@ -25,7 +25,7 @@ struct ping_data {
     char   msg[512];
 };
 
-struct  forward_data{
+struct forward_data{
     uint8_t next_hop_MIP;       // Next hop MIP address
     uint8_t ttl;                // Time To Live
     uint8_t sdu_type;           // Service Data Unit type

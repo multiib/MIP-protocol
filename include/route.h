@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 #include <unistd.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h>
+
 #include <linux/if_packet.h>
 
 #include "ether.h"
@@ -13,22 +18,25 @@
 #define MAX_NODES 52 // Maximum number of nodes in the network
 #define TIMEOUT_INTERVAL 30 // Seconds
 
-typedef struct {
+
+struct RoutingEntry {
     int destination;
     int next_hop;
     int distance;
-} RoutingEntry;
+};
 
-typedef struct {
+struct NeighborStatus {
     time_t lastHelloReceived;
     int isReachable;
-} NeighborStatus;
+};
 
-void initializeRoutingTable(RoutingEntry *table, int size);
 
-RoutingEntry lookupRoutingEntry(int mipAddress);
 
-void updateRoutingTable(int sourceMIP, RoutingEntry receivedTable[MAX_NODES]);
+void initializeRoutingTable(struct RoutingEntry *table, int size);
+
+struct RoutingEntry lookupRoutingEntry(int mipAddress, struct RoutingEntry *routingTable);
+
+void updateRoutingTable(int sourceMIP, struct RoutingEntry receivedTable[MAX_NODES]);
 
 
 
@@ -41,6 +49,7 @@ void receiveAndUpdateRoutingTable(uint8_t *updateMessage, int messageLength);
 void sendHelloMessage(int socket_fd, uint8_t MIP_addr);
 
 void handleIncomingMessages(int socket_fd);
+void checkForNeighborTimeouts(int socket_fd, int localMIP);
 
 
 #endif

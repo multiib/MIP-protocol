@@ -90,7 +90,7 @@ void *sendMessagesThread(void *arg) {
     while (1) {
         sendHelloMessage(socket_fd, localMIP);
         if (routingTableHasChanged) {
-            sendRoutingUpdate(socket_fd, routingTable);
+            sendRoutingUpdate(socket_fd, localMIP);
             routingTableHasChanged = 0;
         }
         checkForNeighborTimeouts(socket_fd, localMIP);
