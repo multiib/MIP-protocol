@@ -122,6 +122,14 @@ int main(int argc, char *argv[]) {
                 printf("Routing daemon connected\n\n"); //TODO: Remove
                 printf("Local MIP address: %u\n", local_mip_addr); //TODO: Remove
 
+
+
+                rc = add_to_epoll_table(epoll_fd, route_fd);
+                if (rc == -1) {
+                    perror("add_to_epoll_table");
+                    exit(EXIT_FAILURE);
+                }
+
                 // Send local MIP address to routing daemon
                 rc = write(route_fd, &local_mip_addr, 1);
                 if (rc == -1) {
@@ -136,6 +144,12 @@ int main(int argc, char *argv[]) {
                     perror("accept");
                     exit(EXIT_FAILURE);
                 }
+
+                rc = add_to_epoll_table(epoll_fd, app_fd);
+                if (rc == -1) {
+                    perror("add_to_epoll_table");
+                    exit(EXIT_FAILURE);
+                }
             }
 
 
@@ -143,12 +157,8 @@ int main(int argc, char *argv[]) {
                 printf("Application connected\n\n");
             }
 
-            // Add new application connection to epoll instance
-            rc = add_to_epoll_table(epoll_fd, app_fd);
-            if (rc == -1) {
-                perror("add_to_epoll_table");
-                exit(EXIT_FAILURE);
-            }
+
+
 
 
         // INCOMING MIP TRAFFIC
