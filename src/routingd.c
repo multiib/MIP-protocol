@@ -21,9 +21,9 @@
 #define HELLO_INTERVAL 10    // Interval in seconds for sending hello messages
 #define TIMEOUT_INTERVAL 30  // Seconds
 
-NeighborStatus neighborStatus[MAX_NODES];
+struct NeighborStatus neighborStatus[MAX_NODES];
 uint8_t localMIP;  // Global variable for local MIP
-RoutingEntry routingTable[MAX_NODES];
+struct RoutingEntry routingTable[MAX_NODES];
 int routingTableHasChanged = 0;  // Global flag for routing table change
 int neighborTable[MAX_NODES];     // 1 indicates a neighbor, 0 otherwise
 
