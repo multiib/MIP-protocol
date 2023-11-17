@@ -28,7 +28,7 @@ void initializeRoutingTable(struct RoutingEntry* table, int size) {
 }
 
 
-struct RoutingEntry lookupRoutingEntry(int mipAddress) {
+struct RoutingEntry lookupRoutingEntry(int mipAddress, struct RoutingEntry* routingTable) {
     if (mipAddress >= 0 && mipAddress < MAX_NODES) {
         return routingTable[mipAddress];
     } else {
