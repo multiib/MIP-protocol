@@ -50,6 +50,6 @@ void sendHelloMessage(int socket_fd, uint8_t MIP_addr);
 
 void handleIncomingMessages(int socket_fd);
 void checkForNeighborTimeouts(int socket_fd, int localMIP);
-void handleRequestMessage(int socket_fd, uint8_t *requestMessage, int messageLength)
+void handleRequestMessage(int socket_fd, uint8_t *requestMessage, int messageLength);
 
 #endif
