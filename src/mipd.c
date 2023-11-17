@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     printf("Debug mode: %d\n", debug_mode); //TODO: Remove
     printf("Socket upper: %s\n", socket_upper); //TODO: Remove
     printf("MIP address: %u\n", local_mip_addr); //TODO: Remove
-    
+
 
     // SET UP NETWORKING UTILITIES
     // Create epoll instance
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
             printf("routing_fd: %d\n", route_fd);
             if (route_fd == -1){
                 route_fd = accept(listening_fd, NULL, NULL);
-                if (app_fd == -1) {
+                if (route_fd == -1) {
                     perror("accept");
                     exit(EXIT_FAILURE);
                 }
