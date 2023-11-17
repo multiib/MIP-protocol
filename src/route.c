@@ -17,8 +17,9 @@
 #include "pdu.h"
 #include "mip.h"
 
+extern int neighborTable[];
 
-void initializeRoutingTable(RoutingEntry* table, int size) {
+void initializeRoutingTable(struct RoutingEntry* table, int size) {
     for (int i = 0; i < size; i++) {
         table[i].destination = i; // MIP address as the destination
         table[i].next_hop = -1;    // -1 indicates unknown next hop
@@ -36,7 +37,7 @@ struct RoutingEntry lookupRoutingEntry(int mipAddress, struct RoutingEntry* rout
     }
 }
 
-void updateRoutingTable(int sourceMIP, RoutingEntry receivedTable[MAX_NODES]) {
+void updateRoutingTable(int sourceMIP, struct RoutingEntry receivedTable[MAX_NODES]) {
     for (int i = 0; i < MAX_NODES; i++) {
         int newDistance = receivedTable[i].distance + lookupRoutingEntry(sourceMIP).distance;
         if (newDistance < routingTable[i].distance) {
@@ -192,7 +193,7 @@ void handleRequestMessage(int socket_fd, uint8_t *requestMessage, int messageLen
 
 int getNextHopMIP(int destinationMIP) {
     if (destinationMIP >= 0 && destinationMIP < MAX_NODES) {
-        RoutingEntry entry = lookupRoutingEntry(destinationMIP);
+        struct RoutingEntry entry = lookupRoutingEntry(destinationMIP);
         if (entry.distance != INFINITY) {
             return entry.next_hop;  // Return the next hop for the destination
         }
