@@ -27,7 +27,7 @@ void initializeRoutingTable(RoutingEntry* table, int size) {
 }
 
 
-RoutingEntry lookupRoutingEntry(int mipAddress) {
+RoutingEntry lookupRoutingEntry(int mipAddress, RoutingEntry* routingTable) {
     if (mipAddress >= 0 && mipAddress < MAX_NODES) {
         return routingTable[mipAddress];
     } else {

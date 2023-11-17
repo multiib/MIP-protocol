@@ -84,5 +84,7 @@ void decode_fill_ping_buf(const char *buf, size_t buf_size, char *destination_ho
 char* uint32ArrayToString(uint32_t* arr);
 uint8_t routing_lookup(uint8_t host_mip_addr, int *route_fd);
 void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip_addr, int debug_mode);
-void fill_forward_data(forward_data_t *forward_data, uint8_t *next_hop_MIP, pdu *pdu, int *waiting_to_forward);
+void fill_forward_data(struct forward_data *forward_data, uint8_t next_hop_MIP, struct pdu *pdu, int *waiting_to_forward);
+void clear_forward_data(struct forward_data *forward_data, int *waiting_to_forward);
+
 #endif

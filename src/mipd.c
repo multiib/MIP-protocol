@@ -50,10 +50,6 @@ int main(int argc, char *argv[]) {
     int route_fd = -1; // File descriptor for routing daemon
     int app_fd   = -1; // File descriptor for application
 
-    // Queue for storing packets while waiting for ARP reply
-    packet_queue_t packet_queue;
-    init_queue(&packet_queue);
-
 
 
     // PARSE ARGUMENTS FROM CLI
@@ -166,7 +162,7 @@ int main(int argc, char *argv[]) {
                     printf("Packet not for us\n");
                 }
                 
-                uint8_t *next_hop_MIP = routing_lookup(pdu->miphdr->dst, &route_fd);
+                uint8_t next_hop_MIP = routing_lookup(pdu->miphdr->dst, &route_fd);
 
                 // If next hop exists, forward packet
                 if (next_hop_MIP != 255){
@@ -179,7 +175,7 @@ int main(int argc, char *argv[]) {
                         if (next_hop_MAC) {
                             // Known MAC address, forward the packet
                             uint8_t interface = arp_lookup_interface(*next_hop_MIP);
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, next_hop_MAC, ifs.local_mip_addr, *next_hop_MIP, pdu->miphdr->ttl, pdu->sdu_type, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, next_hop_MAC, ifs.local_mip_addr, *next_hop_MIP, pdu->miphdr->ttl, pdu->miphdr->sdu_type, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
                         } else {
                             // Unknown MAC address, send ARP request
 
@@ -309,7 +305,7 @@ int main(int argc, char *argv[]) {
 
 
                             send_mip_packet(&ifs, ifs.addr[recv_interface].sll_addr, next_hop_MAC, ifs.local_mip_addr, waiting_next_hop_MIP, set_ttl, forward_data.sdu_type, forward_data.sdu, forward_data.sdu_len*sizeof(uint32_t));
-                            clear_forward_data(&forward_data), &waiting_to_forward;
+                            clear_forward_data(&forward_data, &waiting_to_forward);
                         }
 
 
