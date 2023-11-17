@@ -28,7 +28,7 @@ void initializeRoutingTable(struct RoutingEntry* table, int size) {
 }
 
 
-struct RoutingEntry lookupRoutingEntry(int mipAddress, struct RoutingEntry* routingTable) {
+struct RoutingEntry lookupRoutingEntry(int mipAddress) {
     if (mipAddress >= 0 && mipAddress < MAX_NODES) {
         return routingTable[mipAddress];
     } else {
@@ -39,7 +39,7 @@ struct RoutingEntry lookupRoutingEntry(int mipAddress, struct RoutingEntry* rout
 
 void updateRoutingTable(int sourceMIP, struct RoutingEntry receivedTable[MAX_NODES]) {
     for (int i = 0; i < MAX_NODES; i++) {
-        int newDistance = receivedTable[i].distance + lookupRoutingEntry(sourceMIP).distance;
+        int newDistance = receivedTable[i].distance + lookupRoutingEntry(sourceMIP, receivedTable).distance;
         if (newDistance < routingTable[i].distance) {
             routingTable[i].distance = newDistance;
             routingTable[i].next_hop = sourceMIP;
@@ -92,7 +92,7 @@ void sendRoutingUpdate(int socket_fd, int localMIP) {
 }
 
 
-void handleUpdateMessage(uint8_t *updateMessage, int messageLength, int localMIP) {
+void handleUpdateMessage(uint8_t *updateMessage, int messageLength) {
     if (messageLength < 4) { // Check for minimum length (header + at least one entry)
         printf("Invalid update message length.\n");
         return;
@@ -122,9 +122,9 @@ void handleUpdateMessage(uint8_t *updateMessage, int messageLength, int localMIP
 }
 
 
-void sendHelloMessage(int socket_fd, uint8_t MIP_addr) {
+void sendHelloMessage(int socket_fd) {
     uint8_t helloMessage[] = {
-        MIP_addr, // MIP address
+        localMIP, // MIP address
         0x00,           // TTL set to zero
         0x48,           // ASCII for 'H'
         0x45,           // ASCII for 'E'
@@ -163,7 +163,7 @@ void handleIncomingMessages(int socket_fd) {
 
 }
 
-void checkForNeighborTimeouts(int socket_fd, int localMIP) {
+void checkForNeighborTimeouts(int socket_fd) {
     time_t currentTime = time(NULL);
     for (int i = 0; i < MAX_NODES; i++) {
         if (neighborTable[i] && (currentTime - neighborStatus[i].lastHelloReceived > TIMEOUT_INTERVAL)) {

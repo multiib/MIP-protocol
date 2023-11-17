@@ -38,7 +38,7 @@ extern int routingTableHasChanged;
 
 void initializeRoutingTable(struct RoutingEntry *table, int size);
 
-struct RoutingEntry lookupRoutingEntry(int mipAddress, struct RoutingEntry *routingTable);
+struct RoutingEntry lookupRoutingEntry(int mipAddress);
 
 void updateRoutingTable(int sourceMIP, struct RoutingEntry receivedTable[MAX_NODES]);
 
@@ -50,10 +50,12 @@ void sendRoutingUpdate(int socket_fd, int localMIP);
 
 
 
-void sendHelloMessage(int socket_fd, uint8_t MIP_addr);
+void sendHelloMessage(int socket_fd);
 
 void handleIncomingMessages(int socket_fd);
-void checkForNeighborTimeouts(int socket_fd, int localMIP);
+void checkForNeighborTimeouts(int socket_fd);
 void handleRequestMessage(int socket_fd, uint8_t *requestMessage, int messageLength);
+void handleUpdateMessage(uint8_t *updateMessage, int messageLength);
+void sendResponseMessage(int socket_fd, int destinationMIP, int next_hop);
 
 #endif
