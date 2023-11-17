@@ -193,7 +193,7 @@ void handleRequestMessage(int socket_fd, uint8_t *requestMessage, int messageLen
 
 int getNextHopMIP(int destinationMIP) {
     if (destinationMIP >= 0 && destinationMIP < MAX_NODES) {
-        struct RoutingEntry entry = lookupRoutingEntry(destinationMIP);
+        struct RoutingEntry entry = lookupRoutingEntry(destinationMIP, routingTable);
         if (entry.distance != INFINITY) {
             return entry.next_hop;  // Return the next hop for the destination
         }
