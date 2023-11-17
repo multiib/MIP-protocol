@@ -108,6 +108,7 @@ int main(int argc, char *argv[]) {
             
             // Accept new connection
             // We assume that the routing daemon always connects first for now
+            printf("routing_fd: %d\n", route_fd);
             if (route_fd == -1){
                 route_fd = accept(listening_fd, NULL, NULL);
                 if (app_fd == -1) {
