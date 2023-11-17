@@ -55,7 +55,10 @@ int main(int argc, char *argv[]) {
     // PARSE ARGUMENTS FROM CLI
     parse_arguments(argc, argv, &debug_mode, &socket_upper, &local_mip_addr);
 
-
+    printf("Debug mode: %d\n", debug_mode); //TODO: Remove
+    printf("Socket upper: %s\n", socket_upper); //TODO: Remove
+    printf("MIP address: %u\n", local_mip_addr); //TODO: Remove
+    
 
     // SET UP NETWORKING UTILITIES
     // Create epoll instance
@@ -77,7 +80,7 @@ int main(int argc, char *argv[]) {
 
     // Create UNIX listening socket for application traffic
     listening_fd = create_unix_sock(socket_upper);
-
+    printf("Listening on %s\n", socket_upper); //TODO: Remove
     // Add RAW socket to epoll instance
     rc = add_to_epoll_table(epoll_fd, raw_fd);
     if (rc == -1) {
