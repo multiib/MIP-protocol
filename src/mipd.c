@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
 
 
                             fill_forward_data(&forward_data, next_hop_MIP, pdu, &waiting_to_forward);
-                            send_arp_request_to_all_interfaces(&ifs, *next_hop_MIP, debug_mode);
+                            send_arp_request_to_all_interfaces(&ifs, next_hop_MIP, debug_mode);
                         }
 
                 } else if (debug_mode){
