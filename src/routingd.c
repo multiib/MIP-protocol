@@ -8,7 +8,7 @@
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#include <sys/un.h>		/* definitions for UNIX domain sockets */
+#include <sys/un.h>      /* definitions for UNIX domain sockets */
 
 #include "arp.h"
 #include "ether.h"
@@ -18,49 +18,32 @@
 #include "ipc.h"
 #include "route.h"
 
-
 #define HELLO_INTERVAL 10    // Interval in seconds for sending hello messages
-#define TIMEOUT_INTERVAL 30 // Seconds
-
-
+#define TIMEOUT_INTERVAL 30  // Seconds
 
 NeighborStatus neighborStatus[MAX_NODES];
-
-
-uint8_t localMIP;  // Declare this as a global variable
-
+uint8_t localMIP;  // Global variable for local MIP
 RoutingEntry routingTable[MAX_NODES];
+int routingTableHasChanged = 0;  // Global flag for routing table change
+int neighborTable[MAX_NODES];     // 1 indicates a neighbor, 0 otherwise
 
-int routingTableHasChanged = 0; // Global flag for routing table chan
-
-int neighborTable[MAX_NODES]; // 1 indicates a neighbor, 0 otherwise
-
-
-// Declaration of the parse_arguments function
+// Function prototypes
+void *sendMessagesThread(void *arg);
+void *receiveMessagesThread(void *arg);
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_lower);
-
-
 
 int main(int argc, char *argv[]) {
     int debug_mode = 0;
     char *socket_lower = NULL;
-
     parse_arguments(argc, argv, &debug_mode, &socket_lower);
-
-
-
-
 
     // Set up the UNIX domain socket
     int sd, rc;
-
-
-
     struct sockaddr_un addr;
     sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (sd < 0) {
-            perror("socket");
-            exit(EXIT_FAILURE);
+        perror("socket");
+        exit(EXIT_FAILURE);
     }
 
     memset(&addr, 0, sizeof(addr));
@@ -68,17 +51,15 @@ int main(int argc, char *argv[]) {
     strncpy(addr.sun_path, socket_lower, sizeof(addr.sun_path) - 1);
 
     rc = connect(sd, (struct sockaddr *)&addr, sizeof(addr));
-    if ( rc < 0) {
-            perror("connect");
-            close(sd);
-            exit(EXIT_FAILURE);
+    if (rc < 0) {
+        perror("connect");
+        close(sd);
+        exit(EXIT_FAILURE);
     }
 
     printf("Connected to %s\n", socket_lower);
 
-
     // Read the MIP address from the socket
-    uint8_t localMIP;
     if (read(sd, &localMIP, 1) < 0) {
         perror("read");
         close(sd);
@@ -126,8 +107,6 @@ void *receiveMessagesThread(void *arg) {
     return NULL;
 }
 
-// Implementation for sendHelloMessage, handleIncomingMessages, sendRoutingUpdate...
-
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_lower) {
     int opt;
     *debug_mode = 0;
@@ -147,3 +126,4 @@ void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_lowe
         }
     }
 }
+
