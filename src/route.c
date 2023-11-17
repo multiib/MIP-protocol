@@ -17,7 +17,7 @@
 #include "pdu.h"
 #include "mip.h"
 
-extern int neighborTable[];
+extern int neighborTable[MAX_NODES];
 
 void initializeRoutingTable(struct RoutingEntry* table, int size) {
     for (int i = 0; i < size; i++) {
