@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     struct forward_data forward_data; // Struct for storing data to be forwarded while waiting for ARP reply
     
     uint8_t set_ttl = 15; //TODO: Implement user specified TTL
-    uint8_t set_ttl_broadcast = 1;
+
 
     uint8_t mip_return = 0; // Used to store MIP adresses while talking to ping_server
     uint8_t ttl_return;     // Used to store TTL while talking to ping_server
@@ -167,15 +167,15 @@ int main(int argc, char *argv[]) {
                 // If next hop exists, forward packet
                 if (next_hop_MIP != 255){
                     if (debug_mode){
-                        printf("Forwarding packet to MIP: %u\n", *next_hop_MIP);
+                        printf("Forwarding packet to MIP: %u\n", next_hop_MIP);
                     }
                         // Get MAC address of next hop MIP
-                        uint8_t *next_hop_MAC = arp_lookup(*next_hop_MIP);
+                        uint8_t *next_hop_MAC = arp_lookup(next_hop_MIP);
 
                         if (next_hop_MAC) {
                             // Known MAC address, forward the packet
-                            uint8_t interface = arp_lookup_interface(*next_hop_MIP);
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, next_hop_MAC, ifs.local_mip_addr, *next_hop_MIP, pdu->miphdr->ttl, pdu->miphdr->sdu_type, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
+                            uint8_t interface = arp_lookup_interface(next_hop_MIP);
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, next_hop_MAC, ifs.local_mip_addr, next_hop_MIP, pdu->miphdr->ttl, pdu->miphdr->sdu_type, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
                         } else {
                             // Unknown MAC address, send ARP request
 
