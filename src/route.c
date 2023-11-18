@@ -59,7 +59,7 @@ void checkForNeighborTimeouts() {
             routingTable[i].distance = INFINITY;
             
             // Send routing update
-            sendRoutingUpdate();
+            sendUpdateMessage();
         }
     }
 }
