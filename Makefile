@@ -33,7 +33,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Rule for making mipd executable
-mipd: $(OBJ_DIR)/mipd.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o
+mipd: $(OBJ_DIR)/mipd.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o $(OBJ_DIR)/route.o
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for making ping_client executable
@@ -46,7 +46,7 @@ ping_server: $(OBJ_DIR)/ping_server.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_
 
 
 # Rule for making routingd executable
-routingd: $(OBJ_DIR)/routingd.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/route.o
+routingd: $(OBJ_DIR)/routingd.o $(OBJ_DIR)/utils.o $(OBJ_DIR)/pdu.o $(OBJ_DIR)/ipc.o $(OBJ_DIR)/arp.o $(OBJ_DIR)/route.o 
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Rule for cleaning the project

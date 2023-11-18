@@ -167,6 +167,10 @@ void handleIncomingMessages() {
 
 }
 
+
+
+
+// ROUTING MESSAGE SENDING FUNCTIONS //
 void sendHelloMessage() {
     uint8_t helloMessage[] = {
         localMIP, // MIP address
@@ -183,10 +187,6 @@ void sendHelloMessage() {
         printf("Hello message sent.\n");
     }
 }
-
-
-// ROUTING MESSAGE SENDING FUNCTIONS //
-
 void sendUpdatemessage() {
     uint8_t updateMessage[3 * MAX_NODES + 5]; // Header + 5 bytes for each entry
     updateMessage[0] = localMIP; // MIP address of the sender
@@ -235,7 +235,7 @@ void sendResponseMessage(int next_hop) {
 
 
 
-?
+
 // M -> R
 void sendRequestMessage(int destinationMIP) {
     uint8_t requestMessage[] = {
