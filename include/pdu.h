@@ -67,7 +67,7 @@ int is_queue_empty(struct pdu_queue *queue);
 void enqueue(struct pdu_queue *queue, struct pdu *packet);
 struct pdu * dequeue(struct pdu_queue *queue);
 void clear_ping_data(struct ping_data *data);
-void forward_pdu(int fd, struct pdu *pdu, struct pdu_queue *pdu_queue);
+
 
 
 #endif /* _PDU_H_ */
