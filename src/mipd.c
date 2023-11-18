@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
                     printf("Packet not for us\n");
                 }
                 
-                forward_pdu(pdu, &queue);
+                // forward_pdu(pdu, &queue);
                 
             } else {
                 if (debug_mode){
