@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     // Set up the UNIX domain socket
     int rc;
     struct sockaddr_un addr;
-    route_fd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    int route_fd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
     if (route_fd < 0) {
         perror("socket");
         exit(EXIT_FAILURE);
@@ -99,12 +99,12 @@ int main(int argc, char *argv[]) {
 void *sendMessagesThread(void *arg) {
     int route_fd = *((int *)arg);
     while (1) {
-        sendHelloFromApp(socket_fd);
+        sendHelloFromApp(route_fd);
         if (routingTableHasChanged) {
-            sendUpdateMessage();
+            sendUpdateFromApp(route_fd);
             routingTableHasChanged = 0;
         }
-        checkForNeighborTimeouts();
+        checkForNeighborTimeouts(route_fd);
         sleep(HELLO_INTERVAL);
     }
     return NULL;
