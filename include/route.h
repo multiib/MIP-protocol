@@ -54,7 +54,7 @@ void sendHelloFromApp(int route_fd);
 
 void handleIncomingMessages();
 void checkForNeighborTimeouts();
-void handleRequestMessage(uint8_t *requestMessage, int messageLength);
+void handleRequestMessage(int route_fd, uint8_t *requestMessage, int messageLength);
 void handleUpdateMessage(uint8_t *updateMessage, int messageLength);
 void sendResponseFromApp(int route_fd, int next_hop);
 

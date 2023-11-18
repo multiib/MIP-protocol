@@ -122,7 +122,7 @@ void handleUpdateMessage(uint8_t *updateMessage, int messageLength) {
     }
 }
 
-void handleRequestMessage(uint8_t *requestMessage, int messageLength) {
+void handleRequestMessage(int route_fd, uint8_t *requestMessage, int messageLength) {
     if (messageLength < 9) { // Check for minimum length (header + at least one entry)
         printf("Invalid request message length.\n");
         return;
@@ -132,7 +132,7 @@ void handleRequestMessage(uint8_t *requestMessage, int messageLength) {
     // Assuming requestMessage[2], requestMessage[3], and requestMessage[4] are 'R', 'E', 'Q'
     
     uint8_t next_hop = getNextHopMIP(destinationMIP);
-    sendResponseMessage(next_hop);
+    sendResponseFromApp(route_fd, next_hop);
 }
 
 void handleIncomingMessages() {
