@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
                             // Unknown MAC address, send ARP request
 
 
-                            fill_forward_data(&forward_data, next_hop_MIP, pdu, &waiting_to_forward, );
+                            fill_forward_data(&forward_data, next_hop_MIP, pdu, &waiting_to_forward);
                             waiting_next_hop_MIP = next_hop_MIP;
                             send_arp_request_to_all_interfaces(&ifs, next_hop_MIP, debug_mode);
                         }
