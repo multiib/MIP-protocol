@@ -17,9 +17,9 @@
 #include "ipc.h"
 #include "route.h"
 
-int raw_fd; // File descriptor for UNIX socket
-int app_fd; // File descriptor for application socket
-int route_fd; // File descriptor for routing daemon socket
+int raw_fd   = -1; // File descriptor for UNIX socket
+int app_fd   = -1; // File descriptor for application socket
+int route_fd = -1; // File descriptor for routing daemon socket
 
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *mip_addr);
 
