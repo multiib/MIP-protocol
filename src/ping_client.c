@@ -57,6 +57,16 @@ int main(int argc, char *argv[]) {
             perror("connect");
             close(sd);
             exit(EXIT_FAILURE);
+
+    }
+
+    // Write identifier to socket
+    uint8_t identifier = 0x01;
+    rc = write(sd, &identifier, 1);
+    if (rc < 0) {
+        perror("write");
+        close(sd);
+        exit(EXIT_FAILURE);
     }
     
     printf("Connected to %s\n", socket_lower);

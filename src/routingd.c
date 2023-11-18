@@ -27,6 +27,8 @@ struct RoutingEntry routingTable[MAX_NODES];
 int routingTableHasChanged = 0;  // Global flag for routing table change
 int neighborTable[MAX_NODES];     // 1 indicates a neighbor, 0 otherwise
 
+int route_fd; // File descriptor for routing daemon socket
+
 // Function prototypes
 void *sendMessagesThread(void *arg);
 void *receiveMessagesThread(void *arg);
@@ -38,10 +40,10 @@ int main(int argc, char *argv[]) {
     parse_arguments(argc, argv, &debug_mode, &socket_lower);
 
     // Set up the UNIX domain socket
-    int sd, rc;
+    int rc;
     struct sockaddr_un addr;
-    sd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
-    if (sd < 0) {
+    route_fd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
+    if (route_fd < 0) {
         perror("socket");
         exit(EXIT_FAILURE);
     }
@@ -50,19 +52,29 @@ int main(int argc, char *argv[]) {
     addr.sun_family = AF_UNIX;
     strncpy(addr.sun_path, socket_lower, sizeof(addr.sun_path) - 1);
 
-    rc = connect(sd, (struct sockaddr *)&addr, sizeof(addr));
+    rc = connect(route_fd, (struct sockaddr *)&addr, sizeof(addr));
     if (rc < 0) {
         perror("connect");
-        close(sd);
+        close(route_fd);
         exit(EXIT_FAILURE);
     }
+
+    // Write identifier to socket
+    uint8_t identifier = 0x02;
+    rc = write(route_fd, &identifier, 1);
+    if (rc < 0) {
+        perror("write");
+        close(route_fd);
+        exit(EXIT_FAILURE);
+    }
+    
 
     printf("Connected to %s\n", socket_lower);
 
     // Read the MIP address from the socket
-    if (read(sd, &localMIP, 1) < 0) {
+    if (read(route_fd, &localMIP, 1) < 0) {
         perror("read");
-        close(sd);
+        close(route_fd);
         exit(EXIT_FAILURE);
     }
     printf("Received MIP address: %u\n", localMIP);
@@ -70,10 +82,10 @@ int main(int argc, char *argv[]) {
     pthread_t send_thread, receive_thread;
 
     // Create threads
-    if (pthread_create(&send_thread, NULL, sendMessagesThread, &sd) != 0 ||
-        pthread_create(&receive_thread, NULL, receiveMessagesThread, &sd) != 0) {
+    if (pthread_create(&send_thread, NULL, sendMessagesThread, &route_fd) != 0 ||
+        pthread_create(&receive_thread, NULL, receiveMessagesThread, &route_fd) != 0) {
         perror("pthread_create");
-        close(sd);
+        close(route_fd);
         exit(EXIT_FAILURE);
     }
 
@@ -81,7 +93,7 @@ int main(int argc, char *argv[]) {
     pthread_join(send_thread, NULL);
     pthread_join(receive_thread, NULL);
 
-    close(sd);
+    close(route_fd);
     return 0;
 }
 

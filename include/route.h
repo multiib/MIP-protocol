@@ -46,18 +46,21 @@ void updateRoutingTable(int sourceMIP, struct RoutingEntry receivedTable[MAX_NOD
 
 void handleHelloMessage(int MIPgreeter);
 
-void sendRoutingUpdate(int socket_fd);
+void sendUpdateMessage();
 
 
 
-void sendHelloMessage(int socket_fd);
+void sendHelloMessage();
 
-void handleIncomingMessages(int socket_fd);
-void checkForNeighborTimeouts(int socket_fd);
-void handleRequestMessage(int socket_fd, uint8_t *requestMessage, int messageLength);
+void handleIncomingMessages();
+void checkForNeighborTimeouts();
+void handleRequestMessage(uint8_t *requestMessage, int messageLength);
 void handleUpdateMessage(uint8_t *updateMessage, int messageLength);
-void sendResponseMessage(int socket_fd, int destinationMIP, int next_hop);
+void sendResponseMessage(int next_hop);
 
 int getNextHopMIP(int destinationMIP);
+
+void sendResponseMessage(int next_hop);
+void sendRequestMessage(int destinationMIP);
 
 #endif

@@ -7,6 +7,7 @@
 #include <linux/if_packet.h>
 #include <net/ethernet.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 
 #include "arp.h"
 #include "ether.h"
@@ -14,8 +15,11 @@
 #include "utils.h"
 #include "mip.h"
 #include "ipc.h"
+#include "route.h"
 
-
+int raw_fd; // File descriptor for UNIX socket
+int app_fd; // File descriptor for application socket
+int route_fd; // File descriptor for routing daemon socket
 
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_upper, uint8_t *mip_addr);
 
@@ -47,8 +51,10 @@ int main(int argc, char *argv[]) {
 
     struct ifs_data ifs; // Interface data
 
-    int route_fd = -1; // File descriptor for routing daemon
-    int app_fd   = -1; // File descriptor for application
+    struct pdu_queue queue; // Queue for storing PDUs to be forwarded
+    initialize_queue(queue);
+
+
 
 
 
@@ -96,7 +102,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    // MAIN LOOP FOR HANDLING TRAFFIC FROM APPLICATION AND MIP
+    // MAIN LOOP FOR HANDLING TRAFFIC FROM APPLICATIONS AND MIP
     while(1) {
 
         // Wait for incoming events
@@ -110,19 +116,37 @@ int main(int argc, char *argv[]) {
         if (events->data.fd == listening_fd) {
             
             // Accept new connection
-            // We assume that the routing daemon always connects first for now
-            printf("routing_fd: %d\n", route_fd);
-            if (route_fd == -1){
-                route_fd = accept(listening_fd, NULL, NULL);
-                if (route_fd == -1) {
-                    perror("accept");
+            int unix_fd = accept(listening_fd, NULL, NULL);
+            if (unix_fd == -1) {
+                perror("accept");
+                exit(EXIT_FAILURE);
+            }
+            
+            // Read identifier from socket to determine type of application
+            uint8_t indentifier;
+            rc = read(unix_fd, &indentifier, 1);
+            if (rc == -1) {
+                perror("read");
+                exit(EXIT_FAILURE);
+            }
+
+            // Ping client/server connected
+            if (indentifier == 0x01) {
+
+                app_fd = unix_fd;
+
+                rc = add_to_epoll_table(epoll_fd, app_fd);
+                if (rc == -1) {
+                    perror("add_to_epoll_table");
                     exit(EXIT_FAILURE);
                 }
 
-                printf("Routing daemon connected\n\n"); //TODO: Remove
-                printf("Local MIP address: %u\n", local_mip_addr); //TODO: Remove
+                printf("Ping/pong client connected\n\n"); //TODO: Remove
 
+            // Routing daemon connected
+            } else if (indentifier == 0x02) {
 
+                route_fd = unix_fd;
 
                 rc = add_to_epoll_table(epoll_fd, route_fd);
                 if (rc == -1) {
@@ -136,28 +160,14 @@ int main(int argc, char *argv[]) {
                     perror("write");
                     exit(EXIT_FAILURE);
                 }
-                printf("Sent local MIP address to routing daemon\n\n"); //TODO: Remove
 
+                printf("Routing daemon connected\n\n"); //TODO: Remove
+            
             } else {
-                app_fd = accept(listening_fd, NULL, NULL);
-                if (app_fd == -1) {
-                    perror("accept");
-                    exit(EXIT_FAILURE);
-                }
-
-                rc = add_to_epoll_table(epoll_fd, app_fd);
-                if (rc == -1) {
-                    perror("add_to_epoll_table");
-                    exit(EXIT_FAILURE);
-                }
-
-                printf("App connected\n\n"); //TODO: Remove
+                printf("Unknown application connected\n\n"); //TODO: Remove
             }
 
 
-            if (debug_mode){
-                printf("Application connected\n\n");
-            }
 
 
 
@@ -173,7 +183,7 @@ int main(int argc, char *argv[]) {
             int recv_interface;
 
             // Handle incoming MIP packet and determine type of packet
-            MIP_handle type = handle_mip_packet(raw_fd, &ifs, pdu, &recv_interface);
+            MIP_handle type = handle_mip_packet(&ifs, pdu, &recv_interface);
 
             // Check if packet is for another MIP daemon, forward if it is
             if (local_mip_addr != pdu->miphdr->dst){
@@ -181,34 +191,7 @@ int main(int argc, char *argv[]) {
                     printf("Packet not for us\n");
                 }
                 
-                uint8_t next_hop_MIP = routing_lookup(pdu->miphdr->dst, &route_fd);
-
-                // If next hop exists, forward packet
-                if (next_hop_MIP != 255){
-                    if (debug_mode){
-                        printf("Forwarding packet to MIP: %u\n", next_hop_MIP);
-                    }
-                        // Get MAC address of next hop MIP
-                        uint8_t *next_hop_MAC = arp_lookup(next_hop_MIP);
-
-                        if (next_hop_MAC) {
-                            // Known MAC address, forward the packet
-                            uint8_t interface = arp_lookup_interface(next_hop_MIP);
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, next_hop_MAC, ifs.local_mip_addr, next_hop_MIP, pdu->miphdr->ttl, pdu->miphdr->sdu_type, pdu->sdu, pdu->miphdr->sdu_len*sizeof(uint32_t));
-                        } else {
-                            // Unknown MAC address, send ARP request
-
-
-                            fill_forward_data(&forward_data, next_hop_MIP, pdu, &waiting_to_forward);
-                            waiting_next_hop_MIP = next_hop_MIP;
-                            send_arp_request_to_all_interfaces(&ifs, next_hop_MIP, debug_mode);
-                        }
-
-                } else if (debug_mode){
-                    printf("No route to destination\n");
-                }
-
-
+                forward_pdu(pdu, queue);
                 
             } else {
                 if (debug_mode){
@@ -368,22 +351,9 @@ int main(int argc, char *argv[]) {
 
 
                     // RECIEVED MIP ROUTE HELLO FROM OTHER MIP DAEMON
-                    case MIP_ROUTE_HELLO:
-                        if (debug_mode){
-                            printf("\nReceived MIP_ROUTE_HELLO\n");
-                            print_pdu_content(pdu);
-                            printf("\n");
-                        }
+                    case MIP_ROUTE:
 
-                        break;
-
-                    // RECIEVED MIP ROUTE UPDATE FROM OTHER MIP DAEMON
-                    case MIP_ROUTE_UPDATE:
-                        if (debug_mode){
-                            printf("\nReceived MIP_ROUTE_UPDATE\n");
-                            print_pdu_content(pdu);
-                            printf("\n");
-                        }
+                        sendToRoutingDaemon();
 
                         break;
 
@@ -401,7 +371,7 @@ int main(int argc, char *argv[]) {
 
             printf("Received APP msg\n"); // TODO: Remove
             // Handle incoming application message and determine type of message
-            APP_handle type = handle_app_message(events->data.fd, &ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
+            APP_handle type = handle_app_message(app_fd, &ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
 
             switch (type){
 
@@ -504,15 +474,74 @@ int main(int argc, char *argv[]) {
             uint8_t msg [8192];
 
             ROUTE_handle type = handle_route_message(route_fd, msg);
+            uint8_t recieved_mip = msg[0];
 
             switch (type)
             {
             case ROUTE_HELLO:
                 printf("Received ROUTE_HELLO\n");
+
+                
+                // // Get MAC address of destination MIP and what ethernet interface it is on
+                // uint8_t *dst_mac_addr = arp_lookup(recieved_mip); //TODO: We assume we have the MAC address bc
+                // // we have recieved from the deamon we are about to send to
+                // uint8_t interface = arp_lookup_interface(recieved_mip);
+
+
+                // Create Broadcast MAC address
+                uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
+                // Create broadcast MIP address
+                uint8_t broadcast_mip_addr = 0xff;
+
+                // TODO: Look at this function name and more
+                uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
+                uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ifs->local_mip_addr);
+
+
+                // Send hello packet to all interfaces
+                for (int interface = 0; interface < ifs.ifn; interface++) {
+                    if (debug_mode) {
+                    // printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
+                    }
+                    send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                }
+
+            //int send_mip_packet(struct ifs_data *ifs,
+                        // uint8_t *src_mac_addr,
+                        // uint8_t *dst_mac_addr,
+                        // uint8_t src_mip_addr,
+                        // uint8_t dst_mip_addr,
+                        // uint8_t ttl,
+                        // uint8_t sdu_type,
+                        // const uint32_t *sdu,
+                        // uint16_t sdu_len)
+
                 break;
 
             case ROUTE_UPDATE:
                 printf("Received ROUTE_UPDATE\n");
+
+                // Create Broadcast MAC address
+                uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+
+                // Create broadcast MIP address
+                uint8_t broadcast_mip_addr = 0xff;
+
+                // TODO: Look at this function name and more
+                uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
+                uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ifs->local_mip_addr);
+
+
+                // Send hello packet to all interfaces
+                for (int interface = 0; interface < ifs.ifn; interface++) {
+                    if (debug_mode) {
+                    // printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
+                    }
+                    send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                }
+
+
                 break;
 
             case ROUTE_RESPONSE:
@@ -528,6 +557,8 @@ int main(int argc, char *argv[]) {
             printf("Received unknown event\n");
 
         }
+
+
     }
 
     // Close listening socket

@@ -26,6 +26,8 @@ struct ping_data {
     char   msg[512];
 };
 
+
+
 struct forward_data{
     uint8_t next_hop_MIP;       // Next hop MIP address
     uint8_t ttl;                // Time To Live
@@ -33,6 +35,18 @@ struct forward_data{
     uint32_t *sdu;              // Pointer to Service Data Unit array
     size_t sdu_len;             // Length of the SDU array
 };
+
+struct pdu_node {
+    struct pdu *packet;
+    struct pdu_node *next;
+};
+
+struct pdu_queue {
+    struct pdu_node *front;
+    struct pdu_node *rear;
+    int size;
+};
+
 
 struct pdu * alloc_pdu(void);
 void fill_pdu(struct pdu *pdu,
@@ -48,5 +62,12 @@ size_t mip_serialize_pdu(struct pdu *, uint8_t *);
 size_t mip_deserialize_pdu(struct pdu *, uint8_t *);
 void print_pdu_content(struct pdu *);
 void destroy_pdu(struct pdu *);
+void initialize_queue(struct pdu_queue *queue);
+int is_queue_empty(struct pdu_queue *queue);
+void enqueue(struct pdu_queue *queue, struct pdu *packet);
+struct pdu * dequeue(struct pdu_queue *queue);
+void clear_ping_data(struct ping_data *data);
+void forward_pdu(int fd, struct pdu *pdu, struct pdu_queue *pdu_queue);
+
 
 #endif /* _PDU_H_ */

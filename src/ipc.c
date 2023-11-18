@@ -46,3 +46,19 @@ int create_unix_sock(const char *socket_path)
     return sd;
 
 }
+
+int add_to_epoll_table(int efd, int fd)
+{
+        int rc = 0;
+
+        struct  epoll_event ev;
+        
+        ev.events = EPOLLIN;
+        ev.data.fd = fd;
+        if (epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ev) == -1) {
+                perror("epoll_ctl");
+                rc = -1;
+        }
+
+        return rc;
+}

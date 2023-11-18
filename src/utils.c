@@ -130,21 +130,7 @@ uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr) {
 }
 
 
-int add_to_epoll_table(int efd, int fd)
-{
-        int rc = 0;
 
-        struct  epoll_event ev;
-        
-        ev.events = EPOLLIN;
-        ev.data.fd = fd;
-        if (epoll_ctl(efd, EPOLL_CTL_ADD, fd, &ev) == -1) {
-                perror("epoll_ctl");
-                rc = -1;
-        }
-
-        return rc;
-}
 
 // Fill a buffer with a MIP ARP SDU
 void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message, const char *ttl) {
@@ -207,7 +193,7 @@ void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, con
  * the function returns -1.
  */
 
-MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, int *recv_ifs_index)
+MIP_handle handle_mip_packet(struct ifs_data *ifs, struct pdu *pdu, int *recv_ifs_index)
 {
     // Make sure pdu is not NULL
     if (pdu == NULL) {
@@ -259,16 +245,8 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
 
     // TODO: Fix type for ROUTE
     } else if (pdu->miphdr->sdu_type == SDU_TYPE_ROUTE) {
-        if (pdu->sdu[1] == 0x524F5554) {
-            mip_type = MIP_ROUTE_HELLO;
-        } else if (pdu->sdu[1] == 0x524F5555) {
-            mip_type = MIP_ROUTE_UPDATE;
-        } else {
-            if (debug_mode) {
-                printf("Error: Unknown ROUTE type\n");
-            }
-            return -1;
-        }
+            return MIP_ROUTE;
+
     } else {
         if (debug_mode) {
             printf("Error: Unknown SDU type\n");
@@ -304,7 +282,7 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
  * Returns the type of the received application message.
  */
 
-APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t *ttl)
+APP_handle handle_app_message(uint8_t *dst_mip_addr, char *msg, uint8_t *ttl)
 {
     int rc;
     APP_handle app_type;
@@ -317,7 +295,7 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t 
 
     printf("Handle app message 1\n");
     // Read message from application
-    rc = read(fd, buf, sizeof(buf));
+    rc = read(app_fd, buf, sizeof(buf));
     if (rc <= 0) {
         perror("read");
         exit(EXIT_FAILURE);
@@ -343,7 +321,7 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t 
 
     } else {
         perror("Unknown message type");
-        close(fd);
+        close(app_fd);
         exit(EXIT_FAILURE);
     }
     // Copy the rest of the buffer to msg
@@ -356,7 +334,7 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t 
 
 
 
-ROUTE_handle handle_route_message(int fd, uint8_t *buf)
+ROUTE_handle handle_route_message(uint8_t *buf)
 {
     int rc;
     ROUTE_handle route_type;
@@ -368,7 +346,7 @@ ROUTE_handle handle_route_message(int fd, uint8_t *buf)
     memset(buf, 0, 8192);
 
     // Read message from application
-    rc = read(fd, buf, 5000); // TODO: Create a better system for setting the buffer size
+    rc = read(route_fd, buf, 5000); // TODO: Create a better system for setting the buffer size
     if (rc <= 0) {
         perror("read");
         exit(EXIT_FAILURE);
@@ -389,7 +367,7 @@ ROUTE_handle handle_route_message(int fd, uint8_t *buf)
         route_type = ROUTE_RESPONSE;
     } else {
         perror("Unknown message type");
-        close(fd);
+        close(route_fd);
         exit(EXIT_FAILURE);
     }
 
@@ -624,45 +602,46 @@ char* uint32ArrayToString(uint32_t* arr) {
     return str - arr[0];
 }
 
-uint8_t routing_lookup(uint8_t host_mip_addr, int *route_fd) {
-    uint8_t next_hop;
+// TODO: remove
+// uint8_t routing_lookup(uint8_t host_mip_addr, int *route_fd) {
+//     uint8_t next_hop;
 
-    // Request message format
-    uint8_t request_msg[REQUEST_MSG_LEN] = {
-        host_mip_addr,
-        0x00, // TTL
-        0x52, // 'R'
-        0x45, // 'E'
-        0x51, // 'Q'
-        host_mip_addr // MIP address to look up
-    };
+//     // Request message format
+//     uint8_t request_msg[REQUEST_MSG_LEN] = {
+//         host_mip_addr,
+//         0x00, // TTL
+//         0x52, // 'R'
+//         0x45, // 'E'
+//         0x51, // 'Q'
+//         host_mip_addr // MIP address to look up
+//     };
 
-    // Send request to routing daemon
-    ssize_t sent_bytes = send(*route_fd, request_msg, REQUEST_MSG_LEN, 0);
-    if (sent_bytes < 0) {
-        perror("send");
-        return 0; // 0 could signify an error
-    }
+//     // Send request to routing daemon
+//     ssize_t sent_bytes = send(*route_fd, request_msg, REQUEST_MSG_LEN, 0);
+//     if (sent_bytes < 0) {
+//         perror("send");
+//         return 0; // 0 could signify an error
+//     }
 
-    // Receive response from routing daemon
-    uint8_t response_msg[RESPONSE_MSG_LEN];
-    ssize_t received_bytes = recv(*route_fd, response_msg, RESPONSE_MSG_LEN, 0);
-    if (received_bytes < 0) {
-        perror("recv");
-        return 0; // 0 could signify an error
-    }
+//     // Receive response from routing daemon
+//     uint8_t response_msg[RESPONSE_MSG_LEN];
+//     ssize_t received_bytes = recv(*route_fd, response_msg, RESPONSE_MSG_LEN, 0);
+//     if (received_bytes < 0) {
+//         perror("recv");
+//         return 0; // 0 could signify an error
+//     }
 
-    // Validate the response
-    if (received_bytes != RESPONSE_MSG_LEN || 
-        response_msg[2] != 0x52 || response_msg[3] != 0x53 || response_msg[4] != 0x50) {
-        fprintf(stderr, "Invalid response format.\n");
-        return 0; // 0 could signify an error
-    }
+//     // Validate the response
+//     if (received_bytes != RESPONSE_MSG_LEN || 
+//         response_msg[2] != 0x52 || response_msg[3] != 0x53 || response_msg[4] != 0x50) {
+//         fprintf(stderr, "Invalid response format.\n");
+//         return 0; // 0 could signify an error
+//     }
 
-    // Extract the next hop MIP address
-    next_hop = response_msg[5];
-    return next_hop;
-}
+//     // Extract the next hop MIP address
+//     next_hop = response_msg[5];
+//     return next_hop;
+// }
 
 // Function to send ARP request to all interfaces
 void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip_addr, int debug_mode) {
@@ -729,4 +708,31 @@ void clear_forward_data(struct forward_data *forward_data, int *waiting_to_forwa
     forward_data->ttl = 0;
     forward_data->sdu_type = 0;
     forward_data->sdu_len = 0;
+}
+
+// Send message to neighbours
+
+void send_message_to_neighbours(struct ifs_data *ifs, uint8_t *src_mac_addr, uint8_t *dst_mac_addr, uint8_t src_mip_addr, uint8_t dst_mip_addr, uint8_t ttl, uint8_t sdu_type, const uint32_t *sdu, uint16_t sdu_len, int debug_mode) {
+    // Send MIP packet to all interfaces
+    for (int interface = 0; interface < ifs->ifn; interface++) {
+        if (debug_mode) {
+            printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", dst_mip_addr, interface);
+        }
+        send_mip_packet(ifs, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
+    }
+}
+
+void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue) {
+
+
+    enqueue(&pdu_queue, pdu);
+
+    sendRequestMessage(pdu->sdu, pdu->miphdr->dst);
+
+
+
+}
+
+void sendToRoutingDaemon(void) {
+    printf("MADE")
 }

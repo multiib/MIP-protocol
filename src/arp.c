@@ -53,4 +53,20 @@ void arp_insert(uint8_t mip, uint8_t mac[6], int interface) {
     }
 }
 
+
+// Return number of entries in ARP cache
+int arp_count_entries() {
+    return arp_count;
+}
+
+// Get every mip address in the ARP cache
+uint8_t* arp_get_mip_addresses() {
+    uint8_t* mip_addresses = (uint8_t*)malloc(arp_count * sizeof(uint8_t));
+    for (int i = 0; i < arp_count; ++i) {
+        mip_addresses[i] = arp_cache[i].mip;
+    }
+    return mip_addresses;
+}
+
+
 // TODO: Create hash table for ARP cache

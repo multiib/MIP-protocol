@@ -43,6 +43,15 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
     }
 
+    // Write identifier to socket
+    uint8_t identifier = 0x01;
+    rc = write(sd, &identifier, 1);
+    if (rc < 0) {
+        perror("write");
+        close(sd);
+        exit(EXIT_FAILURE);
+    }
+    
 
     uint8_t localMIP;
     rc = read(sd, &localMIP, 1); // Read a single byte for the MIP address

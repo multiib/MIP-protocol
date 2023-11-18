@@ -10,6 +10,7 @@
 #include "pdu.h"
 #include "utils.h"
 #include "arp.h"
+#include "route.h"
 
 struct pdu * alloc_pdu(void) {
     struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));
@@ -198,3 +199,58 @@ void destroy_pdu(struct pdu *pdu)
 
 }
  
+
+void initialize_queue(struct pdu_queue *queue) {
+    queue->front = queue->rear = NULL;
+    queue->size = 0;
+}
+
+int is_queue_empty(struct pdu_queue *queue) {
+    return (queue->size == 0);
+}
+
+
+void enqueue(struct pdu_queue *queue, struct pdu *packet) {
+    struct pdu_node *newNode = (struct pdu_node *)malloc(sizeof(struct pdu_node));
+    newNode->packet = packet;
+    newNode->next = NULL;
+
+    if (queue->rear == NULL) {
+        queue->front = queue->rear = newNode;
+    } else {
+        queue->rear->next = newNode;
+        queue->rear = newNode;
+    }
+    queue->size++;
+}
+
+struct pdu* dequeue(struct pdu_queue *queue) {
+    if (is_queue_empty(queue)) {
+        return NULL;
+    }
+
+    struct pdu_node *temp = queue->front;
+    struct pdu *packet = temp->packet;
+
+    queue->front = queue->front->next;
+    if (queue->front == NULL) {
+        queue->rear = NULL;
+    }
+
+    free(temp);
+    queue->size--;
+
+    return packet;
+}
+
+struct pdu *find_packet_for_destination(struct pdu_queue *queue, uint32_t destination) {
+    struct pdu_node *current = queue->front;
+    while (current != NULL) {
+        if (current->packet->miphdr->dst == destination) {
+            return current->packet;
+        }
+        current = current->next;
+    }
+    return NULL;
+}
+
