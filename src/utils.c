@@ -306,6 +306,7 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t 
     // Clear buffer
     memset(buf, 0, sizeof(buf));
 
+
     // Read message from application
     rc = read(fd, buf, sizeof(buf));
     if (rc <= 0) {
@@ -315,10 +316,11 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t 
 
     // Set the destination_mip to the first byte of the buffer
     *dst_mip_addr = (uint8_t) buf[0];
+    *ttl = (uint8_t) buf[1];
 
 
     // Initialize an offset for the message
-    int offset = 1; // Skip the first byte (destination_mip)
+    int offset = 2; // Skip the first byte (destination_mip)
 
     // Set app_type
     if (strncmp(buf + offset, "PING:", 5) == 0) {

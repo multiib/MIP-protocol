@@ -150,6 +150,8 @@ int main(int argc, char *argv[]) {
                     perror("add_to_epoll_table");
                     exit(EXIT_FAILURE);
                 }
+
+                printf("App connected\n\n"); //TODO: Remove
             }
 
 
@@ -397,6 +399,7 @@ int main(int argc, char *argv[]) {
         // INCOMING APPLICATION TRAFFIC
         } else if (events->data.fd == app_fd){
 
+            printf("Received APP msg\n"); // TODO: Remove
             // Handle incoming application message and determine type of message
             APP_handle type = handle_app_message(events->data.fd, &ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
 
