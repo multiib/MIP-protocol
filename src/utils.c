@@ -283,7 +283,7 @@ MIP_handle handle_mip_packet(struct ifs_data *ifs, struct pdu *pdu, int *recv_if
  * Returns the type of the received application message.
  */
 
-APP_handle handle_app_message(uint8_t *dst_mip_addr, char *msg, uint8_t *ttl)
+APP_handle handle_app_message(int app_fd, uint8_t *dst_mip_addr, char *msg, uint8_t *ttl)
 {
     int rc;
     APP_handle app_type;
@@ -727,4 +727,38 @@ void send_message_to_neighbours(struct ifs_data *ifs, uint8_t *src_mac_addr, uin
 
 void sendToRoutingDaemon(void) {
     printf("MADE");
+}
+
+void MIP_send(struct ifaces ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int debug_mode) {
+    // Lookup the MAC address for the destination MIP address
+    uint8_t *mac_addr = arp_lookup(dst_mip_addr);
+
+    if (mac_addr) {
+        if (debug_mode) {
+            printf("We have the MAC address for MIP %u\n", dst_mip_addr);
+        }
+
+        uint8_t sdu_len;
+        uint32_t *sdu = stringToUint32Array(message, &sdu_len);
+
+        uint8_t *dst_mac_addr = arp_lookup(dst_mip_addr);
+        uint8_t interface = arp_lookup_interface(dst_mip_addr);
+
+        if (debug_mode) {
+            printf("Sending MIP_PING to MIP: %u\n", dst_mip_addr);
+        }
+
+        // Subtract 1 from TTL to account for the current node
+        ttl--;
+
+        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, dst_mip_addr, ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
+
+        free(sdu);
+    } else {
+        if (debug_mode) {
+            printf("MAC address for MIP %u not found in cache\n", dst_mip_addr);
+        }
+
+        send_arp_request_to_all_interfaces(&ifs, dst_mip_addr, debug_mode);
+    }
 }

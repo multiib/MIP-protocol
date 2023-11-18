@@ -46,22 +46,22 @@ void updateRoutingTable(int sourceMIP, struct RoutingEntry receivedTable[MAX_NOD
 
 void handleHelloMessage(int MIPgreeter);
 
-void sendUpdateMessage();
+void sendUpdateFromApp (int route_fd);
 
 
 
-void sendHelloMessage();
+void sendHelloFromApp(int route_fd);
 
 void handleIncomingMessages();
 void checkForNeighborTimeouts();
 void handleRequestMessage(uint8_t *requestMessage, int messageLength);
 void handleUpdateMessage(uint8_t *updateMessage, int messageLength);
-void sendResponseMessage(int next_hop);
+void sendResponseFromApp(int route_fd, int next_hop);
 
 int getNextHopMIP(int destinationMIP);
 
-void sendResponseMessage(int next_hop);
-void sendRequestMessage(int destinationMIP);
+
+void sendRequestToApp(int route_fd, int destinationMIP);
 // void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue);
 
 #endif

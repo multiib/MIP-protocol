@@ -26,9 +26,7 @@
 
 extern int debug_mode;
 
-extern int raw_fd; // File descriptor for UNIX socket
-extern int app_fd; // File descriptor for application socket
-extern int route_fd; // File descriptor for routing daemon socket
+
 
 struct ifs_data {
     struct sockaddr_ll addr[MAX_IF];
@@ -77,7 +75,7 @@ int send_mip_packet(struct ifs_data *ifs,
                     const uint32_t *sdu,
                     uint16_t sdu_len);
 //HANDLE
-APP_handle handle_app_message(uint8_t *dst_mip_addr, char *msg, uint8_t *ttl);
+APP_handle handle_app_message(int app_fd, uint8_t *dst_mip_addr, char *msg, uint8_t *ttl);
 struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_mac_addr);
 uint32_t* stringToUint32Array(const char* str, uint8_t *length);
 uint32_t find_matching_if_index(struct ifs_data *ifs, struct sockaddr_ll *from_addr);
@@ -89,8 +87,10 @@ char* uint32ArrayToString(uint32_t* arr);
 void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip_addr, int debug_mode);
 void fill_forward_data(struct forward_data *forward_data, uint8_t next_hop_MIP, struct pdu *pdu, int *waiting_to_forward);
 void clear_forward_data(struct forward_data *forward_data, int *waiting_to_forward);
-ROUTE_handle handle_route_message(uint8_t *msg);
+ROUTE_handle handle_route_message(int route_fd, uint8_t *msg);
 
 void sendToRoutingDaemon(void);
+
+void MIP_send(struct ifaces ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int debug_mode);
 
 #endif

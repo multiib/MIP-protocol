@@ -171,7 +171,7 @@ void handleIncomingMessages() {
 
 
 // ROUTING MESSAGE SENDING FUNCTIONS //
-void sendHelloMessage() {
+void sendHelloFromApp(int route_fd) {
     uint8_t helloMessage[] = {
         localMIP, // MIP address
         0x00,           // TTL set to zero
@@ -187,7 +187,7 @@ void sendHelloMessage() {
         printf("Hello message sent.\n");
     }
 }
-void sendUpdateMessage() {
+void sendUpdateFromApp(int route_fd) {
     uint8_t updateMessage[3 * MAX_NODES + 5]; // Header + 5 bytes for each entry
     updateMessage[0] = localMIP; // MIP address of the sender
     updateMessage[1] = 0x00;     // TTL set to zero
@@ -215,7 +215,7 @@ void sendUpdateMessage() {
 
 
 // R -> M
-void sendResponseMessage(int next_hop) {
+void sendResponseFromApp(int route_fd, int next_hop) {
     uint8_t responseMessage[] = {
         localMIP,       // MIP address
         0x00,           // TTL set to zero
@@ -237,7 +237,7 @@ void sendResponseMessage(int next_hop) {
 
 
 // M -> R
-void sendRequestMessage(int destinationMIP) {
+void sendRequestToApp(int route_fd, int destinationMIP) {
     uint8_t requestMessage[] = {
         localMIP, // MIP address
         0x00,           // TTL set to zero
