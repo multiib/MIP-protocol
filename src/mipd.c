@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
 
     // Create Broadcast MAC address
     uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+    uint8_t broadcast_mip_addr = 0xff;
 
     uint8_t target_arp_mip_addr; // Used to store MIP address from SDU of ARP request
 
@@ -193,7 +194,7 @@ int main(int argc, char *argv[]) {
                     printf("Packet not for us\n");
                 }
                 
-                forward_pdu(pdu, queue);
+                forward_pdu(pdu, &queue);
                 
             } else {
                 if (debug_mode){
@@ -373,7 +374,7 @@ int main(int argc, char *argv[]) {
 
             printf("Received APP msg\n"); // TODO: Remove
             // Handle incoming application message and determine type of message
-            APP_handle type = handle_app_message(app_fd, &ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
+            APP_handle type = handle_app_message(&ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
 
             switch (type){
 
@@ -490,11 +491,6 @@ int main(int argc, char *argv[]) {
                 // uint8_t interface = arp_lookup_interface(recieved_mip);
 
 
-
-
-                // Create broadcast MIP address
-                uint8_t broadcast_mip_addr = 0xff;
-
                 // TODO: Look at this function name and more
                 uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
                 uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ifs.local_mip_addr);
@@ -505,7 +501,7 @@ int main(int argc, char *argv[]) {
                     if (debug_mode) {
                     // printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
                     }
-                    send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                    send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
                 }
 
             //int send_mip_packet(struct ifs_data *ifs,
@@ -523,8 +519,8 @@ int main(int argc, char *argv[]) {
             case ROUTE_UPDATE:
                 printf("Received ROUTE_UPDATE\n");
 
-                // Create broadcast MIP address
-                uint8_t broadcast_mip_addr = 0xff;
+
+
 
                 // TODO: Look at this function name and more
                 uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
