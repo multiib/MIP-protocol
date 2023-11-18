@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
             if (indentifier == 0x01 && app_fd == -1) {
 
                 app_fd = unix_fd;
-
+                printf("Ping/pong client connected\n\n"); //TODO: Remove
                 rc = add_to_epoll_table(epoll_fd, app_fd);
                 if (rc == -1) {
                     perror("add_to_epoll_table");
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
             } else if (indentifier == 0x02 && route_fd == -1) {
 
                 route_fd = unix_fd;
-
+                printf("Route daemon connected\n\n"); //TODO: Remove
                 rc = add_to_epoll_table(epoll_fd, route_fd);
                 if (rc == -1) {
                     perror("add_to_epoll_table");
