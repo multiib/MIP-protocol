@@ -369,7 +369,7 @@ int main(int argc, char *argv[]) {
                     }
                     
 
-                    MIP_send(ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, debug_mode);
+                    MIP_send(&ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, debug_mode);
 
 
                     
@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
 
                     // Send MIP packet back to source
                     if (ttl_return){
-                        MIP_send(ifs, mip_return, ttl_return, ping_data.msg, debug_mode);
+                        MIP_send(&ifs, mip_return, ttl_return, ping_data.msg, debug_mode);
                     } else if (debug_mode){
                         printf("TTL = 0, dropping packet\n");
                     }
