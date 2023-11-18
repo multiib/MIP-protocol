@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Ping client/server connected
-            if (indentifier == 0x01) {
+            if (indentifier == 0x01 && app_fd == -1) {
 
                 app_fd = unix_fd;
 
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
                 printf("Ping/pong client connected\n\n"); //TODO: Remove
 
             // Routing daemon connected
-            } else if (indentifier == 0x02) {
+            } else if (indentifier == 0x02 && route_fd == -1) {
 
                 route_fd = unix_fd;
 
