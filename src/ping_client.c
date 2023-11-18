@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
     char *socket_lower = NULL;
     char *destination_host = NULL;
     char *message = NULL;
-    char ttl = NULL;
+    char *ttl = NULL;
 
     int sd, rc;
     int epfd, nfds;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     printf("Connected to %s\n", socket_lower);
 
 
-
+    printf("Sending message to %s with TTL %s\n", destination_host, ttl);
 
     fill_ping_buf(buf, sizeof(buf), destination_host, message, ttl);
 
