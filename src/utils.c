@@ -149,19 +149,21 @@ int add_to_epoll_table(int efd, int fd)
 // Fill a buffer with a MIP ARP SDU
 void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message, const char *ttl) {
     // Initialize the buffer to zeros
-    memset(buf, 0, buf_size);
 
+    printf("Fill ping buf 1\n");
+    memset(buf, 0, buf_size);
+    printf("Fill ping buf 2\n");
     buf[0] = atoi(destination_host);
     buf[1] = atoi(ttl);
-
+    printf("Fill ping buf 3\n");
     // Add "PING:"
     strcat(buf, "PING:");
-
+    printf("Fill ping buf 4\n");
     // Then add message
     if (message != NULL) {
         strcat(buf, message);
     }
-
+    printf("Fill ping buf 5\n");
     // print message
     printf("VBVstrmoblen: %s\n", buf); // TODO: Remove this line
 }
@@ -309,19 +311,19 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t 
     // Clear buffer
     memset(buf, 0, sizeof(buf));
 
-
+    printf("Handle app message 1\n");
     // Read message from application
     rc = read(fd, buf, sizeof(buf));
     if (rc <= 0) {
         perror("read");
         exit(EXIT_FAILURE);
     }
-
+    printf("Handle app message 2\n");
     // Set the destination_mip to the first byte of the buffer
     *dst_mip_addr = (uint8_t) buf[0];
     *ttl = (uint8_t) buf[1];
 
-
+    printf("Handle app message 3\n");
     // Initialize an offset for the message
     int offset = 2; // Skip the first byte (destination_mip)
 
