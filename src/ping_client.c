@@ -120,7 +120,9 @@ int main(int argc, char *argv[]) {
     } else if (nfds == 0) {
         printf("Timeout occurred! No data received for 5 seconds.\n");
         close(epfd);
-        exit(EXIT_FAILURE);
+        
+        // close program
+        return 0;
     }
 
     // Read from socket
