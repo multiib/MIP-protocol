@@ -498,7 +498,7 @@ int main(int argc, char *argv[]) {
             printf("Received ROUTE\n");
             // print message
 
-            uint8_t *msg;
+            uint8_t msg [8192];
 
             ROUTE_handle type = handle_route_message(route_fd, msg);
 

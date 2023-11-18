@@ -343,13 +343,13 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
 
 
 
-ROUTE_handle handle_route_message(int fd, uint8_t *msg)
+ROUTE_handle handle_route_message(int fd, uint8_t *buf)
 {
     int rc;
     ROUTE_handle route_type;
     
     // Buffer to hold message from application
-    uint8_t buf[512];
+
 
     // Clear buffer
     memset(buf, 0, sizeof(buf));
@@ -379,8 +379,7 @@ ROUTE_handle handle_route_message(int fd, uint8_t *msg)
         close(fd);
         exit(EXIT_FAILURE);
     }
-    // Copy the rest of the buffer to msg, note this is not a string
-    memcpy(msg, buf + offset, sizeof(buf) - offset);
+
     
 
     return route_type;
