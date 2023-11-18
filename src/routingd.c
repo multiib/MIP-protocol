@@ -99,9 +99,9 @@ int main(int argc, char *argv[]) {
 }
 
 void *sendMessagesThread(void *arg) {
-    // int socket_fd = *((int *)arg);
+    int route_fd = *((int *)arg);
     while (1) {
-        sendHelloMessage();
+        sendHelloFromApp(socket_fd);
         if (routingTableHasChanged) {
             sendUpdateMessage();
             routingTableHasChanged = 0;
@@ -113,7 +113,7 @@ void *sendMessagesThread(void *arg) {
 }
 
 void *receiveMessagesThread(void *arg) {
-    // int socket_fd = *((int *)arg);
+    int route_fd = *((int *)arg);
     while (1) {
         handleIncomingMessages();
     }
