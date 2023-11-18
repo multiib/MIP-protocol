@@ -423,9 +423,9 @@ int main(int argc, char *argv[]) {
                 case ROUTE_HELLO:
                     printf("Received ROUTE_HELLO\n");
 
-                    // print msg uint8t arr
-                    for (int i = 0; i < 512; i++){
-                        printf("%u ", msg[i]);
+                    // print msg uint8t arr in hex
+                    for (int i = 0; i < 5; i++){
+                        printf("%x ", msg[i]);
                     }
 
                     
@@ -489,7 +489,7 @@ int main(int argc, char *argv[]) {
                     printf("Received ROUTE_RESPONSE\n");
 
                     // print msg uint8t arr
-                    for (int i = 0; i < 512; i++){
+                    for (int i = 0; i < 5; i++){
                         printf("%u ", msg[i]);
                     }
                     break;
