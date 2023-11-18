@@ -751,7 +751,7 @@ void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const cha
         // Subtract 1 from TTL to account for the current node
         ttl--;
 
-        send_mip_packet(ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, dst_mip_addr, ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
+        send_mip_packet(ifs, ifs->addr[interface].sll_addr, dst_mac_addr, ifs->local_mip_addr, dst_mip_addr, ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
 
         free(sdu);
     } else {
