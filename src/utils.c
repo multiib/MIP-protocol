@@ -161,6 +161,9 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
     if (message != NULL) {
         strcat(buf, message);
     }
+
+    // print message
+    printf("VBVstrmoblen: %s\n", buf); // TODO: Remove this line
 }
 
 void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, const char *message) {
