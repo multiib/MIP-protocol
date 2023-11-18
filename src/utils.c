@@ -335,7 +335,7 @@ APP_handle handle_app_message(int app_fd, uint8_t *dst_mip_addr, char *msg, uint
 
 
 
-ROUTE_handle handle_route_message(uint8_t *buf)
+ROUTE_handle handle_route_message(int route_fd, uint8_t *buf)
 {
     int rc;
     ROUTE_handle route_type;
@@ -344,10 +344,10 @@ ROUTE_handle handle_route_message(uint8_t *buf)
 
 
     // Clear buffer
-    memset(buf, 0, 8192);
+    memset(buf, 0, 1024);
 
     // Read message from application
-    rc = read(route_fd, buf, 5000); // TODO: Create a better system for setting the buffer size
+    rc = read(route_fd, buf, 1024); // TODO: Create a better system for setting the buffer size
     if (rc <= 0) {
         perror("read");
         exit(EXIT_FAILURE);
@@ -729,7 +729,7 @@ void sendToRoutingDaemon(void) {
     printf("MADE");
 }
 
-void MIP_send(struct ifaces ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int debug_mode) {
+void MIP_send(struct ifs_data ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int debug_mode) {
     // Lookup the MAC address for the destination MIP address
     uint8_t *mac_addr = arp_lookup(dst_mip_addr);
 
