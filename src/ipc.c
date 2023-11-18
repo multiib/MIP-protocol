@@ -1,9 +1,14 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/socket.h>
-#include <sys/un.h>
+#include <sys/epoll.h>
+#include <linux/if_packet.h>
+#include <net/ethernet.h>
+#include <arpa/inet.h>
+#include <pthread.h>
+
 
 #define MAX_CONNS 3
 
