@@ -64,7 +64,7 @@ void handleHelloMessage(int MIPgreeter) {
     }
 }
 
-void sendRoutingUpdate(int socket_fd, int localMIP) {
+void sendRoutingUpdate(int socket_fd) {
     uint8_t updateMessage[3 * MAX_NODES + 5]; // Header + 5 bytes for each entry
     updateMessage[0] = localMIP; // MIP address of the sender
     updateMessage[1] = 0x00;     // TTL set to zero
