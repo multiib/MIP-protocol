@@ -28,6 +28,7 @@ int routingTableHasChanged = 0;  // Global flag for routing table change
 int neighborTable[MAX_NODES];     // 1 indicates a neighbor, 0 otherwise
 
 int route_fd; // File descriptor for routing daemon socket
+int app_fd; // File descriptor for application socket
 
 // Function prototypes
 void *sendMessagesThread(void *arg);
@@ -98,23 +99,23 @@ int main(int argc, char *argv[]) {
 }
 
 void *sendMessagesThread(void *arg) {
-    int socket_fd = *((int *)arg);
+    // int socket_fd = *((int *)arg);
     while (1) {
-        sendHelloMessage(socket_fd);
+        sendHelloMessage();
         if (routingTableHasChanged) {
-            sendRoutingUpdate(socket_fd);
+            sendRoutingUpdate();
             routingTableHasChanged = 0;
         }
-        checkForNeighborTimeouts(socket_fd);
+        checkForNeighborTimeouts();
         sleep(HELLO_INTERVAL);
     }
     return NULL;
 }
 
 void *receiveMessagesThread(void *arg) {
-    int socket_fd = *((int *)arg);
+    // int socket_fd = *((int *)arg);
     while (1) {
-        handleIncomingMessages(socket_fd);
+        handleIncomingMessages();
     }
     return NULL;
 }
