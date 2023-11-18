@@ -489,10 +489,38 @@ int main(int argc, char *argv[]) {
                     if (debug_mode){
                         printf("Received unknown APP message\n");
                     }
+
+
+                    
                     break;
             }
         } else if (events->data.fd == route_fd){
             printf("Received ROUTE\n");
+            // print message
+
+            uint8_t *msg;
+
+            ROUTE_handle type = handle_route_message(route_fd, msg);
+
+            switch (type)
+            {
+            case ROUTE_HELLO:
+                printf("Received ROUTE_HELLO\n");
+                break;
+
+            case ROUTE_UPDATE:
+                printf("Received ROUTE_UPDATE\n");
+                break;
+
+            case ROUTE_RESPONSE:
+                printf("Received ROUTE_RESPONSE\n");
+                break;
+            
+            default:
+                printf("Received unknown ROUTE message\n");
+                break;
+            }
+
         } else {
             printf("Received unknown event\n");
 

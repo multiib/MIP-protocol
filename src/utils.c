@@ -343,7 +343,7 @@ APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
 
 
 
-ROUTE_handle handle_route_message(int fd, uint8_t *dst_mip_addr, uint8_t *msg)
+ROUTE_handle handle_route_message(int fd, uint8_t *msg)
 {
     int rc;
     ROUTE_handle route_type;
@@ -362,7 +362,7 @@ ROUTE_handle handle_route_message(int fd, uint8_t *dst_mip_addr, uint8_t *msg)
     }
 
     // Set the destination_mip to the first byte of the buffer
-    *dst_mip_addr =  buf[0];
+    // *dst_mip_addr =  buf[0];
 
 
     // Initialize an offset for the message
