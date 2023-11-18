@@ -357,7 +357,7 @@ int main(int argc, char *argv[]) {
 
             printf("Received APP msg\n"); // TODO: Remove
             // Handle incoming application message and determine type of message
-            APP_handle type = handle_app_message(&ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
+            APP_handle type = handle_app_message(app_fd, &ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
 
             switch (type){
 
@@ -369,7 +369,7 @@ int main(int argc, char *argv[]) {
                     }
                     
 
-                    MIP_send(&ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, debug_mode);
+                    MIP_send(ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, debug_mode);
 
 
                     
@@ -386,7 +386,7 @@ int main(int argc, char *argv[]) {
 
                     // Send MIP packet back to source
                     if (ttl_return){
-                        MIP_send(&ifs, mip_return, ttl_return, ping_data.msg, debug_mode);
+                        MIP_send(ifs, mip_return, ttl_return, ping_data.msg, debug_mode);
                     } else if (debug_mode){
                         printf("TTL = 0, dropping packet\n");
                     }
@@ -415,7 +415,7 @@ int main(int argc, char *argv[]) {
 
             uint8_t msg [512];
 
-            ROUTE_handle type = handle_route_message(msg);
+            ROUTE_handle type = handle_route_message(int route_fd, msg);
             uint8_t recieved_mip = msg[0];
 
             switch (type)
