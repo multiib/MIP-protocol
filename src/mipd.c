@@ -492,17 +492,17 @@ int main(int argc, char *argv[]) {
 
 
                 // TODO: Look at this function name and more
-                uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
-                uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ifs.local_mip_addr);
+                // uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
+                // uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ifs.local_mip_addr);
 
 
-                // Send hello packet to all interfaces
-                for (int interface = 0; interface < ifs.ifn; interface++) {
-                    if (debug_mode) {
-                    // printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
-                    }
-                    send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
-                }
+                // // Send hello packet to all interfaces
+                // for (int interface = 0; interface < ifs.ifn; interface++) {
+                //     if (debug_mode) {
+                //     // printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
+                //     }
+                //     send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                // }
 
             //int send_mip_packet(struct ifs_data *ifs,
                         // uint8_t *src_mac_addr,
@@ -522,18 +522,18 @@ int main(int argc, char *argv[]) {
 
 
 
-                // TODO: Look at this function name and more
-                uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
-                uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ifs->local_mip_addr);
+                // // TODO: Look at this function name and more
+                // uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
+                // uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ifs->local_mip_addr);
 
 
-                // Send hello packet to all interfaces
-                for (int interface = 0; interface < ifs.ifn; interface++) {
-                    if (debug_mode) {
-                    // printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
-                    }
-                    send_mip_packet(&ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
-                }
+                // // Send hello packet to all interfaces
+                // for (int interface = 0; interface < ifs.ifn; interface++) {
+                //     if (debug_mode) {
+                //     // printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
+                //     }
+                //     send_mip_packet(&ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                // }
 
 
                 break;
