@@ -187,7 +187,7 @@ void sendHelloMessage() {
         printf("Hello message sent.\n");
     }
 }
-void sendUpdatemessage() {
+void sendUpdateMessage() {
     uint8_t updateMessage[3 * MAX_NODES + 5]; // Header + 5 bytes for each entry
     updateMessage[0] = localMIP; // MIP address of the sender
     updateMessage[1] = 0x00;     // TTL set to zero
@@ -251,4 +251,13 @@ void sendRequestMessage(int destinationMIP) {
     if (bytes_sent < 0) {
         perror("send");
     }
+}
+
+// ETC
+void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue) {
+
+    enqueue(pdu_queue, pdu);
+
+    sendRequestMessage(pdu->miphdr->dst);
+
 }

@@ -90,7 +90,7 @@ void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip
 void fill_forward_data(struct forward_data *forward_data, uint8_t next_hop_MIP, struct pdu *pdu, int *waiting_to_forward);
 void clear_forward_data(struct forward_data *forward_data, int *waiting_to_forward);
 ROUTE_handle handle_route_message(uint8_t *msg);
-void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue);
+
 void sendToRoutingDaemon(void);
 
 #endif
