@@ -62,5 +62,6 @@ int getNextHopMIP(int destinationMIP);
 
 void sendResponseMessage(int next_hop);
 void sendRequestMessage(int destinationMIP);
+void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue);
 
 #endif
