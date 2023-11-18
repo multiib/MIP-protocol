@@ -731,5 +731,5 @@ void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue) {
 }
 
 void sendToRoutingDaemon(void) {
-    printf("MADE")
+    printf("MADE");
 }
