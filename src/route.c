@@ -177,7 +177,7 @@ void checkForNeighborTimeouts(int socket_fd) {
             routingTable[i].distance = INFINITY;
             
             // Send routing update
-            sendRoutingUpdate(socket_fd, localMIP);
+            sendRoutingUpdate(socket_fd);
         }
     }
 }
