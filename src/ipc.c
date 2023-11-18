@@ -8,6 +8,7 @@
 #include <net/ethernet.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <sys/un.h>      /* definitions for UNIX domain sockets */
 
 
 #define MAX_CONNS 3
