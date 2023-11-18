@@ -113,7 +113,7 @@ void *sendMessagesThread(void *arg) {
 void *receiveMessagesThread(void *arg) {
     int route_fd = *((int *)arg);
     while (1) {
-        handleIncomingMessages();
+        handleIncomingMessages(route_fd);
     }
     return NULL;
 }

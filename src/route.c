@@ -135,7 +135,7 @@ void handleRequestMessage(int route_fd, uint8_t *requestMessage, int messageLeng
     sendResponseFromApp(route_fd, next_hop);
 }
 
-void handleIncomingMessages() {
+void handleIncomingMessages(int route_fd) {
     uint8_t read_buf[1024];
     int rc = read(route_fd, read_buf, sizeof(read_buf));
     if (rc < 0) {
