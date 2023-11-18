@@ -61,7 +61,7 @@ void get_mac_from_ifaces(struct ifs_data *);
 void init_ifs(struct ifs_data *, int, uint8_t);
 uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr);
 int add_to_epoll_table(int, int);
-void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message, const char *ttl)
+void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message, const char *ttl);
 void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, const char *message);
 MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, int *recv_ifs_index);
 int send_mip_packet(struct ifs_data *ifs,
