@@ -415,7 +415,7 @@ int main(int argc, char *argv[]) {
 
             uint8_t msg [512];
 
-            ROUTE_handle type = handle_route_message(int route_fd, msg);
+            ROUTE_handle type = handle_route_message(route_fd, msg);
             uint8_t recieved_mip = msg[0];
 
             switch (type)
