@@ -352,10 +352,10 @@ ROUTE_handle handle_route_message(int fd, uint8_t *buf)
 
 
     // Clear buffer
-    memset(buf, 0, sizeof(buf));
+    memset(buf, 0, );
 
     // Read message from application
-    rc = read(fd, buf, sizeof(buf));
+    rc = read(fd, buf, 5000); // TODO: Create a better system for setting the buffer size
     if (rc <= 0) {
         perror("read");
         exit(EXIT_FAILURE);
@@ -366,7 +366,7 @@ ROUTE_handle handle_route_message(int fd, uint8_t *buf)
 
 
     // Initialize an offset for the message
-    int offset = 2; // Skip the first byte (MIP) and the second byte (TTL) TODO: Check if this is correct
+    // int offset = 2; // Skip the first byte (MIP) and the second byte (TTL) TODO: Check if this is correct
 
     if (buf[2] == 0x48 && buf[3] == 0x45 && buf[4] == 0x4C) {
         route_type = ROUTE_HELLO;
