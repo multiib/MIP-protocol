@@ -27,8 +27,6 @@ struct RoutingEntry routingTable[MAX_NODES];
 int routingTableHasChanged = 0;  // Global flag for routing table change
 int neighborTable[MAX_NODES];     // 1 indicates a neighbor, 0 otherwise
 
-int route_fd; // File descriptor for routing daemon socket
-int app_fd; // File descriptor for application socket
 
 // Function prototypes
 void *sendMessagesThread(void *arg);

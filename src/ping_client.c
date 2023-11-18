@@ -14,9 +14,6 @@
 #include "pdu.h"
 
 
-// In a source file (e.g., globals.c)
-int app_fd;
-int route_fd;
 
 
 // Declaration of the parse_arguments function
