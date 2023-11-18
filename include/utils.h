@@ -74,7 +74,7 @@ int send_mip_packet(struct ifs_data *ifs,
                     const uint32_t *sdu,
                     uint16_t sdu_len);
 //HANDLE
-APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t *ttl)
+APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t *ttl);
 struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_mac_addr);
 uint32_t* stringToUint32Array(const char* str, uint8_t *length);
 uint32_t find_matching_if_index(struct ifs_data *ifs, struct sockaddr_ll *from_addr);
