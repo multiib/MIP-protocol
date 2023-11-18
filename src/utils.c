@@ -725,7 +725,7 @@ void send_message_to_neighbours(struct ifs_data *ifs, uint8_t *src_mac_addr, uin
 
 void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue) {
 
-    enqueue(&pdu_queue, pdu);
+    enqueue(pdu_queue, pdu);
 
     sendRequestMessage(pdu->miphdr->dst);
 
