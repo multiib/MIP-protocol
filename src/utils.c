@@ -352,7 +352,7 @@ ROUTE_handle handle_route_message(int fd, uint8_t *buf)
 
 
     // Clear buffer
-    memset(buf, 0, );
+    memset(buf, 0, 8192);
 
     // Read message from application
     rc = read(fd, buf, 5000); // TODO: Create a better system for setting the buffer size
