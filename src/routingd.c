@@ -103,7 +103,7 @@ void *sendMessagesThread(void *arg) {
     while (1) {
         sendHelloMessage();
         if (routingTableHasChanged) {
-            sendRoutingUpdate();
+            sendUpdateMessage();
             routingTableHasChanged = 0;
         }
         checkForNeighborTimeouts();
