@@ -254,10 +254,10 @@ void sendRequestMessage(int destinationMIP) {
 }
 
 // ETC
-void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue) {
+// void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue) {
 
-    enqueue(pdu_queue, pdu);
+//     enqueue(pdu_queue, pdu);
 
-    sendRequestMessage(pdu->miphdr->dst);
+//     sendRequestMessage(pdu->miphdr->dst);
 
-}
+// }
