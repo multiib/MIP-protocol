@@ -61,8 +61,8 @@ void get_mac_from_ifaces(struct ifs_data *);
 void init_ifs(struct ifs_data *, int, uint8_t);
 uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr);
 int add_to_epoll_table(int, int);
-void fill_ping_buf(char *, size_t, const char *, const char *);
-void fill_pong_buf(char *, size_t, const char *, const char *);
+void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message, const char *ttl)
+void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, const char *message);
 MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, int *recv_ifs_index);
 int send_mip_packet(struct ifs_data *ifs,
                     uint8_t *src_mac_addr,
@@ -74,7 +74,7 @@ int send_mip_packet(struct ifs_data *ifs,
                     const uint32_t *sdu,
                     uint16_t sdu_len);
 //HANDLE
-APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg);
+APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t *ttl)
 struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_mac_addr);
 uint32_t* stringToUint32Array(const char* str, uint8_t *length);
 uint32_t find_matching_if_index(struct ifs_data *ifs, struct sockaddr_ll *from_addr);

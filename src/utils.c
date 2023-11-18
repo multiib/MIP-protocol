@@ -147,11 +147,12 @@ int add_to_epoll_table(int efd, int fd)
 }
 
 // Fill a buffer with a MIP ARP SDU
-void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message) {
+void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message, const char *ttl) {
     // Initialize the buffer to zeros
     memset(buf, 0, buf_size);
 
     buf[0] = atoi(destination_host);
+    buf[1] = atoi(ttl);
 
     // Add "PING:"
     strcat(buf, "PING:");
@@ -167,6 +168,7 @@ void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, con
     memset(buf, 0, buf_size);
 
     buf[0] = atoi(destination_host);
+    buf[1] = 0x00; // Filler value
 
     // Add "PING:"
     strcat(buf, "PONG:");
@@ -293,7 +295,7 @@ MIP_handle handle_mip_packet(int raw_fd, struct ifs_data *ifs, struct pdu *pdu, 
  * Returns the type of the received application message.
  */
 
-APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg)
+APP_handle handle_app_message(int fd, uint8_t *dst_mip_addr, char *msg, uint8_t *ttl)
 {
     int rc;
     APP_handle app_type;

@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     struct ping_data ping_data; // Struct for storing data from application
     struct forward_data forward_data; // Struct for storing data to be forwarded while waiting for ARP reply
     
-    uint8_t set_ttl = 15; //TODO: Implement user specified TTL
+    // uint8_t set_ttl = 15; //TODO: Implement user specified TTL
 
 
     uint8_t mip_return = 0; // Used to store MIP adresses while talking to ping_server
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
                             // Unknown MAC address, send ARP request
 
 
-                            fill_forward_data(&forward_data, next_hop_MIP, pdu, &waiting_to_forward);
+                            fill_forward_data(&forward_data, next_hop_MIP, pdu, &waiting_to_forward, );
                             waiting_next_hop_MIP = next_hop_MIP;
                             send_arp_request_to_all_interfaces(&ifs, next_hop_MIP, debug_mode);
                         }
@@ -322,7 +322,7 @@ int main(int argc, char *argv[]) {
                             uint8_t *next_hop_MAC = arp_lookup(waiting_next_hop_MIP);
 
 
-                            send_mip_packet(&ifs, ifs.addr[recv_interface].sll_addr, next_hop_MAC, ifs.local_mip_addr, waiting_next_hop_MIP, set_ttl, forward_data.sdu_type, forward_data.sdu, forward_data.sdu_len*sizeof(uint32_t));
+                            send_mip_packet(&ifs, ifs.addr[recv_interface].sll_addr, next_hop_MAC, ifs.local_mip_addr, waiting_next_hop_MIP, forward_data.ttl, forward_data.sdu_type, forward_data.sdu, forward_data.sdu_len*sizeof(uint32_t));
                             clear_forward_data(&forward_data, &waiting_to_forward);
                         }
 
@@ -352,7 +352,7 @@ int main(int argc, char *argv[]) {
                             }
 
                             // Send to destination MIP daemon
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
+                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
 
                             free(sdu);
                             sdu = NULL;
@@ -398,7 +398,7 @@ int main(int argc, char *argv[]) {
         } else if (events->data.fd == app_fd){
 
             // Handle incoming application message and determine type of message
-            APP_handle type = handle_app_message(events->data.fd, &ping_data.dst_mip_addr, ping_data.msg);
+            APP_handle type = handle_app_message(events->data.fd, &ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
 
             switch (type){
 
@@ -433,7 +433,7 @@ int main(int argc, char *argv[]) {
                         }
 
                         // Send to ping_server
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, set_ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
 
                         free(sdu);
                         sdu = NULL;

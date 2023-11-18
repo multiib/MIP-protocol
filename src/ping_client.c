@@ -17,12 +17,14 @@
 
 
 // Declaration of the parse_arguments function
-void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message);
+void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message, char **ttl);
+
 
 int main(int argc, char *argv[]) {
     char *socket_lower = NULL;
     char *destination_host = NULL;
     char *message = NULL;
+    char ttl = NULL;
 
     int sd, rc;
     int epfd, nfds;
@@ -33,7 +35,7 @@ int main(int argc, char *argv[]) {
 
 
     // Call the function to parse arguments
-    parse_arguments(argc, argv, &socket_lower, &destination_host, &message);
+    parse_arguments(argc, argv, &socket_lower, &destination_host, &message, &ttl);
 
     
     struct sockaddr_un addr;
@@ -62,7 +64,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    fill_ping_buf(buf, sizeof(buf), destination_host, message);
+    fill_ping_buf(buf, sizeof(buf), destination_host, message, ttl);
 
 
 
@@ -141,26 +143,26 @@ int main(int argc, char *argv[]) {
 }
 
 // Definition of the parse_arguments function
-void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message) {
+void parse_arguments(int argc, char *argv[], char **socket_lower, char **destination_host, char **message, char **ttl) {
     int opt;
     while ((opt = getopt(argc, argv, "h")) != -1) {
         switch (opt) {
             case 'h':
-                printf("Usage: %s [-h] <socket_lower> <destination_host> <message>\n", argv[0]);
+                printf("Usage: %s [-h] <socket_lower> <destination_host> <message> <ttl>\n", argv[0]);
                 exit(0);
             default:
-                fprintf(stderr, "Usage: %s [-h] <socket_lower> <destination_host> <message>\n", argv[0]);
+                fprintf(stderr, "Usage: %s [-h] <socket_lower> <destination_host> <message> <ttl>\n", argv[0]);
                 exit(1);
         }
     }
 
-    // After processing options, optind points to the first non-option argument
-    if (optind + 3 != argc) {
-        fprintf(stderr, "Usage: %s [-h] <socket_lower> <destination_host> <message>\n", argv[0]);
+    if (optind + 4 != argc) {
+        fprintf(stderr, "Usage: %s [-h] <socket_lower> <destination_host> <message> <ttl>\n", argv[0]);
         exit(1);
     }
 
     *socket_lower = argv[optind];
     *destination_host = argv[optind + 1];
     *message = argv[optind + 2];
+    *ttl = argv[optind + 3];
 }
