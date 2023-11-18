@@ -88,12 +88,12 @@ int main(int argc, char *argv[]) {
 void *sendMessagesThread(void *arg) {
     int socket_fd = *((int *)arg);
     while (1) {
-        sendHelloMessage(socket_fd, localMIP);
+        sendHelloMessage(socket_fd);
         if (routingTableHasChanged) {
-            sendRoutingUpdate(socket_fd, localMIP);
+            sendRoutingUpdate(socket_fd);
             routingTableHasChanged = 0;
         }
-        checkForNeighborTimeouts(socket_fd, localMIP);
+        checkForNeighborTimeouts(socket_fd);
         sleep(HELLO_INTERVAL);
     }
     return NULL;

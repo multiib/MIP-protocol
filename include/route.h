@@ -46,7 +46,7 @@ void updateRoutingTable(int sourceMIP, struct RoutingEntry receivedTable[MAX_NOD
 
 void handleHelloMessage(int MIPgreeter);
 
-void sendRoutingUpdate(int socket_fd, int localMIP);
+void sendRoutingUpdate(int socket_fd);
 
 
 
