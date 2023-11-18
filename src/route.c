@@ -49,7 +49,7 @@ void updateRoutingTable(int sourceMIP, struct RoutingEntry receivedTable[MAX_NOD
     }
 }
 
-void checkForNeighborTimeouts() {
+void checkForNeighborTimeouts(int route_fd) {
     time_t currentTime = time(NULL);
     for (int i = 0; i < MAX_NODES; i++) {
         if (neighborTable[i] && (currentTime - neighborStatus[i].lastHelloReceived > TIMEOUT_INTERVAL)) {
@@ -59,7 +59,7 @@ void checkForNeighborTimeouts() {
             routingTable[i].distance = INFINITY;
             
             // Send routing update
-            sendUpdateMessage();
+            sendUpdateFromApp(route_fd);
         }
     }
 }
@@ -155,7 +155,7 @@ void handleIncomingMessages() {
         handleUpdateMessage(read_buf, rc);
     } else if (read_buf[2] == 0x52 && read_buf[3] == 0x45 && read_buf[4] == 0x51) {
         printf("Received request message.\n");
-        handleRequestMessage(read_buf, rc);
+        handleRequestMessage(route_fd, read_buf, rc);
     } else {
         printf("Invalid message type.\n");
 
