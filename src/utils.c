@@ -16,6 +16,7 @@
 #include "ether.h"
 #include "pdu.h"
 #include "mip.h"
+#include "route.h"
 
 #define REQUEST_MSG_LEN 6
 #define RESPONSE_MSG_LEN 6
@@ -726,7 +727,7 @@ void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue) {
 
     enqueue(&pdu_queue, pdu);
 
-    sendRequestMessage(pdu->sdu, pdu->miphdr->dst);
+    sendRequestMessage(pdu->miphdr->dst);
 
 }
 
