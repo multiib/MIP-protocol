@@ -153,7 +153,11 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
     printf("Fill ping buf 1\n");
     memset(buf, 0, buf_size);
     printf("Fill ping buf 2\n");
+    printf("destination_host: %s\n", destination_host);
+    printf("ttl: %s\n", ttl);
+
     buf[0] = atoi(destination_host);
+    printf("Fill ping buf 2\n");
     buf[1] = atoi(ttl);
     printf("Fill ping buf 3\n");
     // Add "PING:"
