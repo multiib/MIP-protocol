@@ -466,6 +466,8 @@ int main(int argc, char *argv[]) {
                     
                     break;
             }
+
+        // INCOMING ROUTING DAEMON TRAFFIC
         } else if (events->data.fd == route_fd){
             printf("Received ROUTE\n");
             // print message
@@ -490,15 +492,20 @@ int main(int argc, char *argv[]) {
 
                     // Create SDU
                     sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
+                    printf("sdu_len: %u\n", sdu_len);
 
 
+                    if (arp_count_entries == 0){
+
+                        send_arp_request_to_all_interfaces(&ifs, 255, debug_mode);
+                    }
 
                     // Send to all known nodes
                     for (int interface = 0; interface < ifs.ifn; interface++){
 
                         // Find MIP adress of interface if it exists
                         uint8_t dst_mip = arp_get_mip_from_interface(interface);
-                        
+
 
                         // If MIP adress of interface exists, send PDU
                         if (dst_mip != -1){
@@ -509,6 +516,8 @@ int main(int argc, char *argv[]) {
                             send_PDU(&ifs, pdu, &a_queue);
                         }
                     }
+
+
 
 
 
