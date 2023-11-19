@@ -105,5 +105,5 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue);
 
 void uint32_to_uint8(uint32_t *input, size_t input_size, uint8_t *output);
 uint32_t* uint8ArrayToUint32Array(const uint8_t* byte_array, uint8_t array_length, uint8_t *length);
-void sendRequestToApp(int route_fd, int destinationMIP);
+void sendRequestToApp(int route_fd, int destinationMIP, int localMIP);
 #endif
