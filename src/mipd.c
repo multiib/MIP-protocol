@@ -193,7 +193,11 @@ int main(int argc, char *argv[]) {
                     printf("Packet not for us, forwarding..\n");
                 }
                 
-                forward_pdu(route_fd, &f_queue, pdu);
+                    // Add to queue
+                enqueue(f_queue, pdu);
+
+                // Send route request
+                sendRequestToApp(route_fd, pdu->miphdr->dst);
 
                 
             // ACCEPT PACKET IF FOR US
