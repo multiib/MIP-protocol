@@ -472,7 +472,7 @@ int main(int argc, char *argv[]) {
             printf("Received ROUTE\n");
             // print message
 
-            uint8_t msg [512];
+            uint8_t msg [1024];
 
 
 
@@ -490,9 +490,9 @@ int main(int argc, char *argv[]) {
                     // for (int i = 0; i < 5; i++){
                     //     printf("%x ", msg[i]);
                     // }
-                    uint8_t sdu_len;
-                    uint32_t *sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
-                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                    // uint8_t sdu_len;
+                    // uint32_t *sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
+                    // struct pdu *pdu = create_PDU(ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
 
                     printf("\ni");
 
