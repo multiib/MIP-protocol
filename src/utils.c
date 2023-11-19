@@ -344,12 +344,12 @@ ROUTE_handle handle_route_message(int route_fd, uint8_t *buf)
     
     // Buffer to hold message from application
 
-
+    uint8_t buf[512];
     // Clear buffer
-    memset(buf, 0, 1024);
+    memset(buf, 0, sizeof(buf));
 
     // Read message from application
-    rc = read(route_fd, buf, 1024); // TODO: Create a better system for setting the buffer size
+    rc = read(route_fd, buf, sizeof(buf)); // TODO: Create a better system for setting the buffer size
     if (rc <= 0) {
         perror("read");
         exit(EXIT_FAILURE);

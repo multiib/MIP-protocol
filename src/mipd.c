@@ -474,6 +474,9 @@ int main(int argc, char *argv[]) {
 
             uint8_t msg [1024];
 
+            // Clear buffer
+            memset(msg, 0, sizeof(msg));
+
 
 
             ROUTE_handle type = handle_route_message(route_fd, msg);
