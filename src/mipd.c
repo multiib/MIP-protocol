@@ -497,7 +497,6 @@ int main(int argc, char *argv[]) {
                     }
 
                     // Create SDU
-                    uint8_t sdu_len;
                     sdu = uint8ArrayToUint32Array(msg, 6, &sdu_len);
 
                     // Send to all interfaces
@@ -555,8 +554,18 @@ int main(int argc, char *argv[]) {
                     // Check queue for packets waiting for this MIP address
                     struct pdu *pdu = dequeue(&queue);
 
-                    pdu->ethhdr->dst_mac = arp_lookup(next_hop);
-                    pdu->ethhdr->src_mac = ifs.addr[arp_lookup_interface(next_hop)].sll_addr;
+                    // Assuming arp_lookup returns a pointer to a MAC address
+                    uint8_t *dst_mac_addr = arp_lookup(next_hop);
+                    if (dst_mac_addr != NULL) {
+                        memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, MAC_ADDR_SIZE); // MAC_ADDR_SIZE should be the size of your MAC address, typically 6 bytes
+                    }
+
+                    // For src_mac
+                    int interface_index = arp_lookup_interface(next_hop);
+                    if (interface_index != -1) {
+                        memcpy(pdu->ethhdr->src_mac, ifs.addr[interface_index].sll_addr, MAC_ADDR_SIZE);
+                    }
+
 
                     // Send packet
                     send_PDU(&ifs, pdu);
