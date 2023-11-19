@@ -495,12 +495,15 @@ int main(int argc, char *argv[]) {
                     // Create SDU
                     sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
 
+                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
 
-                    // Send to all interfaces
-                    for (int interface = 0; interface < ifs.ifn; interface++){
-
-                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
-                    }
+                    send_PDU(&ifs, pdu, NULL);
+                    // // Send to all interfaces
+                    // for (int interface = 0; interface < ifs.ifn; interface++){
+                        
+                    //     printf("Sending ROUTE_HELLO to interface: %d\n", interface);
+                    //     //send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                    // }
 
                     break;
 

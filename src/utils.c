@@ -814,6 +814,20 @@ struct pdu* create_PDU(uint8_t src_mip_addr,
 void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue){
 
 
+    // If queue pointer is null send hello msg to all interfaces
+    if (a_queue == NULL) {
+        for (int interface = 0; interface < ifs->ifn; interface++) {
+            if (debug_mode) {
+                printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", BROADCAST_MIP_ADDR, interface);
+            }
+            
+            // Add ethernet header if not already present
+            if (pdu->ethhdr == NULL) {
+                memcpy(pdu->ethhdr->dst_mac, ifs->addr[interface].sll_addr, 6);
+                memcpy(pdu->ethhdr->src_mac, ifs->addr[interface].sll_addr, 6);
+            }
+        }
+    }
 
 
     // Get mac address for destination mip
