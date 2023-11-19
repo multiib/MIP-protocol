@@ -369,7 +369,7 @@ int main(int argc, char *argv[]) {
                     }
 
 
-                    MIP_send(&ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, MIP_PING debug_mode);
+                    MIP_send(&ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, MIP_PING, debug_mode);
 
                     
                     break;
@@ -427,7 +427,7 @@ int main(int argc, char *argv[]) {
                         printf("%x ", msg[i]);
                     }
 
-                    MIP_send(&ifs, BROADCAST_MIP_ADDR, 0, MIP_ROUTE, &msg, debug_mode)
+                    MIP_send(&ifs, BROADCAST_MIP_ADDR, 0, &msg, MIP_ROUTE, debug_mode);
 
                     break;
 
