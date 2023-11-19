@@ -797,3 +797,89 @@ void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const cha
     }
 }
 
+struct pdu* create_PDU(uint8_t *src_mac_addr,
+            uint8_t *dst_mac_addr,
+            uint8_t src_mip_addr,
+            uint8_t dst_mip_addr,
+            uint8_t ttl,
+            uint8_t sdu_type,
+            const uint32_t *sdu,
+            uint16_t sdu_len)
+{
+
+    struct pdu *pdu = alloc_pdu();
+    fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
+
+    return pdu;
+}
+
+void send_PDU(struct ifs_data *ifs, struct pdu *pdu){
+
+    uint8_t snd_buf[MAX_BUF_SIZE];
+    size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
+
+    struct sockaddr_ll *interface = find_matching_sockaddr(ifs, pdu->ethhdr->dst_mac);
+
+    // Decrement TTL
+    pdu->miphdr->ttl--;
+
+    if (sendto(ifs->rsock, snd_buf, snd_len, 0,
+        (struct sockaddr *)interface,
+        sizeof(struct sockaddr_ll)) <= 0) {
+        perror("sendto()");
+        close(ifs->rsock);
+    }
+
+    if (debug_mode){
+        printf("Sending PDU with content (size %zu):\n", snd_len);
+        print_pdu_content(pdu);
+    }
+
+    destroy_pdu(pdu);
+    
+}
+
+void forward_pdu(int route_fd, struct pdu_queue *queue, struct pdu *pdu){
+
+    // Add to queue
+    enqueue(&queue, pdu);
+
+    // Send route request
+    sendRequestToApp(route_fd, pdu->miphdr->dst_mip_addr);
+}
+
+void uint32_to_uint8(uint32_t *input, size_t input_size, uint8_t *output) {
+    for (size_t i = 0; i < input_size; ++i) {
+        uint32_t value = input[i];
+        
+        output[i * 4]     = (value >> 24) & 0xFF; // Extract the first byte
+        output[i * 4 + 1] = (value >> 16) & 0xFF; // Extract the second byte
+        output[i * 4 + 2] = (value >> 8) & 0xFF;  // Extract the third byte
+        output[i * 4 + 3] = value & 0xFF;         // Extract the fourth byte
+    }
+}
+
+
+
+
+uint32_t* uint8ArrayToUint32Array(const uint8_t* byte_array, uint8_t array_length, uint8_t *length) {
+    uint8_t num_elements = array_length / 4 + (array_length % 4 != 0);
+
+    // Calculate length in uint32_t elements and set the output parameter
+    *length = num_elements;
+
+    uint32_t *arr = (uint32_t*)calloc(num_elements, sizeof(uint32_t));
+    if (arr == NULL) {
+        return NULL; // Failed to allocate memory
+    }
+
+
+    for (uint8_t i = 0; i < array_length; i++) {
+        uint8_t arr_idx = i / 4; // Start from index 1
+        uint8_t shift = (3 - (i % 4)) * 8;
+
+        arr[arr_idx] |= (uint32_t)byte_array[i] << shift;
+    }
+
+    return arr;
+}

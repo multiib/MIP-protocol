@@ -27,5 +27,6 @@ void arp_insert(uint8_t, uint8_t[6], int interface);
 void arp_broadcast(uint8_t);
 int arp_count_entries();
 uint8_t* arp_get_mip_addresses();
+uint8_t arp_get_mip_from_interface(uint8_t interface);
 
 #endif // ARP_H

@@ -33,7 +33,7 @@ struct NeighborStatus {
 extern int neighborTable[MAX_NODES];
 extern struct RoutingEntry routingTable[MAX_NODES];
 extern struct NeighborStatus neighborStatus[MAX_NODES];
-extern uint8_t localMIP;
+
 extern int routingTableHasChanged;
 
 void initializeRoutingTable(struct RoutingEntry *table, int size);

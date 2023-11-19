@@ -70,3 +70,15 @@ uint8_t* arp_get_mip_addresses() {
 
 
 // TODO: Create hash table for ARP cache
+
+
+
+// Function to get MIP address from an interface
+uint8_t arp_get_mip_from_interface(uint8_t interface) {
+    for (int i = 0; i < arp_count; ++i) {
+        if (arp_cache[i].interface == interface) {
+            return arp_cache[i].mip;
+        }
+    }
+    return -1; // Indicate that the interface was not found
+}
