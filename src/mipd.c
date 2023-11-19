@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
                 enqueue(&f_queue, pdu);
 
                 // Send route request
-                sendRequestToApp(route_fd, pdu->miphdr->dst);
+                sendRequestToApp(route_fd, pdu->miphdr->dst, local_mip_addr);
 
                 
             // ACCEPT PACKET IF FOR US

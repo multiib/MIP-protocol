@@ -61,7 +61,7 @@ void sendResponseFromApp(int route_fd, int next_hop);
 int getNextHopMIP(int destinationMIP);
 
 
-void sendRequestToApp(int route_fd, int destinationMIP);
+
 // void forward_pdu(struct pdu *pdu, struct pdu_queue *pdu_queue);
 
 #endif
