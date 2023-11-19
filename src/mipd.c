@@ -527,7 +527,7 @@ int main(int argc, char *argv[]) {
                     printf("\n");
 
                     // Create SDU
-                    sdu = uint8ArrayToUint32Array(msg, 3 * MAX_NODES + 5, &sdu_len);
+                    uint32_t *sdu sdu = uint8ArrayToUint32Array(msg, 3 * MAX_NODES + 5, &sdu_len);
 
                     // Send to all interfaces
                     for (int interface = 0; interface < ifs.ifn; interface++){
@@ -535,7 +535,7 @@ int main(int argc, char *argv[]) {
                         uint8_t dst_mip = arp_get_mip_from_interface(interface);
 
                         // Create PDU
-                        pdu = create_PDU(ifs.local_mip_addr, dst_mip, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
+                        struct pdu *pdu = create_PDU(ifs.local_mip_addr, dst_mip, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
 
                         // Send PDU
                         send_PDU(&ifs, pdu, &a_queue);
