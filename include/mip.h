@@ -10,6 +10,7 @@
 
 #define HIP_VERSION	4
 
+#define BROADCAST_MIP_ADDR ((uint8_t)0xFF)
 
 #define MIP_DST_ADDR	0xff
 

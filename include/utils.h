@@ -91,6 +91,6 @@ ROUTE_handle handle_route_message(int route_fd, uint8_t *msg);
 
 void sendToRoutingDaemon(void);
 
-void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int debug_mode);
+void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int type, int debug_mode);
 
 #endif

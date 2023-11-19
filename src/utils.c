@@ -729,36 +729,58 @@ void sendToRoutingDaemon(void) {
     printf("MADE");
 }
 
-void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int debug_mode) {
+void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int type, int debug_mode) {
     // Lookup the MAC address for the destination MIP address
-    uint8_t *mac_addr = arp_lookup(dst_mip_addr);
 
-    if (mac_addr) {
-        if (debug_mode) {
-            printf("We have the MAC address for MIP %u\n", dst_mip_addr);
-        }
+    
+
+    if (dst_mip_addr == BROADCAST_MIP_ADDR){
+        // Send MIP packet to all interfaces
+        uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
         uint8_t sdu_len;
         uint32_t *sdu = stringToUint32Array(message, &sdu_len);
+        
 
-        uint8_t *dst_mac_addr = arp_lookup(dst_mip_addr);
-        uint8_t interface = arp_lookup_interface(dst_mip_addr);
-
-        if (debug_mode) {
-            printf("Sending MIP_PING to MIP: %u\n", dst_mip_addr);
+        for (int interface = 0; interface < ifs->ifn; interface++) {
+            if (debug_mode) {
+                printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", BROADCAST_MIP_ADDR, interface);
+            }
+            send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, BROADCAST_MIP_ADDR, 0, type, sdu, sdu_len);
         }
+    }else{
 
-        // Subtract 1 from TTL to account for the current node
-        ttl--;
+        uint8_t *mac_addr = arp_lookup(dst_mip_addr);
 
-        send_mip_packet(ifs, ifs->addr[interface].sll_addr, dst_mac_addr, ifs->local_mip_addr, dst_mip_addr, ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
+        if (mac_addr) {
+            if (debug_mode) {
+                printf("We have the MAC address for MIP %u\n", dst_mip_addr);
+            }
 
-        free(sdu);
-    } else {
-        if (debug_mode) {
-            printf("MAC address for MIP %u not found in cache\n", dst_mip_addr);
+            uint8_t sdu_len;
+            uint32_t *sdu = stringToUint32Array(message, &sdu_len);
+            uint8_t *dst_mac_addr = arp_lookup(dst_mip_addr);
+            uint8_t interface = arp_lookup_interface(dst_mip_addr);
+
+            if (debug_mode) {
+                printf("Sending MIP_PING to MIP: %u\n", dst_mip_addr);
+            }
+
+            // Subtract 1 from TTL to account for the current node
+            ttl--;
+
+            send_mip_packet(ifs, ifs->addr[interface].sll_addr, dst_mac_addr, ifs->local_mip_addr, dst_mip_addr, ttl, type, sdu, sdu_len*sizeof(uint32_t));
+
+            free(sdu);
+        } else {
+            if (debug_mode) {
+                printf("MAC address for MIP %u not found in cache\n", dst_mip_addr);
+            }
+
+            send_arp_request_to_all_interfaces(ifs, dst_mip_addr, debug_mode);
+
+            // Add to queue
+
         }
-
-        send_arp_request_to_all_interfaces(ifs, dst_mip_addr, debug_mode);
     }
 }

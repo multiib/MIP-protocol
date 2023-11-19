@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     uint8_t waiting_next_hop_MIP; 
 
     uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-    uint8_t broadcast_mip_addr = 0xff;
+
 
     uint8_t target_arp_mip_addr; // Used to store MIP address from SDU of ARP request
 
@@ -367,10 +367,9 @@ int main(int argc, char *argv[]) {
                         printf("\nReceived APP_PING\n");
                         printf("Content: %s\n", ping_data.msg);
                     }
-                    
 
-                    MIP_send(&ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, debug_mode);
 
+                    MIP_send(&ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, MIP_PING debug_mode);
 
                     
                     break;
@@ -386,7 +385,7 @@ int main(int argc, char *argv[]) {
 
                     // Send MIP packet back to source
                     if (ttl_return){
-                        MIP_send(&ifs, mip_return, ttl_return, ping_data.msg, debug_mode);
+                        MIP_send(&ifs, mip_return, ttl_return, ping_data.msg, MIP_PONG, debug_mode);
                     } else if (debug_mode){
                         printf("TTL = 0, dropping packet\n");
                     }
@@ -428,35 +427,7 @@ int main(int argc, char *argv[]) {
                         printf("%x ", msg[i]);
                     }
 
-                    
-                    // // Get MAC address of destination MIP and what ethernet interface it is on
-                    // uint8_t *dst_mac_addr = arp_lookup(recieved_mip); //TODO: We assume we have the MAC address bc
-                    // // we have recieved from the deamon we are about to send to
-                    // uint8_t interface = arp_lookup_interface(recieved_mip);
-
-
-                    // TODO: Look at this function name and more
-                    // uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
-                    // uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ifs.local_mip_addr);
-
-
-                    // // Send hello packet to all interfaces
-                    // for (int interface = 0; interface < ifs.ifn; interface++) {
-                    //     if (debug_mode) {
-                    //     // printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
-                    //     }
-                    //     send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
-                    // }
-
-                //int send_mip_packet(struct ifs_data *ifs,
-                            // uint8_t *src_mac_addr,
-                            // uint8_t *dst_mac_addr,
-                            // uint8_t src_mip_addr,
-                            // uint8_t dst_mip_addr,
-                            // uint8_t ttl,
-                            // uint8_t sdu_type,
-                            // const uint32_t *sdu,
-                            // uint16_t sdu_len)
+                    MIP_send(&ifs, BROADCAST_MIP_ADDR, 0, MIP_ROUTE, &msg, debug_mode)
 
                     break;
 
@@ -464,9 +435,13 @@ int main(int argc, char *argv[]) {
                     printf("Received ROUTE_UPDATE\n");
 
                     // print msg uint8t arr
+                    printf("msg: ");
+
                     for (int i = 0; i < 512; i++){
                         printf("%u ", msg[i]);
                     }
+                    printf("\n");
+
 
 
                     // // TODO: Look at this function name and more
