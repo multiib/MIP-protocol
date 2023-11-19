@@ -50,8 +50,6 @@ struct pdu_queue {
 
 struct pdu * alloc_pdu(void);
 void fill_pdu(struct pdu *pdu,
-              uint8_t *src_mac_addr,
-              uint8_t *dst_mac_addr,
               uint8_t src_mip_addr,
               uint8_t dst_mip_addr,
               uint8_t ttl,
@@ -68,7 +66,7 @@ int queue_is_not_empty(struct pdu_queue *queue);
 void enqueue(struct pdu_queue *queue, struct pdu *packet);
 struct pdu * dequeue(struct pdu_queue *queue);
 void clear_ping_data(struct ping_data *data);
-struct pdu *find_packet_for_destination(struct pdu_queue *queue, uint8_t destination);
+// struct pdu *find_packet_for_destination(struct pdu_queue *queue, uint8_t destination);
 
 
 
