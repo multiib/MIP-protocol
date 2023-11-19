@@ -495,11 +495,11 @@ int main(int argc, char *argv[]) {
 
                     // Create SDU
                     printf("1we23");
-                    sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
-                    printf("1290803");
-                    pdu = create_PDU(ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
-                    printf("123");
-                    send_PDU(&ifs, pdu, NULL);
+                    // sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
+                    // printf("1290803");
+                    // pdu = create_PDU(ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                    // printf("123");
+                    // send_PDU(&ifs, pdu, NULL);
                     // // Send to all interfaces
                     // for (int interface = 0; interface < ifs.ifn; interface++){
                         
