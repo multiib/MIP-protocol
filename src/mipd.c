@@ -473,23 +473,26 @@ int main(int argc, char *argv[]) {
             // print message
 
             uint8_t msg [512];
-            uint8_t sdu_len;
-            uint32_t *sdu;
-            struct pdu *pdu;
+
 
 
             ROUTE_handle type = handle_route_message(route_fd, msg);
             uint8_t recieved_mip = msg[0];
+            printf("recieved_mip: %u\n", recieved_mip);
 
             switch (type)
             {
                 case ROUTE_HELLO:
                     printf("Received ROUTE_HELLO\n");
-
+                    
+                    
                     // // print msg uint8t arr in hex
                     // for (int i = 0; i < 5; i++){
                     //     printf("%x ", msg[i]);
                     // }
+                    uint8_t sdu_len;
+                    uint32_t *sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
+                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
 
                     printf("\ni");
 
