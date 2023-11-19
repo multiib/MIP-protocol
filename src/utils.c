@@ -816,6 +816,7 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue){
 
     // If queue pointer is null send hello msg to all interfaces
     if (a_queue == NULL) {
+        printf("1nul23");
         for (int interface = 0; interface < ifs->ifn; interface++) {
             if (debug_mode) {
                 printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", BROADCAST_MIP_ADDR, interface);
