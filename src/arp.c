@@ -5,7 +5,7 @@
 #include "utils.h"
 
 static ArpEntry arp_cache[ARP_CACHE_SIZE];
-static int arp_count = 0;
+static int arp_count;
 
 
 // Print the ARP cache
@@ -27,7 +27,7 @@ void arp_init() {
 uint8_t* arp_lookup(uint8_t mip) {
 
 
-    
+
     for (int i = 0; i < arp_count; ++i) {
         if (arp_cache[i].mip == mip) {
             return arp_cache[i].mac;
@@ -57,9 +57,15 @@ void arp_insert(uint8_t mip, uint8_t mac[6], int interface) {
 }
 
 
-// Return number of entries in ARP cache
+// Return number of entries in ARP cache by counting the number of non-zero MIP addresses
 int arp_count_entries() {
-    return arp_count;
+    int count = 0;
+    for (int i = 0; i < ARP_CACHE_SIZE; ++i) {
+        if (arp_cache[i].mip != 0) {
+            count++;
+        }
+    }
+    return count;
 }
 
 // Get every mip address in the ARP cache
