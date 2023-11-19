@@ -490,43 +490,17 @@ int main(int argc, char *argv[]) {
                         printf("%x ", msg[i]);
                     }
 
+                    printf("\n");
+
                     // Create SDU
                     sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
-                    printf("sdu_len: %u\n", sdu_len);
 
-                    
 
-                    uint8_t nentries = arp_count_entries();
-                    printf("arp_count_entries: %u\n", arp_count_entries());
-                    if (nentries == 0){
-                        printf("No entries in ARP table, sending ARP request to all interfaces\n");
-                        send_arp_request_to_all_interfaces(&ifs, 255, debug_mode);
-
-                        continue;
-                    }
-
-                    // Send to all known nodes
+                    // Send to all interfaces
                     for (int interface = 0; interface < ifs.ifn; interface++){
 
-                        // Find MIP adress of interface if it exists
-                        uint8_t dst_mip = arp_get_mip_from_interface(interface);
-
-
-                        // If MIP adress of interface exists, send PDU
-                        if (dst_mip != -1){
-                            // Create PDU
-                            struct pdu *pdu = create_PDU(ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
-
-                            // Send PDU
-                            send_PDU(&ifs, pdu, &a_queue);
-                        }
+                        send_mip_packet(&ifs, ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
                     }
-
-
-
-
-
-
 
                     break;
 
