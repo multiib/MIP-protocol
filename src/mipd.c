@@ -412,14 +412,14 @@ int main(int argc, char *argv[]) {
                         }
 
                         // Create SDU
-                        uint8_t sdu_len;
+
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ping_data.dst_mip_addr);
 
                         // Send ARP request to all interfaces
                         for (int interface = 0; interface < ifs.ifn; interface++){
 
                             // Create PDU
-                            struct pdu *pdu = create_PDU(ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
+                            struct pdu *pdu = create_PDU(ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_MIPARP, sdu, sizeof(uint32_t));
 
                             // Send PDU
                             send_PDU(&ifs, pdu);
