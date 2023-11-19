@@ -486,10 +486,10 @@ int main(int argc, char *argv[]) {
                 case ROUTE_HELLO:
                     printf("Received ROUTE_HELLO\n");
 
-                    // print msg uint8t arr in hex
-                    for (int i = 0; i < 5; i++){
-                        printf("%x ", msg[i]);
-                    }
+                    // // print msg uint8t arr in hex
+                    // for (int i = 0; i < 5; i++){
+                    //     printf("%x ", msg[i]);
+                    // }
 
                     printf("\ni");
 
