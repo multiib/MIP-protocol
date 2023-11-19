@@ -247,14 +247,14 @@ struct pdu* dequeue(struct pdu_queue *queue) {
     return packet;
 }
 
-struct pdu *find_packet_for_destination(struct pdu_queue *queue, uint32_t destination) {
-    struct pdu_node *current = queue->front;
-    while (current != NULL) {
-        if (current->packet->miphdr->dst == destination) {
-            return current->packet;
-        }
-        current = current->next;
-    }
-    return NULL;
-}
+// struct pdu *find_packet_for_destination(struct pdu_queue *queue, uint32_t destination) {
+//     struct pdu_node *current = queue->front;
+//     while (current != NULL) {
+//         if (current->packet->miphdr->dst == destination) {
+//             return current->packet;
+//         }
+//         current = current->next;
+//     }
+//     return NULL;
+// }
 
