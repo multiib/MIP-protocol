@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     int send_hello_again = 0;
 
-    
+    arp_init();
 
     struct pdu_queue f_queue; // Queue for storing PDUs to be forwarded
     struct pdu_queue a_queue; // Queue for storing PDUs while waiting for ARP reply
