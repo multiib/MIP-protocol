@@ -475,6 +475,7 @@ int main(int argc, char *argv[]) {
             uint8_t msg [512];
             uint8_t sdu_len;
             uint32_t *sdu;
+            struct pdu *pdu;
 
 
             ROUTE_handle type = handle_route_message(route_fd, msg);
@@ -495,7 +496,7 @@ int main(int argc, char *argv[]) {
                     // Create SDU
                     sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
 
-                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                    pdu = create_PDU(ifs.local_mip_addr, 255, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
 
                     send_PDU(&ifs, pdu, NULL);
                     // // Send to all interfaces
@@ -527,7 +528,7 @@ int main(int argc, char *argv[]) {
                         uint8_t dst_mip = arp_get_mip_from_interface(interface);
 
                         // Create PDU
-                        struct pdu *pdu = create_PDU(ifs.local_mip_addr, dst_mip, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
+                        pdu = create_PDU(ifs.local_mip_addr, dst_mip, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
 
                         // Send PDU
                         send_PDU(&ifs, pdu, &a_queue);
@@ -545,7 +546,7 @@ int main(int argc, char *argv[]) {
                     uint8_t next_hop = msg[5];
 
                     // Check queue for packets waiting for this MIP address
-                    struct pdu *pdu = dequeue(&f_queue);
+                    pdu = dequeue(&f_queue);
 
                     // Assuming arp_lookup returns a pointer to a MAC address
                     uint8_t *dst_mac_addr = arp_lookup(next_hop);
