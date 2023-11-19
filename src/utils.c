@@ -823,13 +823,17 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue){
         enqueue(a_queue, pdu);
 
         // Send ARP request
-        send_arp_request_to_all_interfaces(ifs, pdu->miphdr->dst, debug_mode); ///
+        send_arp_request_to_all_interfaces(ifs, pdu->miphdr->dst, debug_mode);
         return;
     }
 
-    // Add ethernet header
-    memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
-    memcpy(pdu->ethhdr->src_mac, ifs->addr[arp_lookup_interface(pdu->miphdr->dst)].sll_addr, 6);
+    // Add ethernet header if not already present
+    if (pdu->ethhdr == NULL) {
+        memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
+        memcpy(pdu->ethhdr->src_mac, ifs->addr[arp_lookup_interface(pdu->miphdr->dst)].sll_addr, 6);
+    }
+
+
 
 
     uint8_t snd_buf[MAX_BUF_SIZE];
@@ -856,14 +860,7 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue){
     
 }
 
-void forward_pdu(int route_fd, struct pdu_queue *queue, struct pdu *pdu){
 
-    // Add to queue
-    enqueue(queue, pdu);
-
-    // Send route request
-    sendRequestToApp(route_fd, pdu->miphdr->dst);
-}
 
 void uint32_to_uint8(uint32_t *input, size_t input_size, uint8_t *output) {
     for (size_t i = 0; i < input_size; ++i) {
