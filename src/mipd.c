@@ -494,8 +494,11 @@ int main(int argc, char *argv[]) {
                     sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
                     printf("sdu_len: %u\n", sdu_len);
 
-                    printf("arp_count_entries: %u\n", arp_count_entries);
-                    if (!arp_count_entries){
+                    printf("arp_count_entries: %u\n", arp_count_entries());
+
+                    uint8_t nentries
+
+                    if (!arp_count_entries()){
 
                         send_arp_request_to_all_interfaces(&ifs, 255, debug_mode);
 
