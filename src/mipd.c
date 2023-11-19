@@ -532,7 +532,7 @@ int main(int argc, char *argv[]) {
                         uint8_t dst_mip = arp_get_mip_from_interface(interface);
 
                         // Create PDU
-                        struct pdu *pdu = create_PDU(ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, dst_mip, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
+                        struct pdu *pdu = create_PDU(ifs.local_mip_addr, dst_mip, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
 
                         // Send PDU
                         send_PDU(&ifs, pdu, &a_queue);
