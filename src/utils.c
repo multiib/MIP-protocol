@@ -897,3 +897,18 @@ uint32_t* uint8ArrayToUint32Array(const uint8_t* byte_array, uint8_t array_lengt
 
     return arr;
 }
+void sendRequestToApp(int route_fd, int destinationMIP) {
+    uint8_t requestMessage[] = {
+        localMIP, // MIP address
+        0x00,           // TTL set to zero
+        0x52,           // ASCII for 'R'
+        0x45,           // ASCII for 'E'
+        0x51,           // ASCII for 'Q'
+        destinationMIP        // Next hop for the destination
+    };
+
+    int bytes_sent = send(route_fd, requestMessage, sizeof(requestMessage), 0);
+    if (bytes_sent < 0) {
+        perror("send");
+    }
+}
