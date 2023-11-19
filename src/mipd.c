@@ -303,30 +303,36 @@ int main(int argc, char *argv[]) {
                         arp_insert(pdu->miphdr->src, pdu->ethhdr->src_mac, recv_interface);
                         
                         // Check if we are waiting for this reply by comparing target MIP address with local MIP address
-                        if (ping_data.dst_mip_addr == target_arp_mip_addr){
 
-                            // Create SDU 
-                            uint8_t sdu_len;
-                            uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
+                        // Check if we have a packet waiting to be forwarded waiting for this ARP reply
+                        struct pdu *packet = find_packet_for_destination(&queue, pdu->miphdr->src);
 
-                            // Get MAC address of destination MIP and what ethernet interface it is on
-                            uint8_t *dst_mac_addr = arp_lookup(ping_data.dst_mip_addr);
-                            uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
+                        
+                        MIP_send(&ifs, packet->miphdr->dst, packet->miphdr->ttl, packet->sdu, packet->miphdr->sdu_type, &queue, debug_mode);
+
+                        free(packet);
+
+
+                        // if (ping_data.dst_mip_addr == target_arp_mip_addr){
+
+                        //     // Create SDU 
+                        //     uint8_t sdu_len;
+                        //     uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
+
+                        //     // Get MAC address of destination MIP and what ethernet interface it is on
+                        //     uint8_t *dst_mac_addr = arp_lookup(ping_data.dst_mip_addr);
+                        //     uint8_t interface = arp_lookup_interface(ping_data.dst_mip_addr);
                             
-                            if (debug_mode){
-                                printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
-                            }
+                        //     if (debug_mode){
+                        //         printf("Sending MIP_PING to MIP: %u\n", ping_data.dst_mip_addr);
+                        //     }
 
-                            // Send to destination MIP daemon
-                            send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
+                        //     // Send to destination MIP daemon
+                        //     send_mip_packet(&ifs, ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len*sizeof(uint32_t));
 
-                            free(sdu);
-                            sdu = NULL;
+                        //     free(sdu);
+                        //     sdu = NULL;
 
-
-                        } else if (debug_mode){
-                            printf("Not waiting for this reply\n");
-                        }
 
                         break;
 
@@ -369,7 +375,7 @@ int main(int argc, char *argv[]) {
                     }
 
 
-                    MIP_send(&ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, MIP_PING, debug_mode);
+                    MIP_send(&ifs, ping_data.dst_mip_addr, ping_data.ttl, ping_data.msg, MIP_PING, queue, debug_mode);
 
                     
                     break;
@@ -385,7 +391,8 @@ int main(int argc, char *argv[]) {
 
                     // Send MIP packet back to source
                     if (ttl_return){
-                        MIP_send(&ifs, mip_return, ttl_return, ping_data.msg, MIP_PONG, debug_mode);
+                        MIP_send(&ifs, mip_return, ttl_return, ping_data.msg, MIP_PONG, queue, debug_mode);
+                        
                     } else if (debug_mode){
                         printf("TTL = 0, dropping packet\n");
                     }
@@ -427,7 +434,7 @@ int main(int argc, char *argv[]) {
                         printf("%x ", msg[i]);
                     }
 
-                    MIP_send(&ifs, BROADCAST_MIP_ADDR, 0, &msg, MIP_ROUTE, debug_mode);
+                    MIP_send(&ifs, BROADCAST_MIP_ADDR, 0, &msg, MIP_ROUTE, queue, debug_mode);
 
                     break;
 

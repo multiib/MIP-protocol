@@ -209,6 +209,10 @@ int is_queue_empty(struct pdu_queue *queue) {
     return (queue->size == 0);
 }
 
+int queue_is_not_empty(struct pdu_queue *queue) {
+    return (queue->size != 0);
+}
+
 
 void enqueue(struct pdu_queue *queue, struct pdu *packet) {
     struct pdu_node *newNode = (struct pdu_node *)malloc(sizeof(struct pdu_node));
@@ -243,14 +247,41 @@ struct pdu* dequeue(struct pdu_queue *queue) {
     return packet;
 }
 
-struct pdu *find_packet_for_destination(struct pdu_queue *queue, uint32_t destination) {
+struct pdu* find_packet_for_destination(struct pdu_queue *queue, uint8_t destination) {
     struct pdu_node *current = queue->front;
+    struct pdu_node *prev = NULL;
+
     while (current != NULL) {
         if (current->packet->miphdr->dst == destination) {
-            return current->packet;
+            // If the packet is found
+            if (prev == NULL) {
+                // The packet is at the front of the queue
+                queue->front = current->next;
+                if (queue->front == NULL) {
+                    // The queue is now empty
+                    queue->rear = NULL;
+                }
+            } else {
+                // The packet is not at the front
+                prev->next = current->next;
+                if (current->next == NULL) {
+                    // The packet is at the rear of the queue
+                    queue->rear = prev;
+                }
+            }
+
+            struct pdu *packet = current->packet;
+            free(current);
+            queue->size--;
+
+            return packet;
         }
+
+        prev = current;
         current = current->next;
     }
+
     return NULL;
 }
+
 

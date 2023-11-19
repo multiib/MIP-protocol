@@ -64,9 +64,11 @@ void print_pdu_content(struct pdu *);
 void destroy_pdu(struct pdu *);
 void initialize_queue(struct pdu_queue *queue);
 int is_queue_empty(struct pdu_queue *queue);
+int queue_is_not_empty(struct pdu_queue *queue);
 void enqueue(struct pdu_queue *queue, struct pdu *packet);
 struct pdu * dequeue(struct pdu_queue *queue);
 void clear_ping_data(struct ping_data *data);
+struct pdu *find_packet_for_destination(struct pdu_queue *queue, uint8_t destination);
 
 
 

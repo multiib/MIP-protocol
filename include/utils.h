@@ -25,6 +25,7 @@
 #define SDU_ARP_TYPE_MATCH  1
 
 extern int debug_mode;
+extern int localMIP;
 
 
 
@@ -91,6 +92,6 @@ ROUTE_handle handle_route_message(int route_fd, uint8_t *msg);
 
 void sendToRoutingDaemon(void);
 
-void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int type, int debug_mode);
+void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int type, struct pdu_queue *queue, int debug_mode);
 
 #endif
