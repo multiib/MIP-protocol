@@ -491,7 +491,7 @@ int main(int argc, char *argv[]) {
                         printf("%x ", msg[i]);
                     }
 
-                    printf("\n");
+                    printf("\ni");
 
                     // Create SDU
                     printf("1we23");
