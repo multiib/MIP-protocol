@@ -553,7 +553,10 @@ int main(int argc, char *argv[]) {
                     uint8_t next_hop = msg[5];
 
                     // Check queue for packets waiting for this MIP address
-                    struct pdu *pdu = find_packet_for_destination(&queue, recieved_mip);
+                    struct pdu *pdu = dequeue(&queue);
+
+                    pdu->ethhdr->dst_mac = arp_lookup(next_hop);
+                    pdu->ethhdr->src_mac = ifs.addr[arp_lookup_interface(next_hop)].sll_addr;
 
                     // Send packet
                     send_PDU(&ifs, pdu);
