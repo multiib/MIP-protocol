@@ -426,7 +426,7 @@ int send_mip_packet(struct ifs_data *ifs,
 
 
 
-    fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
+    fill_pdu(pdu, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
 
     pdu->miphdr->ttl--;
 
