@@ -50,8 +50,6 @@ struct pdu * alloc_pdu(void) {
 
 
 void fill_pdu(struct pdu *pdu,
-              uint8_t *src_mac_addr,
-              uint8_t *dst_mac_addr,
               uint8_t src_mip_addr,
               uint8_t dst_mip_addr,
               uint8_t ttl,
@@ -62,9 +60,6 @@ void fill_pdu(struct pdu *pdu,
         // Handle null pdu pointer
         return;
     }
-
-    memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
-    memcpy(pdu->ethhdr->src_mac, src_mac_addr, 6);
 
     pdu->miphdr->dst = dst_mip_addr;
     pdu->miphdr->src = src_mip_addr;

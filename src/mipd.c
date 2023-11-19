@@ -53,10 +53,15 @@ int main(int argc, char *argv[]) {
     uint8_t target_arp_mip_addr; // Used to store MIP address from SDU of ARP request
 
     struct ifs_data ifs; // Interface data
+
+    int send_hello_again = 0;
+
     
 
-    struct pdu_queue queue; // Queue for storing PDUs to be forwarded
-    initialize_queue(&queue);
+    struct pdu_queue f_queue; // Queue for storing PDUs to be forwarded
+    struct pdu_queue a_queue; // Queue for storing PDUs while waiting for ARP reply
+    initialize_queue(&f_queue);
+    initialize_queue(&a_queue);
 
 
     // PARSE ARGUMENTS FROM CLI
@@ -188,7 +193,7 @@ int main(int argc, char *argv[]) {
                     printf("Packet not for us, forwarding..\n");
                 }
                 
-                forward_pdu(route_fd, &queue, pdu);
+                forward_pdu(route_fd, &f_queue, pdu);
 
                 
             // ACCEPT PACKET IF FOR US
@@ -270,11 +275,11 @@ int main(int argc, char *argv[]) {
                             }
 
                             // Create PDU
-                            struct pdu* pdu = create_PDU(ifs.addr[recv_interface].sll_addr, pdu->ethhdr->src_mac, ifs.local_mip_addr, pdu->miphdr->src, pdu->miphdr->ttl, SDU_TYPE_MIPARP, sdu, 4);
+                            struct pdu* pdu = create_PDU(ifs.local_mip_addr, pdu->miphdr->src, pdu->miphdr->ttl, SDU_TYPE_MIPARP, sdu, 4);
 
                             // Send PDU
                             if (pdu->miphdr->ttl > 0){
-                                send_PDU(&ifs, pdu);
+                                send_PDU(&ifs, pdu, a_queue);
                             }
 
 
@@ -304,26 +309,9 @@ int main(int argc, char *argv[]) {
                         
                         // Check if we are waiting for this reply by comparing target MIP address with local MIP address
 
-                        // Check if we have a packet waiting to be forwarded waiting for this ARP reply
-                        struct pdu *pdu = find_packet_for_destination(&queue, pdu->miphdr->src);
-                        if (pdu != NULL){
-                            if (debug_mode){
-                                printf("Found packet waiting for ARP reply\n");
-                            }
+                        if (send_hello_again){
 
-                            // Send packet
-                            send_PDU(&ifs, pdu);
-
-                            // Remove packet from queue
-                            dequeue(&queue);
-
-                        } else {
-                            if (debug_mode){
-                                printf("No packet waiting for ARP reply\n");
-                            }
                         }
-
-
 
                         break;
 
@@ -400,7 +388,7 @@ int main(int argc, char *argv[]) {
                         uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
                         // Create PDU
-                        struct pdu *pdu = create_PDU(ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len);
+                        struct pdu *pdu = create_PDU(ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len);
 
                         // Send PDU
                         send_PDU(&ifs, pdu);
@@ -419,7 +407,7 @@ int main(int argc, char *argv[]) {
                         for (int interface = 0; interface < ifs.ifn; interface++){
 
                             // Create PDU
-                            struct pdu *pdu = create_PDU(ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_MIPARP, sdu, sizeof(uint32_t));
+                            struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_MIPARP, sdu, sizeof(uint32_t));
 
                             // Send PDU
                             send_PDU(&ifs, pdu);
@@ -446,10 +434,10 @@ int main(int argc, char *argv[]) {
 
 
                     // Create PDU
-                    struct pdu *pdu = create_PDU(ifs.addr[interface].sll_addr, dst_mac_addr, ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len);
+                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len);
 
                     // Send PDU
-                    send_PDU(&ifs, pdu);
+                    send_PDU(&ifs, pdu, a_queue);
 
                         
                     if (debug_mode){
@@ -497,18 +485,45 @@ int main(int argc, char *argv[]) {
                     }
 
                     // Create SDU
-                    sdu = uint8ArrayToUint32Array(msg, 6, &sdu_len);
+                    sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
 
-                    // Send to all interfaces
-                    for (int interface = 0; interface < ifs.ifn; interface++){
+                    // If we have known nodes
+                    if (arp_count_entries){
 
-                        uint8_t dst_mip = arp_get_mip_from_interface(interface);
-                        
-                        // Create PDU
-                        struct pdu *pdu = create_PDU(ifs.addr[interface].sll_addr, broadcast_mac, ifs.local_mip_addr, dst_mip, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
+                        // Send to all known nodes
+                        for (int interface = 0; interface < ifs.ifn; interface++){
 
-                        // Send PDU
-                        send_PDU(&ifs, pdu);
+                            // Find MIP adress of interface if it exists
+                            uint8_t dst_mip = arp_get_mip_from_interface(interface);
+                            
+
+                            // If MIP adress of interface exists, send PDU
+                            if (dst_mip != -1){
+                                // Create PDU
+                                struct pdu *pdu = create_PDU(ifs.local_mip_addr, dst_mip, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+
+                                // Send PDU
+                                send_PDU(&ifs, pdu, a_queue);
+                            }
+                        }
+                    // If no known nodes, send ARP broadcast
+                    } else {
+                        // Create SDU
+                        uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, BROADCAST_MIP_ADDR);
+
+                        // Send ARP request to all interfaces
+                        for (int interface = 0; interface < ifs.ifn; interface++){
+
+                            // Create PDU
+                            struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_MIPARP, sdu, sizeof(uint32_t));
+
+                            // Send PDU
+                            send_PDU(&ifs, pdu, a_queue);
+                        }
+
+                        send_hello_again = 1;
+
+
                     }
 
 
@@ -552,7 +567,7 @@ int main(int argc, char *argv[]) {
                     uint8_t next_hop = msg[5];
 
                     // Check queue for packets waiting for this MIP address
-                    struct pdu *pdu = dequeue(&queue);
+                    struct pdu *pdu = dequeue(&f_queue);
 
                     // Assuming arp_lookup returns a pointer to a MAC address
                     uint8_t *dst_mac_addr = arp_lookup(next_hop);

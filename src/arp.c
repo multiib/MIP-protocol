@@ -25,6 +25,9 @@ void arp_init() {
 
 // Lookup a MIP address in the ARP cache
 uint8_t* arp_lookup(uint8_t mip) {
+
+
+    
     for (int i = 0; i < arp_count; ++i) {
         if (arp_cache[i].mip == mip) {
             return arp_cache[i].mac;

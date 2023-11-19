@@ -94,16 +94,14 @@ ROUTE_handle handle_route_message(int route_fd, uint8_t *msg);
 void sendToRoutingDaemon(void);
 
 // void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int type, struct pdu_queue *queue, int debug_mode);
-struct pdu* create_PDU(uint8_t *src_mac_addr,
-            uint8_t *dst_mac_addr,
-            uint8_t src_mip_addr,
+struct pdu* create_PDU(uint8_t src_mip_addr,
             uint8_t dst_mip_addr,
             uint8_t ttl,
             uint8_t sdu_type,
             const uint32_t *sdu,
             uint16_t sdu_len);
 
-void send_PDU(struct ifs_data *ifs, struct pdu *pdu);
+void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue);
 void forward_pdu(int route_fd, struct pdu_queue *queue, struct pdu *pdu);
 void uint32_to_uint8(uint32_t *input, size_t input_size, uint8_t *output);
 uint32_t* uint8ArrayToUint32Array(const uint8_t* byte_array, uint8_t array_length, uint8_t *length);

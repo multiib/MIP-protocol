@@ -797,9 +797,7 @@ void sendToRoutingDaemon(void) {
 //     }
 // }
 
-struct pdu* create_PDU(uint8_t *src_mac_addr,
-            uint8_t *dst_mac_addr,
-            uint8_t src_mip_addr,
+struct pdu* create_PDU(uint8_t src_mip_addr,
             uint8_t dst_mip_addr,
             uint8_t ttl,
             uint8_t sdu_type,
@@ -808,12 +806,31 @@ struct pdu* create_PDU(uint8_t *src_mac_addr,
 {
 
     struct pdu *pdu = alloc_pdu();
-    fill_pdu(pdu, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
+    fill_pdu(pdu, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
 
     return pdu;
 }
 
-void send_PDU(struct ifs_data *ifs, struct pdu *pdu){
+void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue){
+
+
+
+
+    // Get mac address for destination mip
+    uint8_t *dst_mac_addr = arp_lookup(pdu->miphdr->dst);
+    if (dst_mac_addr == NULL) {
+        // Add to queue
+        enqueue(a_queue, pdu);
+
+        // Send ARP request
+        send_arp_request_to_all_interfaces(ifs, pdu->miphdr->dst, debug_mode); ///
+        return;
+    }
+
+    // Add ethernet header
+    memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
+    memcpy(pdu->ethhdr->src_mac, ifs->addr[arp_lookup_interface(pdu->miphdr->dst)].sll_addr, 6);
+
 
     uint8_t snd_buf[MAX_BUF_SIZE];
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
