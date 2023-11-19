@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
                 }
                 
                     // Add to queue
-                enqueue(f_queue, pdu);
+                enqueue(&f_queue, pdu);
 
                 // Send route request
                 sendRequestToApp(route_fd, pdu->miphdr->dst);
