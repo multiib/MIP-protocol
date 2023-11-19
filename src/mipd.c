@@ -499,7 +499,7 @@ int main(int argc, char *argv[]) {
                     uint8_t nentries = arp_count_entries();
                     printf("arp_count_entries: %u\n", arp_count_entries());
                     if (nentries == 0){
-
+                        printf("No entries in ARP table, sending ARP request to all interfaces\n");
                         send_arp_request_to_all_interfaces(&ifs, 255, debug_mode);
 
                         continue;
