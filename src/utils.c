@@ -800,24 +800,19 @@ struct pdu* create_PDU(uint8_t src_mip_addr,
     return pdu;
 }
 
-void send_PDU(struct ifs_data *ifs, struct pdu *pdu){
-
+void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interface) {
     uint8_t snd_buf[MAX_BUF_SIZE];
 
-
     // Check TTL
-    if (pdu->miphdr->ttl < 0){
+    if (pdu->miphdr->ttl <= 0) {
         printf("TTL is 0, not sending packet\n");
         return;
     }
 
     // Decrement TTL
     pdu->miphdr->ttl--;
-    
 
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
-
-    struct sockaddr_ll *interface = find_matching_sockaddr(ifs, pdu->ethhdr->dst_mac);
 
     // Send the serialized buffer via RAW socket
     if (sendto(ifs->rsock, snd_buf, snd_len, 0,
@@ -827,14 +822,18 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu){
         close(ifs->rsock);
     }
 
-    if (debug_mode){
+    if (debug_mode) {
         printf("Sending PDU with content (size %zu):\n", snd_len);
         print_pdu_content(pdu);
     }
 
     destroy_pdu(pdu);
-    
 }
+
+
+
+
+
 
 
 
