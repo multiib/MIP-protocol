@@ -818,7 +818,7 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interfa
 
     printf("minus shit\n");
     for (int i = 0; i < 2; i++){
-        printf("%u ", pdu->miphdr->sdu[i]);
+        printf("%u ", pdu->sdu[i]);
     }
 
 
