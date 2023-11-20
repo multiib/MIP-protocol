@@ -14,6 +14,9 @@
 #define SDU_TYPE_PING   0x02
 #define SDU_TYPE_ROUTE  0x04
 
+#define MAX_RETURN_SIZE 4
+#define MAX_QUEUE_SIZE 8
+
 struct pdu {
     struct eth_hdr *ethhdr;
     struct mip_hdr *miphdr;
@@ -26,27 +29,27 @@ struct ping_data {
     char   msg[512];
 };
 
-
-
-struct forward_data{
-    uint8_t next_hop_MIP;       // Next hop MIP address
-    uint8_t ttl;                // Time To Live
-    uint8_t sdu_type;           // Service Data Unit type
-    uint32_t *sdu;              // Pointer to Service Data Unit array
-    size_t sdu_len;             // Length of the SDU array
+ struct pdu_queue_slot {
+    struct pdu* packet;
+    uint8_t next_hop;  // New field for the next hop
+    int is_occupied;
 };
 
-struct pdu_node {
-    struct pdu *packet;
-    struct pdu_node *next;
+struct pdu_with_hop {
+    struct pdu* packet;
+    uint8_t next_hop;
 };
 
-struct pdu_queue {
-    struct pdu_node *front;
-    struct pdu_node *rear;
+struct queue_node {
+    struct pdu* packet;
+    struct queue_node* next;
+};
+
+struct queue_forward {
+    struct queue_node* front;
+    struct queue_node* rear;
     int size;
 };
-
 
 struct pdu * alloc_pdu(void);
 void fill_pdu(struct pdu *pdu,
@@ -60,14 +63,13 @@ size_t mip_serialize_pdu(struct pdu *, uint8_t *);
 size_t mip_deserialize_pdu(struct pdu *, uint8_t *);
 void print_pdu_content(struct pdu *);
 void destroy_pdu(struct pdu *);
-void initialize_queue(struct pdu_queue *queue);
-int is_queue_empty(struct pdu_queue *queue);
-int queue_is_not_empty(struct pdu_queue *queue);
-void enqueue(struct pdu_queue *queue, struct pdu *packet);
-struct pdu * dequeue(struct pdu_queue *queue);
+void initialize_queue();
+void enqueue(struct pdu* packet, uint8_t next_hop);
+struct pdu* remove_packet_by_mac(uint8_t* mac_address);
+
+
 void clear_ping_data(struct ping_data *data);
-// struct pdu *find_packet_for_destination(struct pdu_queue *queue, uint8_t destination);
-
-
-
+void initialize_queue_forward(struct queue_f* queue);
+int enqueue_forward(struct queue_f* queue, struct pdu* packet);
+struct pdu* dequeue_forward(struct queue_f* queue);
 #endif /* _PDU_H_ */

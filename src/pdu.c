@@ -195,41 +195,86 @@ void destroy_pdu(struct pdu *pdu)
 }
  
 
-void initialize_queue(struct pdu_queue *queue) {
-    queue->front = queue->rear = NULL;
+void initialize_queue() {
+    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
+        queue[i].packet = NULL;
+        queue[i].is_occupied = 0;
+    }
+}
+
+void enqueue(struct pdu* packet, uint8_t next_hop) {
+    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
+        if (!queue[i].is_occupied) {
+            queue[i].packet = packet;
+            queue[i].next_hop = next_hop;  // Set the next hop
+            queue[i].is_occupied = 1;
+        }
+    }
+}
+
+
+
+struct pdu_with_hop remove_packet_by_mac(uint8_t* mac_address) {
+    struct pdu_with_hop result;
+    result.packet = NULL; // Initialize to NULL
+    result.next_hop = 0;  // Initialize with a default value
+
+    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
+        if (queue[i].is_occupied && memcmp(queue[i].packet->ethhdr->dst_mac, mac_address, MAC_ADDR_SIZE) == 0) {
+            result.packet = queue[i].packet;
+            result.next_hop = queue[i].next_hop;
+
+            queue[i].packet = NULL;
+            queue[i].is_occupied = 0;
+
+            return result; // Return the found packet and next_hop
+        }
+    }
+    return result; // No packet found, return the initialized result
+}
+
+
+
+
+// Usage
+// int count;
+// struct pdu** pdus = remove_packets_by_mac(mac_address, &count);
+
+// for (int i = 0; i < count; i++) {
+//     struct pdu* pdu = pdus[i];
+//     // Process pdu
+// }
+
+
+void initialize_queue_forward(struct queue_f* queue) {
+    queue->front = NULL;
+    queue->rear = NULL;
     queue->size = 0;
 }
 
-int is_queue_empty(struct pdu_queue *queue) {
-    return (queue->size == 0);
-}
+int enqueue_forward(struct queue_f* queue, struct pdu* packet) {
+    struct queue_node* newNode = (struct queue_node*)malloc(sizeof(struct queue_node));
+    if (!newNode) return -1;  // Memory allocation failed
 
-int queue_is_not_empty(struct pdu_queue *queue) {
-    return (queue->size != 0);
-}
-
-
-void enqueue(struct pdu_queue *queue, struct pdu *packet) {
-    struct pdu_node *newNode = (struct pdu_node *)malloc(sizeof(struct pdu_node));
     newNode->packet = packet;
     newNode->next = NULL;
 
-    if (queue->rear == NULL) {
+    if (queue->rear == NULL) {  // If queue is empty
         queue->front = queue->rear = newNode;
     } else {
         queue->rear->next = newNode;
         queue->rear = newNode;
     }
+
     queue->size++;
+    return 0;  // Success
 }
 
-struct pdu* dequeue(struct pdu_queue *queue) {
-    if (is_queue_empty(queue)) {
-        return NULL;
-    }
+struct pdu* dequeue_forward(struct queue_f* queue) {
+    if (queue->front == NULL) return NULL;  // Queue is empty
 
-    struct pdu_node *temp = queue->front;
-    struct pdu *packet = temp->packet;
+    struct queue_node* temp = queue->front;
+    struct pdu* packet = temp->packet;
 
     queue->front = queue->front->next;
     if (queue->front == NULL) {
@@ -238,18 +283,5 @@ struct pdu* dequeue(struct pdu_queue *queue) {
 
     free(temp);
     queue->size--;
-
     return packet;
 }
-
-// struct pdu *find_packet_for_destination(struct pdu_queue *queue, uint32_t destination) {
-//     struct pdu_node *current = queue->front;
-//     while (current != NULL) {
-//         if (current->packet->miphdr->dst == destination) {
-//             return current->packet;
-//         }
-//         current = current->next;
-//     }
-//     return NULL;
-// }
-

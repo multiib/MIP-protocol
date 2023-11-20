@@ -811,66 +811,26 @@ struct pdu* create_PDU(uint8_t src_mip_addr,
     return pdu;
 }
 
-void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue, uint8_t next_hop){
+void send_PDU(struct ifs_data *ifs, struct pdu *pdu){
 
     uint8_t snd_buf[MAX_BUF_SIZE];
-    // If queue pointer is null send hello msg to all interfaces
-    if (a_queue == NULL) {
-        printf("1nul23");
-        for (int interface = 0; interface < ifs->ifn; interface++) {
-            if (debug_mode) {
-                printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", BROADCAST_MIP_ADDR, interface);
-            }
-            
-            // Add ethernet header if not already present
-
-            memcpy(pdu->ethhdr->dst_mac, ifs->addr[interface].sll_addr, 6);
-            memcpy(pdu->ethhdr->src_mac, ifs->addr[interface].sll_addr, 6);
-
-            size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
-
-            if (sendto(ifs->rsock, snd_buf, snd_len, 0,
-                (struct sockaddr *)interface,
-                sizeof(struct sockaddr_ll)) <= 0) {
-                perror("sendto()");
-                close(ifs->rsock);
-            }
-
-            if (debug_mode){
-                printf("Sending PDU with content (size %zu):\n", snd_len);
-                print_pdu_content(pdu);
-            }
-
-        }
-    }
 
 
-    // Get mac address for destination mip
-    uint8_t *dst_mac_addr = arp_lookup(pdu->miphdr->dst);
-    if (dst_mac_addr == NULL) {
-        // Add to queue
-        enqueue(a_queue, pdu);
-
-        // Send ARP request
-        send_arp_request_to_all_interfaces(ifs, pdu->miphdr->dst, debug_mode);
+    // Check TTL
+    if (pdu->miphdr->ttl < 0){
+        printf("TTL is 0, not sending packet\n");
         return;
     }
 
-    // Add ethernet header
-    dst_mac_addr = arp_lookup(next_hop);
-
-    memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
-    memcpy(pdu->ethhdr->src_mac, ifs->addr[arp_lookup_interface(next_hop)].sll_addr, 6);
+    // Decrement TTL
+    pdu->miphdr->ttl--;
     
-    // Serialize PDU
 
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
     struct sockaddr_ll *interface = find_matching_sockaddr(ifs, pdu->ethhdr->dst_mac);
 
-    // Decrement TTL
-    pdu->miphdr->ttl--;
-
+    // Send the serialized buffer via RAW socket
     if (sendto(ifs->rsock, snd_buf, snd_len, 0,
         (struct sockaddr *)interface,
         sizeof(struct sockaddr_ll)) <= 0) {
@@ -938,4 +898,16 @@ void sendRequestToApp(int route_fd, int destinationMIP, int localMIP) {
     if (bytes_sent < 0) {
         perror("send");
     }
+}
+
+
+void fill_ethhdr(struct pdu *pdu, const uint8_t *dst_mac, const uint8_t *src_mac) {
+    if (!pdu || !pdu->ethhdr || !dst_mac || !src_mac) {
+        printf("Invalid arguments\n");
+        return;
+    }
+
+    memcpy(pdu->ethhdr->dst_mac, dst_mac, MAC_ADDR_SIZE);
+    memcpy(pdu->ethhdr->src_mac, src_mac, MAC_ADDR_SIZE);
+    pdu->ethhdr->ethertype = htons(ETH_P_MIP);
 }
