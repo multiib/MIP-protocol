@@ -790,6 +790,10 @@ struct pdu* create_PDU(uint8_t src_mip_addr,
             uint16_t sdu_len)
 {
 
+    printf("inside create_PDU\n");
+    for (int i = 0; i < sdu_len; i++){
+        printf("%u ", sdu[i]);
+    }
     struct pdu *pdu = alloc_pdu();
     fill_pdu(pdu, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
 
@@ -811,6 +815,12 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interfa
     pdu->miphdr->ttl--;
 
     // print ttl
+
+    printf("minus shit\n");
+    for (int i = 0; i < 2; i++){
+        printf("%u ", sdu[i]);
+    }
+
 
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
