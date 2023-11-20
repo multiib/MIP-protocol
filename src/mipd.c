@@ -49,16 +49,12 @@ int main(int argc, char *argv[]) {
     uint8_t mip_return = 0; // Used to store MIP adresses while talking to ping_server
     uint8_t ttl_return;     // Used to store TTL while talking to ping_server
 
-    int waiting_to_forward = 0; // Used to check if we are waiting for an ARP reply before forwarding a packet
-    uint8_t waiting_next_hop_MIP; 
-
     uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
     uint8_t target_arp_mip_addr; // Used to store MIP address from SDU of ARP request
 
     struct ifs_data ifs; // Interface data
 
-    int send_hello_again = 0;
 
     // Initialize arp table
     arp_init();
@@ -395,7 +391,6 @@ int main(int argc, char *argv[]) {
 
             switch (type){
                 
-                uint8_t *dst_mac_addr;
 
                 // RECIEVED MESSAGE FROM PING_CLIENT
                 case APP_PING: {
@@ -512,7 +507,7 @@ int main(int argc, char *argv[]) {
                         // Set source and destination MAC address
                         fill_ethhdr(pdu, src_mac_addr, dst_mac_addr);
 
-                        send_PDU(&ifs, pdu, NULL, 255);
+                        send_PDU(&ifs, pdu);
                     }
 
 
@@ -525,6 +520,7 @@ int main(int argc, char *argv[]) {
 
 
                     // Create SDU
+                    uint8_t sdu_len;
                     uint32_t *sdu = uint8ArrayToUint32Array(msg, 3 * MAX_NODES + 5, &sdu_len);
 
                     // Create PDU
@@ -579,7 +575,7 @@ int main(int argc, char *argv[]) {
                     } else {
                        
                         // Add to queue
-                        enqueue(pdu, next_hop);
+                        enqueue(packet, next_hop);
 
                         // Send ARP request
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, next_hop);
@@ -590,11 +586,14 @@ int main(int argc, char *argv[]) {
                             // Create PDU
                             struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_MIPARP, sdu, sizeof(uint32_t));
 
-                            // Set source MAC address
+                            // Get source MAC address
                             uint8_t *src_mac_addr = ifs.addr[interface].sll_addr;
 
-                            // Set destination MAC address
+                            // Get destination MAC address
                             uint8_t *dst_mac_addr = broadcast_mac;
+
+                            // Set source and destination MAC address
+                            fill_ethhdr(pdu, src_mac_addr, dst_mac_addr);
 
 
                             // Send PDU
