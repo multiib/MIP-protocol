@@ -94,7 +94,7 @@ void handleHelloMessage(int MIPgreeter) {
 }
 
 void handleUpdateMessage(uint8_t *updateMessage, int messageLength) {
-    if (messageLength < 4) { // Check for minimum length (header + at least one entry)
+    if (messageLength < 3 * MAX_NODES + 5) { // Check for minimum length (header + at least one entry)
         printf("Invalid update message length.\n");
         return;
     }
@@ -123,7 +123,7 @@ void handleUpdateMessage(uint8_t *updateMessage, int messageLength) {
 }
 
 void handleRequestMessage(int route_fd, uint8_t *requestMessage, int messageLength) {
-    if (messageLength < 9) { // Check for minimum length (header + at least one entry)
+    if (messageLength < 6) { // Check for minimum length (header + at least one entry)
         printf("Invalid request message length.\n");
         return;
     }
