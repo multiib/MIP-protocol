@@ -17,6 +17,8 @@
 #define MAX_RETURN_SIZE 4
 #define MAX_QUEUE_SIZE 8
 
+extern struct pdu_queue_slot queue_arp[MAX_QUEUE_SIZE];
+
 struct pdu {
     struct eth_hdr *ethhdr;
     struct mip_hdr *miphdr;
@@ -63,8 +65,8 @@ size_t mip_serialize_pdu(struct pdu *, uint8_t *);
 size_t mip_deserialize_pdu(struct pdu *, uint8_t *);
 void print_pdu_content(struct pdu *);
 void destroy_pdu(struct pdu *);
-void initialize_queue();
-void enqueue(struct pdu* packet, uint8_t next_hop);
+void initialize_queue_arp();
+void enqueue_arp(struct pdu* packet, uint8_t next_hop);
 struct pdu_with_hop remove_packet_by_mac(uint8_t* mac_address);
 
 void clear_ping_data(struct ping_data *data);

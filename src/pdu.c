@@ -12,6 +12,7 @@
 #include "arp.h"
 #include "route.h"
 
+struct queue_item queue_arp[MAX_QUEUE_SIZE];
 struct pdu * alloc_pdu(void) {
     struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));
     if (!pdu) {
@@ -195,19 +196,19 @@ void destroy_pdu(struct pdu *pdu)
 }
  
 
-void initialize_queue() {
+void initialize_queue_arp() {
     for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-        queue[i].packet = NULL;
-        queue[i].is_occupied = 0;
+        queue_arp[i].packet = NULL;
+        queue_arp[i].is_occupied = 0;
     }
 }
 
-void enqueue(struct pdu* packet, uint8_t next_hop) {
+void enqueue_arp(struct pdu* packet, uint8_t next_hop) {
     for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-        if (!queue[i].is_occupied) {
-            queue[i].packet = packet;
-            queue[i].next_hop = next_hop;  // Set the next hop
-            queue[i].is_occupied = 1;
+        if (!queue_arp[i].is_occupied) {
+            queue_arp[i].packet = packet;
+            queue_arp[i].next_hop = next_hop;  // Set the next hop
+            queue_arp[i].is_occupied = 1;
         }
     }
 }
@@ -224,8 +225,8 @@ struct pdu_with_hop remove_packet_by_mac(uint8_t* mac_address) {
             result.packet = queue[i].packet;
             result.next_hop = queue[i].next_hop;
 
-            queue[i].packet = NULL;
-            queue[i].is_occupied = 0;
+            queue_arp[i].packet = NULL;
+            queue_arp[i].is_occupied = 0;
 
             return result; // Return the found packet and next_hop
         }
