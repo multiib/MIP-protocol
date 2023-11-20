@@ -804,7 +804,7 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interfa
     uint8_t snd_buf[MAX_BUF_SIZE];
 
     // Check TTL
-    if (pdu->miphdr->ttl <= 0) {
+    if (pdu->miphdr->ttl < 0) {
         printf("TTL is 0, not sending packet\n");
         return;
     }
