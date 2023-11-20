@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Ping client/server connected
-            if (indentifier == 0x01) {
+            if (indentifier == 0x01 && app_fd == -1) {
 
                 app_fd = unix_fd;
                 rc = add_to_epoll_table(epoll_fd, app_fd);
