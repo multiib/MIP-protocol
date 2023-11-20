@@ -890,7 +890,7 @@ void sendRequestToApp(int route_fd, int destinationMIP, int localMIP) {
 }
 
 
-void fill_ethhdr(struct pdu *pdu, const uint8_t *dst_mac, const uint8_t *src_mac) {
+void fill_ethhdr(struct pdu *pdu, const uint8_t *src_mac, const uint8_t *dst_mac) {
     if (!pdu || !pdu->ethhdr || !dst_mac || !src_mac) {
         printf("Invalid arguments\n");
         return;

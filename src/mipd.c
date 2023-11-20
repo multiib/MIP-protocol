@@ -460,16 +460,10 @@ int main(int argc, char *argv[]) {
             printf("Received ROUTE\n");
             // print message
 
-            uint8_t msg [1024];
+            uint8_t msg[1024];
 
             // Clear buffer
             memset(msg, 0, sizeof(msg));
-
-            // // print msg uint8t arr in hex
-            for (int i = 0; i < 5; i++){
-                printf("%x ", msg[i]);
-            }
-
 
             ROUTE_handle type = handle_route_message(route_fd, msg, sizeof(msg));
             uint8_t recieved_mip = msg[0];
