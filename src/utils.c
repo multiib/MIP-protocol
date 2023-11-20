@@ -202,7 +202,7 @@ MIP_handle handle_mip_packet(struct ifs_data *ifs, struct pdu *pdu, int *recv_if
 
     MIP_handle mip_type;
 
-    uint8_t rcv_buf[512];
+    uint32_t rcv_buf[512];
     struct sockaddr_ll from_addr;
     socklen_t from_addr_len = sizeof(from_addr);
     
@@ -216,6 +216,13 @@ MIP_handle handle_mip_packet(struct ifs_data *ifs, struct pdu *pdu, int *recv_if
     *recv_ifs_index = find_matching_if_index(ifs, &from_addr);
 
     size_t rcv_len = mip_deserialize_pdu(pdu, rcv_buf);
+
+    printf("Received PDU with content (size %zu):\n", rcv_len);
+    print_pdu_content(pdu);
+
+
+
+
 
     if (pdu->miphdr->sdu_type == SDU_TYPE_MIPARP) {
         int arp_type = (pdu->sdu[0] >> 31) & 1;
@@ -823,6 +830,8 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interfa
 
 
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
+
+
 
     // Send the serialized buffer via RAW socket
     if (sendto(ifs->rsock, snd_buf, snd_len, 0,
