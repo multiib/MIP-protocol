@@ -811,14 +811,14 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interfa
 
 
 
-    // Decrement TTL
-    pdu->miphdr->ttl--;
+    // // Decrement TTL
+    // pdu->miphdr->ttl--;
 
     // print ttl
 
     printf("minus shit\n");
     for (int i = 0; i < 2; i++){
-        printf("%u ", sdu[i]);
+        printf("%u ", pdu->miphdrsdu[i]);
     }
 
 
