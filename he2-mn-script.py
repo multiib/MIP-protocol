@@ -32,11 +32,11 @@ class HE2Topo(Topo):
         E = self.addHost('E')
 
         # Add links. Note the packet loss of 1% (~1 out of 10 packets is discarded)
-        self.addLink(A, B, bw=10, delay='10ms', loss=1.0, use_tbf=False)
-        self.addLink(B, C, bw=10, delay='10ms', loss=1.0, use_tbf=False)
-        self.addLink(B, D, bw=10, delay='10ms', loss=1.0, use_tbf=False)
-        self.addLink(C, D, bw=10, delay='10ms', loss=1.0, use_tbf=False)
-        self.addLink(D, E, bw=10, delay='10ms', loss=1.0, use_tbf=False)
+        self.addLink(A, B, bw=10, delay='10ms', loss=0, use_tbf=False)
+        self.addLink(B, C, bw=10, delay='10ms', loss=0, use_tbf=False)
+        self.addLink(B, D, bw=10, delay='10ms', loss=0, use_tbf=False)
+        self.addLink(C, D, bw=10, delay='10ms', loss=0, use_tbf=False)
+        self.addLink(D, E, bw=10, delay='10ms', loss=0, use_tbf=False)
 
 
 terms = []
