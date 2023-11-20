@@ -811,9 +811,9 @@ struct pdu* create_PDU(uint8_t src_mip_addr,
     return pdu;
 }
 
-void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue){
+void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue, uint8_t next_hop){
 
-
+    uint8_t snd_buf[MAX_BUF_SIZE];
     // If queue pointer is null send hello msg to all interfaces
     if (a_queue == NULL) {
         printf("1nul23");
@@ -823,10 +823,24 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue){
             }
             
             // Add ethernet header if not already present
-            if (pdu->ethhdr == NULL) {
-                memcpy(pdu->ethhdr->dst_mac, ifs->addr[interface].sll_addr, 6);
-                memcpy(pdu->ethhdr->src_mac, ifs->addr[interface].sll_addr, 6);
+
+            memcpy(pdu->ethhdr->dst_mac, ifs->addr[interface].sll_addr, 6);
+            memcpy(pdu->ethhdr->src_mac, ifs->addr[interface].sll_addr, 6);
+
+            size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
+
+            if (sendto(ifs->rsock, snd_buf, snd_len, 0,
+                (struct sockaddr *)interface,
+                sizeof(struct sockaddr_ll)) <= 0) {
+                perror("sendto()");
+                close(ifs->rsock);
             }
+
+            if (debug_mode){
+                printf("Sending PDU with content (size %zu):\n", snd_len);
+                print_pdu_content(pdu);
+            }
+
         }
     }
 
@@ -842,16 +856,14 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct pdu_queue *a_queue){
         return;
     }
 
-    // Add ethernet header if not already present
-    if (pdu->ethhdr == NULL) {
-        memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
-        memcpy(pdu->ethhdr->src_mac, ifs->addr[arp_lookup_interface(pdu->miphdr->dst)].sll_addr, 6);
-    }
+    // Add ethernet header
+    dst_mac_addr = arp_lookup(next_hop);
 
+    memcpy(pdu->ethhdr->dst_mac, dst_mac_addr, 6);
+    memcpy(pdu->ethhdr->src_mac, ifs->addr[arp_lookup_interface(next_hop)].sll_addr, 6);
+    
+    // Serialize PDU
 
-
-
-    uint8_t snd_buf[MAX_BUF_SIZE];
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
     struct sockaddr_ll *interface = find_matching_sockaddr(ifs, pdu->ethhdr->dst_mac);
