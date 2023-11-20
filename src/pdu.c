@@ -222,9 +222,9 @@ struct pdu_with_hop remove_packet_by_mac(uint8_t* mac_address) {
     result.next_hop = 0;  // Initialize with a default value
 
     for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-        if (queue_arp[i].is_occupied && memcmp(queue[i].packet->ethhdr->dst_mac, mac_address, MAC_ADDR_SIZE) == 0) {
-            result.packet = queue[i].packet;
-            result.next_hop = queue[i].next_hop;
+        if (queue_arp[i].is_occupied && memcmp(queue_arp[i].packet->ethhdr->dst_mac, mac_address, MAC_ADDR_SIZE) == 0) {
+            result.packet = queue_arp[i].packet;
+            result.next_hop = queue_arp[i].next_hop;
 
             queue_arp[i].packet = NULL;
             queue_arp[i].is_occupied = 0;
