@@ -802,16 +802,20 @@ struct pdu* create_PDU(uint8_t src_mip_addr,
 
 void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interface) {
     uint8_t snd_buf[MAX_BUF_SIZE];
-
+    printf("TTL23: %d\n", pdu->miphdr->ttl);
     // Check TTL
     if (pdu->miphdr->ttl < 0) {
         printf("TTL is 0, not sending packet\n");
         return;
     }
 
+    printf("TTL33: %d\n", pdu->miphdr->ttl);
+
     // Decrement TTL
     pdu->miphdr->ttl--;
 
+    // print ttl
+    printf("TTL43: %d\n", pdu->miphdr->ttl);
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
     // Send the serialized buffer via RAW socket

@@ -501,7 +501,7 @@ int main(int argc, char *argv[]) {
 
                         // Set source and destination MAC address
                         fill_ethhdr(pdu, src_mac_addr, dst_mac_addr);
-
+                        printf("TTL13: %d\n", pdu->miphdr->ttl);
                         send_PDU(&ifs, pdu, find_matching_sockaddr(&ifs, ifs.addr[interface].sll_addr));
                     }
 
