@@ -12,7 +12,8 @@
 #include "arp.h"
 #include "route.h"
 
-struct queue_item queue_arp[MAX_QUEUE_SIZE];
+struct pdu_queue_slot queue_arp[MAX_QUEUE_SIZE];
+
 struct pdu * alloc_pdu(void) {
     struct pdu *pdu = (struct pdu *)malloc(sizeof(struct pdu));
     if (!pdu) {
@@ -221,7 +222,7 @@ struct pdu_with_hop remove_packet_by_mac(uint8_t* mac_address) {
     result.next_hop = 0;  // Initialize with a default value
 
     for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-        if (queue[i].is_occupied && memcmp(queue[i].packet->ethhdr->dst_mac, mac_address, MAC_ADDR_SIZE) == 0) {
+        if (queue_arp[i].is_occupied && memcmp(queue[i].packet->ethhdr->dst_mac, mac_address, MAC_ADDR_SIZE) == 0) {
             result.packet = queue[i].packet;
             result.next_hop = queue[i].next_hop;
 
