@@ -337,30 +337,22 @@ APP_handle handle_app_message(int app_fd, uint8_t *dst_mip_addr, char *msg, uint
 
 
 
-ROUTE_handle handle_route_message(int route_fd, uint8_t *buf)
+
+
+ROUTE_handle handle_route_message(int route_fd, uint8_t *buf, size_t buf_size)
 {
     int rc;
     ROUTE_handle route_type;
-    
-    // Buffer to hold message from application
 
-    uint8_t buf[512];
     // Clear buffer
-    memset(buf, 0, sizeof(buf));
+    memset(buf, 0, buf_size);
 
     // Read message from application
-    rc = read(route_fd, buf, sizeof(buf)); // TODO: Create a better system for setting the buffer size
+    rc = read(route_fd, buf, buf_size);
     if (rc <= 0) {
         perror("read");
-        exit(EXIT_FAILURE);
+        return -1; // Return an error code
     }
-
-    // Set the destination_mip to the first byte of the buffer
-    // *dst_mip_addr =  buf[0];
-
-
-    // Initialize an offset for the message
-    // int offset = 2; // Skip the first byte (MIP) and the second byte (TTL) TODO: Check if this is correct
 
     if (buf[2] == 0x48 && buf[3] == 0x45 && buf[4] == 0x4C) {
         route_type = ROUTE_HELLO;
@@ -370,15 +362,12 @@ ROUTE_handle handle_route_message(int route_fd, uint8_t *buf)
         route_type = ROUTE_RESPONSE;
     } else {
         perror("Unknown message type");
-        close(route_fd);
-        exit(EXIT_FAILURE);
+        return -1; // Return an error code
     }
 
-    
-
     return route_type;
-
 }
+
 
 /**
  * Send a MIP packet using a raw socket.
@@ -408,52 +397,52 @@ ROUTE_handle handle_route_message(int route_fd, uint8_t *buf)
  * Returns 0 on successful execution. If there is an error in allocating the PDU, 
  * the function returns -ENOMEM.
  */
-int send_mip_packet(struct ifs_data *ifs,
-            uint8_t *src_mac_addr,
-            uint8_t *dst_mac_addr,
-            uint8_t src_mip_addr,
-            uint8_t dst_mip_addr,
-            uint8_t ttl,
-            uint8_t sdu_type,
-            const uint32_t *sdu,
-            uint16_t sdu_len)
-{
-    struct pdu *pdu = alloc_pdu();
-    uint8_t snd_buf[MAX_BUF_SIZE];
+// int send_mip_packet(struct ifs_data *ifs,
+//             uint8_t *src_mac_addr,
+//             uint8_t *dst_mac_addr,
+//             uint8_t src_mip_addr,
+//             uint8_t dst_mip_addr,
+//             uint8_t ttl,
+//             uint8_t sdu_type,
+//             const uint32_t *sdu,
+//             uint16_t sdu_len)
+// {
+//     struct pdu *pdu = alloc_pdu();
+//     uint8_t snd_buf[MAX_BUF_SIZE];
     
-    if (NULL == pdu)
-        return -ENOMEM;
+//     if (NULL == pdu)
+//         return -ENOMEM;
 
 
 
-    fill_pdu(pdu, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
+//     fill_pdu(pdu, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
 
-    pdu->miphdr->ttl--;
+//     pdu->miphdr->ttl--;
 
-    size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
+//     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
-    /* Send the serialized buffer via RAW socket */
+//     /* Send the serialized buffer via RAW socket */
 
-    // Find matching interface
-    struct sockaddr_ll *interface = find_matching_sockaddr(ifs, src_mac_addr);
-
-
-    if (sendto(ifs->rsock, snd_buf, snd_len, 0,
-        (struct sockaddr *)interface,
-        sizeof(struct sockaddr_ll)) <= 0) {
-        perror("sendto()");
-        close(ifs->rsock);
-    }
-
-    if (debug_mode){
-        printf("Sending PDU with content (size %zu):\n", snd_len);
-        print_pdu_content(pdu);
-    }
+//     // Find matching interface
+//     struct sockaddr_ll *interface = find_matching_sockaddr(ifs, src_mac_addr);
 
 
-    destroy_pdu(pdu);
-    return 0;
-}
+//     if (sendto(ifs->rsock, snd_buf, snd_len, 0,
+//         (struct sockaddr *)interface,
+//         sizeof(struct sockaddr_ll)) <= 0) {
+//         perror("sendto()");
+//         close(ifs->rsock);
+//     }
+
+//     if (debug_mode){
+//         printf("Sending PDU with content (size %zu):\n", snd_len);
+//         print_pdu_content(pdu);
+//     }
+
+
+//     destroy_pdu(pdu);
+//     return 0;
+// }
 
 
 struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_mac_addr) {
@@ -647,89 +636,89 @@ char* uint32ArrayToString(uint32_t* arr) {
 // }
 
 // Function to send ARP request to all interfaces
-void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip_addr, int debug_mode) {
-    // Create SDU for ARP request
-    uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
-    uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, target_mip_addr);
+// void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip_addr, int debug_mode) {
+//     // Create SDU for ARP request
+//     uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
+//     uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, target_mip_addr);
 
-    // Create Broadcast MAC address
-    uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+//     // Create Broadcast MAC address
+//     uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
-    // Create broadcast MIP address
-    uint8_t broadcast_mip_addr = 0xff;
+//     // Create broadcast MIP address
+//     uint8_t broadcast_mip_addr = 0xff;
 
-    // Send MIP packet to all interfaces
-    for (int interface = 0; interface < ifs->ifn; interface++) {
-        if (debug_mode) {
-            printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
-        }
-        send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
-    }
+//     // Send MIP packet to all interfaces
+//     for (int interface = 0; interface < ifs->ifn; interface++) {
+//         if (debug_mode) {
+//             printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
+//         }
+//         send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
+//     }
 
-    free(sdu);
-}
+//     free(sdu);
+// }
 
-void fill_forward_data(struct forward_data *forward_data, uint8_t next_hop_MIP, struct pdu *pdu, int *waiting_to_forward) {
+// void fill_forward_data(struct forward_data *forward_data, uint8_t next_hop_MIP, struct pdu *pdu, int *waiting_to_forward) {
 
-    // Set waiting_to_forward to 1
-    *waiting_to_forward = 1;
-
-
-    forward_data->next_hop_MIP = next_hop_MIP;
-    forward_data->ttl = pdu->miphdr->ttl;
-    forward_data->sdu_type = pdu->miphdr->sdu_type;
-
-    // Calculate the number of elements in the SDU array
-    size_t sdu_elements = pdu->miphdr->sdu_len;
-
-    // Allocate memory for the SDU and initialize it to zero
-    forward_data->sdu = (uint32_t *)calloc(sdu_elements, sizeof(uint32_t));
-    if (forward_data->sdu == NULL) {
-        perror("Failed to allocate memory for SDU");
-        exit(EXIT_FAILURE);
-    }
-
-    // Copy the SDU content
-    memcpy(forward_data->sdu, pdu->sdu, sdu_elements * sizeof(uint32_t));
-    forward_data->sdu_len = pdu->miphdr->sdu_len;
-}
-
-void clear_forward_data(struct forward_data *forward_data, int *waiting_to_forward) {
-
-    // Set waiting_to_forward to 0
-    *waiting_to_forward = 0;
+//     // Set waiting_to_forward to 1
+//     *waiting_to_forward = 1;
 
 
-    // Free the dynamically allocated memory for the SDU
-    if (forward_data->sdu != NULL) {
-        free(forward_data->sdu);
-        forward_data->sdu = NULL; // Set pointer to NULL to avoid dangling pointer
-    }
+//     forward_data->next_hop_MIP = next_hop_MIP;
+//     forward_data->ttl = pdu->miphdr->ttl;
+//     forward_data->sdu_type = pdu->miphdr->sdu_type;
 
-    // Reset other fields to default values
-    forward_data->next_hop_MIP = 0;
-    forward_data->ttl = 0;
-    forward_data->sdu_type = 0;
-    forward_data->sdu_len = 0;
-}
+//     // Calculate the number of elements in the SDU array
+//     size_t sdu_elements = pdu->miphdr->sdu_len;
+
+//     // Allocate memory for the SDU and initialize it to zero
+//     forward_data->sdu = (uint32_t *)calloc(sdu_elements, sizeof(uint32_t));
+//     if (forward_data->sdu == NULL) {
+//         perror("Failed to allocate memory for SDU");
+//         exit(EXIT_FAILURE);
+//     }
+
+//     // Copy the SDU content
+//     memcpy(forward_data->sdu, pdu->sdu, sdu_elements * sizeof(uint32_t));
+//     forward_data->sdu_len = pdu->miphdr->sdu_len;
+// }
+
+// void clear_forward_data(struct forward_data *forward_data, int *waiting_to_forward) {
+
+//     // Set waiting_to_forward to 0
+//     *waiting_to_forward = 0;
+
+
+//     // Free the dynamically allocated memory for the SDU
+//     if (forward_data->sdu != NULL) {
+//         free(forward_data->sdu);
+//         forward_data->sdu = NULL; // Set pointer to NULL to avoid dangling pointer
+//     }
+
+//     // Reset other fields to default values
+//     forward_data->next_hop_MIP = 0;
+//     forward_data->ttl = 0;
+//     forward_data->sdu_type = 0;
+//     forward_data->sdu_len = 0;
+// }
 
 // Send message to neighbours
 
-void send_message_to_neighbours(struct ifs_data *ifs, uint8_t *src_mac_addr, uint8_t *dst_mac_addr, uint8_t src_mip_addr, uint8_t dst_mip_addr, uint8_t ttl, uint8_t sdu_type, const uint32_t *sdu, uint16_t sdu_len, int debug_mode) {
-    // Send MIP packet to all interfaces
-    for (int interface = 0; interface < ifs->ifn; interface++) {
-        if (debug_mode) {
-            printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", dst_mip_addr, interface);
-        }
-        send_mip_packet(ifs, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
-    }
-}
+// void send_message_to_neighbours(struct ifs_data *ifs, uint8_t *src_mac_addr, uint8_t *dst_mac_addr, uint8_t src_mip_addr, uint8_t dst_mip_addr, uint8_t ttl, uint8_t sdu_type, const uint32_t *sdu, uint16_t sdu_len, int debug_mode) {
+//     // Send MIP packet to all interfaces
+//     for (int interface = 0; interface < ifs->ifn; interface++) {
+//         if (debug_mode) {
+//             printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", dst_mip_addr, interface);
+//         }
+//         send_mip_packet(ifs, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
+//     }
+// }
 
 
 
-void sendToRoutingDaemon(void) {
-    printf("MADE");
-}
+// void sendToRoutingDaemon(void) {
+//     printf("MADE");
+// }
 
 // void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int type, struct pdu_queue *queue, int debug_mode) {
 //     // Lookup the MAC address for the destination MIP address

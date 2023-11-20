@@ -89,7 +89,7 @@ char* uint32ArrayToString(uint32_t* arr);
 // void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip_addr, int debug_mode);
 // void fill_forward_data(struct forward_data *forward_data, uint8_t next_hop_MIP, struct pdu *pdu, int *waiting_to_forward);
 // void clear_forward_data(struct forward_data *forward_data, int *waiting_to_forward);
-ROUTE_handle handle_route_message(int route_fd, uint8_t *msg);
+ROUTE_handle handle_route_message(int route_fd, uint8_t *buf, size_t buf_size)
 
 // void sendToRoutingDaemon(void);
 

@@ -471,7 +471,7 @@ int main(int argc, char *argv[]) {
             }
 
 
-            ROUTE_handle type = handle_route_message(route_fd, msg);
+            ROUTE_handle type = handle_route_message(route_fd, msg, sizeof(msg));
             uint8_t recieved_mip = msg[0];
             printf("recieved_mip: %u\n", recieved_mip);
 
