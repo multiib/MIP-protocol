@@ -191,9 +191,11 @@ int main(int argc, char *argv[]) {
                 }
                 
                 //Add to queue
+                printf("Adding to queue\n");
                 enqueue_forward(&queue_forward, pdu);
 
                 // Get next hop MIP address from routing table, we will send the packet if we find a next hop
+                printf("Finding next hop\n");
                 sendRequestToApp(route_fd, pdu->miphdr->dst, local_mip_addr); // TODO::
 
 
