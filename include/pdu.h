@@ -65,7 +65,6 @@ void print_pdu_content(struct pdu *);
 void destroy_pdu(struct pdu *);
 void initialize_queue();
 void enqueue(struct pdu* packet, uint8_t next_hop);
-struct pdu* remove_packet_by_mac(uint8_t* mac_address);
 struct pdu_with_hop remove_packet_by_mac(uint8_t* mac_address);
 
 void clear_ping_data(struct ping_data *data);

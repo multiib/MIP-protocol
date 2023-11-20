@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
                 switch (type){
 
                     // RECIEVED MIP PING FROM OTHER MIP DAEMON
-                    case MIP_PING:
+                    case MIP_PING: {
                         if (debug_mode){
                             printf("\nReceived MIP_PING\n");
                             print_pdu_content(pdu);
@@ -228,9 +228,9 @@ int main(int argc, char *argv[]) {
                         ttl_return = pdu->miphdr->ttl;
 
                         break;
-
+                    }
                     // RECIEVED MIP PONG FROM OTHER MIP DAEMON
-                    case MIP_PONG:
+                    case MIP_PONG: {
                         if (debug_mode){
                             printf("\nReceived MIP_PONG\n");
                             print_pdu_content(pdu);
@@ -249,9 +249,10 @@ int main(int argc, char *argv[]) {
                         close(app_fd);
 
                         break;
+                    }
 
                     // RECIEVED MIP ARP REQUEST FROM OTHER MIP DAEMON
-                    case MIP_ARP_REQUEST:
+                    case MIP_ARP_REQUEST: {
                         if (debug_mode){
                             printf("\nReceived MIP_ARP_REQUEST\n");
                             print_pdu_content(pdu);
@@ -299,9 +300,9 @@ int main(int argc, char *argv[]) {
                             }
                         }
                         break;
-
+                    }
                     // RECIEVED MIP ARP REPLY FROM OTHER MIP DAEMON
-                    case MIP_ARP_REPLY:
+                    case MIP_ARP_REPLY: {
                         if (debug_mode){
                             printf("\nReceived MIP_ARP_REPLY\n");
                             print_pdu_content(pdu);
@@ -346,10 +347,10 @@ int main(int argc, char *argv[]) {
                         }
 
                         break;
-
+                    }
 
                     // RECIEVED MIP ROUTE HELLO FROM OTHER MIP DAEMON
-                    case MIP_ROUTE:
+                    case MIP_ROUTE: {
                         if (debug_mode){
                             printf("\nReceived MIP_ROUTE\n");
                             print_pdu_content(pdu);
@@ -376,11 +377,12 @@ int main(int argc, char *argv[]) {
                         free(msg);
 
                         break;
-                    
+                    }
                     // RECIEVED UNKNOWN MIP PACKET
-                    default:
+                    default: {
                         printf("Received unknown MIP packet\n");
                         break;
+                    }
                 }
                 destroy_pdu(pdu);
             }
@@ -396,7 +398,7 @@ int main(int argc, char *argv[]) {
                 uint8_t *dst_mac_addr;
 
                 // RECIEVED MESSAGE FROM PING_CLIENT
-                case APP_PING:
+                case APP_PING: {
                     if (debug_mode){
                         printf("\nReceived APP_PING\n");
                         printf("Content: %s\n", ping_data.msg);
@@ -416,10 +418,10 @@ int main(int argc, char *argv[]) {
                     sendRequestToApp(route_fd, ping_data.dst_mip_addr, local_mip_addr);
                     
                     break;
-
+                }
 
                 // RECIEVED MESSAGE FROM PING_SERVER
-                case APP_PONG:
+                case APP_PONG: {
                     if (debug_mode){
                         printf("Received APP_PONG\n");
                     }
@@ -444,10 +446,10 @@ int main(int argc, char *argv[]) {
                     ttl_return = 0;
 
                     break;
+                }
 
 
-
-                default:
+                default: {
                     if (debug_mode){
                         printf("Received unknown APP message\n");
                     }
@@ -455,6 +457,7 @@ int main(int argc, char *argv[]) {
 
                     
                     break;
+                }
             }
 
         // INCOMING ROUTING DAEMON TRAFFIC
@@ -479,7 +482,7 @@ int main(int argc, char *argv[]) {
 
             switch (type)
             {
-                case ROUTE_HELLO:
+                case ROUTE_HELLO: {
                     printf("Received ROUTE_HELLO\n");
                     
                     
@@ -514,8 +517,9 @@ int main(int argc, char *argv[]) {
 
 
                     break;
+                }
 
-                case ROUTE_UPDATE:
+                case ROUTE_UPDATE: {
                     printf("Received ROUTE_UPDATE\n");
 
 
@@ -541,8 +545,9 @@ int main(int argc, char *argv[]) {
                         send_PDU(&ifs, pdu);
                     }
                     break;
+                }
 
-                case ROUTE_RESPONSE:
+                case ROUTE_RESPONSE: {
                     printf("Received ROUTE_RESPONSE\n");
 
                     // print msg uint8t arr
@@ -602,10 +607,11 @@ int main(int argc, char *argv[]) {
 
                     }
                     break;
-                
-                default:
+                }
+                default: {
                     printf("Received unknown ROUTE message\n");
                     break;
+                }
             }
 
         } else {
