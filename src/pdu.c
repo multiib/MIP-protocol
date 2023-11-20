@@ -94,6 +94,7 @@ size_t mip_serialize_pdu(struct pdu *pdu, uint8_t *snd_buf)
     uint32_t miphdr = 0;
     miphdr |= (uint32_t) pdu->miphdr->dst << 24;
     miphdr |= (uint32_t) pdu->miphdr->src << 16;
+    printf("TTL, berfor7e set: %u\n", pdu->miphdr->ttl);
     miphdr |= (uint32_t) (pdu->miphdr->ttl & 0xff) << 12;
     miphdr |= (uint32_t) (pdu->miphdr->sdu_len & 0xff) << 3;
     miphdr |= (uint32_t) (pdu->miphdr->sdu_type & 0xf);
@@ -135,6 +136,7 @@ size_t mip_deserialize_pdu(struct pdu *pdu, uint8_t *rcv_buf) {
     uint32_t header = ntohl(*tmp);
     pdu->miphdr->dst = (uint8_t) (header >> 24);
     pdu->miphdr->src = (uint8_t) (header >> 16);
+    printf("TTL, berfore se2t: %u\n", pdu->miphdr->ttl);
     pdu->miphdr->ttl = (uint8_t) (((header >> 12) & 0xf));
     pdu->miphdr->sdu_len = (uint8_t) ((header >> 3) & 0x3f);
     pdu->miphdr->sdu_type = (uint8_t) (header & 0xf);
