@@ -496,6 +496,11 @@ int main(int argc, char *argv[]) {
                     // Create SDU
                     uint8_t sdu_len;
                     uint32_t *sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
+
+                    // print sdu
+                    for (int i = 0; i < sdu_len; i++){
+                        printf("%u ", sdu[i]);
+                    }
                     
                     // Create PDU
                     struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 1, SDU_TYPE_ROUTE, sdu, sdu_len);
@@ -511,7 +516,6 @@ int main(int argc, char *argv[]) {
 
                         // Set source and destination MAC address
                         fill_ethhdr(pdu, src_mac_addr, dst_mac_addr);
-                        printf("TTL13: %d\n", pdu->miphdr->ttl);
                         send_PDU(&ifs, pdu, find_matching_sockaddr(&ifs, ifs.addr[interface].sll_addr));
                     }
 
