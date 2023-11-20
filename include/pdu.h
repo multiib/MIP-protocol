@@ -45,7 +45,7 @@ struct queue_node {
     struct queue_node* next;
 };
 
-struct queue_forward {
+struct queue_f {
     struct queue_node* front;
     struct queue_node* rear;
     int size;
@@ -66,7 +66,7 @@ void destroy_pdu(struct pdu *);
 void initialize_queue();
 void enqueue(struct pdu* packet, uint8_t next_hop);
 struct pdu* remove_packet_by_mac(uint8_t* mac_address);
-
+struct pdu_with_hop remove_packet_by_mac(uint8_t* mac_address);
 
 void clear_ping_data(struct ping_data *data);
 void initialize_queue_forward(struct queue_f* queue);

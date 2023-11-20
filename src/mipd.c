@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     uint8_t local_mip_addr;    // MIP Adress
 
     struct ping_data ping_data; // Struct for storing data from application
-    struct forward_data forward_data; // Struct for storing data to be forwarded while waiting for ARP reply
+    // struct forward_data forward_data; // Struct for storing data to be forwarded while waiting for ARP reply
     
     struct queue_f queue_forward;
 
@@ -279,7 +279,7 @@ int main(int argc, char *argv[]) {
                             }
 
                             // Create PDU for ARP reply
-                            struct pdu* pdu = create_PDU(ifs.local_mip_addr, pdu->miphdr->src, 0, SDU_TYPE_MIPARP, sdu, 4);
+                            struct pdu* packet = create_PDU(ifs.local_mip_addr, pdu->miphdr->src, 0, SDU_TYPE_MIPARP, sdu, 4);
 
                             // Set source MAC address by looking up the interface that recieved the ARP request
                             uint8_t *src_mac_addr = ifs.addr[recv_interface].sll_addr;
@@ -287,9 +287,9 @@ int main(int argc, char *argv[]) {
                             // Set destination MAC address
                             uint8_t *dst_mac_addr = arp_lookup(pdu->miphdr->src);
 
-                            fill_ethhdr(pdu, src_mac_addr, dst_mac_addr);
+                            fill_ethhdr(packet, src_mac_addr, dst_mac_addr);
 
-                            send_PDU(&ifs, pdu);
+                            send_PDU(&ifs, packet);
 
 
                             // If ARP request is not for this MIP daemon, throw packet away
@@ -402,50 +402,18 @@ int main(int argc, char *argv[]) {
                         printf("Content: %s\n", ping_data.msg);
                     }
 
-                    // Check if we have a MAC address for the destination MIP address
-                    if (dst_mac_addr != NULL){
-                        if (debug_mode){
-                            printf("Found MAC address for MIP: %u\n", ping_data.dst_mip_addr);
-                        }
+
                         
-                        // Create SDU
-                        uint8_t sdu_len;
-                        uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
+                    // Create SDU
+                    uint8_t sdu_len;
+                    uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
-                        // Create PDU
-                        struct pdu *pdu = create_PDU(ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len);
+                    // Create PDU
+                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, ping_data.dst_mip_addr, ping_data.ttl, SDU_TYPE_PING, sdu, sdu_len);
 
-                        // Enqueue packet
-
-
-                        // Get next hop MIP
-                        sendRequestToApp(route_fd, ping_data.dst_mip_addr, local_mip_addr)
-
-
-
-
-                        send_PDU(&ifs, pdu);
-                    
-                    // If we don't have a MAC address for the destination MIP address, send ARP request
-                    } else {
-                        if (debug_mode){
-                            printf("No MAC address found for MIP: %u\n", ping_data.dst_mip_addr);
-                        }
-
-                        // Create SDU
-                        uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, ping_data.dst_mip_addr);
-
-                        // Send ARP request to all interfaces
-                        for (int interface = 0; interface < ifs.ifn; interface++){
-
-                            // Create PDU
-                            struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_MIPARP, sdu, sizeof(uint32_t));
-
-                            // Send PDU
-                            send_PDU(&ifs, pdu);
-                        }
-                    }
-
+                    // We do not know the next hop, add to queue and send routing request
+                    enqueue_forward(&queue_forward, pdu);
+                    sendRequestToApp(route_fd, ping_data.dst_mip_addr, local_mip_addr);
                     
                     break;
 
@@ -466,23 +434,9 @@ int main(int argc, char *argv[]) {
                     struct pdu *pdu = create_PDU(ifs.local_mip_addr, mip_return, ttl_return, SDU_TYPE_PING, sdu, sdu_len);
 
 
-                    // Get source MAC address
-                    uint8_t *src_mac_addr = ifs.addr[arp_lookup_interface(mip_return)].sll_addr;
-
-                    // Get destination MAC address
-                    uint8_t *dst_mac_addr = arp_lookup(mip_return);
-
-                    // Set source and destination MAC address
-                    fill_ethhdr(pdu, src_mac_addr, dst_mac_addr);
-
-
-                    // Send PDU
-                    send_PDU(&ifs, pdu);
-
-
-                    if (debug_mode){
-                        printf("TTL = 0, dropping packet\n");
-                    }
+                    // We do not know the next hop, add to queue and send routing request
+                    enqueue_forward(&queue_forward, pdu);
+                    sendRequestToApp(route_fd, mip_return, local_mip_addr);
 
 
                     // Reset mip_return and ttl_return for next ping
