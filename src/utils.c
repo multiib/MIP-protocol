@@ -139,26 +139,22 @@ uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr) {
 void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message, const char *ttl) {
     // Initialize the buffer to zeros
 
-    printf("Fill ping buf 1\n");
+
     memset(buf, 0, buf_size);
-    printf("Fill ping buf 2\n");
-    printf("destination_host: %s\n", destination_host);
-    printf("ttl: %s\n", ttl);
+
 
     buf[0] = atoi(destination_host);
-    printf("Fill ping buf 2\n");
+
     buf[1] = atoi(ttl);
-    printf("Fill ping buf 3\n");
+
     // Add "PING:"
     strcat(buf, "PING:");
-    printf("Fill ping buf 4\n");
+
     // Then add message
     if (message != NULL) {
         strcat(buf, message);
     }
-    printf("Fill ping buf 5\n");
-    // print message
-    printf("VBVstrmoblen: %s\n", buf); // TODO: Remove this line
+
 }
 
 void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, const char *message) {
@@ -809,13 +805,13 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interfa
         return;
     }
 
-    printf("TTL33: %d\n", pdu->miphdr->ttl);
+
 
     // Decrement TTL
     pdu->miphdr->ttl--;
 
     // print ttl
-    printf("TTL43: %d\n", pdu->miphdr->ttl);
+
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
     // Send the serialized buffer via RAW socket

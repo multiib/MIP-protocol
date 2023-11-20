@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
             }
 
             // Ping client/server connected
-            if (indentifier == 0x01 && app_fd == -1) {
+            if (indentifier == 0x01) {
 
                 app_fd = unix_fd;
                 rc = add_to_epoll_table(epoll_fd, app_fd);
@@ -385,13 +385,7 @@ int main(int argc, char *argv[]) {
         // INCOMING APPLICATION TRAFFIC
         } else if (events->data.fd == app_fd){
 
-            // Check if the client disconnected
-            if (events->data.fd & EPOLLHUP || events->data.fd & EPOLLRDHUP || events->data.fd & EPOLLERR) {
-                printf("Application client disconnected on fd %d\n", app_fd);
-                close(app_fd);
-                app_fd = -1; // Set the flag
 
-            }
 
 
 

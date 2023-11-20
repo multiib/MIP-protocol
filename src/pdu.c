@@ -68,10 +68,18 @@ void fill_pdu(struct pdu *pdu,
     pdu->miphdr->ttl = ttl;
     pdu->miphdr->sdu_type = sdu_type;
     pdu->miphdr->sdu_len = sdu_len;
-
+    printf("before free\n");
+    for (int i = 0; i < sdu_len; i++){
+        printf("%u ", sdu[i]);
+    }
     if (pdu->sdu) {
         free(pdu->sdu); // Free existing sdu memory
     }
+    printf("after free\n");
+    for (int i = 0; i < sdu_len; i++){
+        printf("%u ", sdu[i]);
+    }
+
     pdu->sdu = (uint32_t *)calloc(sdu_len, sizeof(uint32_t));
     if (!pdu->sdu) {
         // Handle memory allocation failure
@@ -79,6 +87,11 @@ void fill_pdu(struct pdu *pdu,
     }
     
     memcpy(pdu->sdu, sdu, sdu_len * sizeof(uint32_t));
+
+    printf("last free\n");
+    for (int i = 0; i < sdu_len; i++){
+        printf("%u ", sdu[i]);
+    }
 }
 
 
