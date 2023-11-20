@@ -391,7 +391,51 @@ APP_handle handle_app_message(int app_fd, uint8_t *dst_mip_addr, char *msg, uint
 
 }
 
+/**
+ * Handle a route message received on a given socket file descriptor.
+ * 
+ * route_fd: The socket file descriptor for routing messages.
+ * buf: The buffer to store the received message.
+ * buf_size: The size of the buffer.
+ * 
+ * This function reads a message from the specified socket file descriptor and determines
+ * its type based on the message header. It recognizes three types: HELLO, UPDATE, and RESPONSE.
+ * The type is returned as a ROUTE_handle enum value.
+ * 
+ * Returns:
+ *   - ROUTE_HELLO for hello messages
+ *   - ROUTE_UPDATE for update messages
+ *   - ROUTE_RESPONSE for response messages
+ *   - -1 for unknown message types or read errors
+ */
+ROUTE_handle handle_route_message(int route_fd, uint8_t *buf, size_t buf_size)
+{
+    int rc;
+    ROUTE_handle route_type;
 
+    // Clear buffer
+    memset(buf, 0, buf_size);
+
+    // Read message from application
+    rc = read(route_fd, buf, buf_size);
+    if (rc <= 0) {
+        perror("read");
+        return -1; // Return an error code
+    }
+
+    if (buf[2] == 0x48 && buf[3] == 0x45 && buf[4] == 0x4C) {
+        route_type = ROUTE_HELLO;
+    } else if (buf[2] == 0x55 && buf[3] == 0x50 && buf[4] == 0x44) {
+        route_type = ROUTE_UPDATE;
+    } else if (buf[2] == 0x52 && buf[3] == 0x45 && buf[4] == 0x53) {
+        route_type = ROUTE_RESPONSE;
+    } else {
+        perror("Unknown message type");
+        return -1; // Return an error code
+    }
+
+    return route_type;
+}
 
 /**
  * Find a matching sockaddr_ll structure based on the destination MAC address.
