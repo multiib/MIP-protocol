@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
 
                             fill_ethhdr(packet, src_mac_addr, dst_mac_addr);
 
-                            send_PDU(&ifs, packet);
+                            send_PDU(&ifs, packet, find_matching_sockaddr(ifs, dst_mac_addr));
 
 
                             // If ARP request is not for this MIP daemon, throw packet away
@@ -331,7 +331,7 @@ int main(int argc, char *argv[]) {
                                 fill_ethhdr(packet, src_mac_addr, dst_mac_addr);
 
                                 // Send packet
-                                send_PDU(&ifs, packet);
+                                send_PDU(&ifs, packet, find_matching_sockaddr(ifs, dst_mac_addr));
 
                             }
                             // Free the pdu after processing, if necessary
@@ -465,6 +465,7 @@ int main(int argc, char *argv[]) {
             // Clear buffer
             memset(msg, 0, sizeof(msg));
 
+
             ROUTE_handle type = handle_route_message(route_fd, msg, sizeof(msg));
             uint8_t recieved_mip = msg[0];
             printf("recieved_mip: %u\n", recieved_mip);
@@ -501,7 +502,7 @@ int main(int argc, char *argv[]) {
                         // Set source and destination MAC address
                         fill_ethhdr(pdu, src_mac_addr, dst_mac_addr);
 
-                        send_PDU(&ifs, pdu);
+                        send_PDU(&ifs, pdu), find_matching_sockaddr(ifs, ifs.addr[interface].sll_addr);
                     }
 
 
@@ -532,7 +533,9 @@ int main(int argc, char *argv[]) {
                         // Set source and destination MAC address
                         fill_ethhdr(pdu, src_mac_addr, dst_mac_addr);
 
-                        send_PDU(&ifs, pdu);
+
+
+                        send_PDU(&ifs, pdu), find_matching_sockaddr(ifs, ifs.addr[interface].sll_addr);
                     }
                     break;
                 }
@@ -565,7 +568,7 @@ int main(int argc, char *argv[]) {
                         fill_ethhdr(packet, src_mac_addr, dst_mac_addr);
 
                         // Send packet
-                        send_PDU(&ifs, packet);
+                        send_PDU(&ifs, packet, find_matching_sockaddr(ifs, dst_mac_addr));
                     } else {
                        
                         // Add to queue
@@ -591,7 +594,7 @@ int main(int argc, char *argv[]) {
 
 
                             // Send PDU
-                            send_PDU(&ifs, pdu);
+                            send_PDU(&ifs, packet, find_matching_sockaddr(ifs, dst_mac_addr));
                         }
 
 
