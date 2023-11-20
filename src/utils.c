@@ -34,7 +34,6 @@ int debug_mode = 0;
  * The function iterates through the MAC address array and prints
  * each byte in hexadecimal format, separated by a colon.
  */
-
 void print_mac_addr(uint8_t *addr, size_t len)
 {
     size_t i;
@@ -47,7 +46,17 @@ void print_mac_addr(uint8_t *addr, size_t len)
 
 
 
-// Prepare a raw socket for receiving and sending MIP packets
+/**
+ * Create a raw socket for sending and receiving packets.
+ * 
+ * This function sets up a raw socket using the AF_PACKET family, which is used for 
+ * sending and receiving packets at the device driver (OSI Layer 2) level. It uses the 
+ * SOCK_RAW type and specifies the ETH_P_MIP protocol for the Ethernet protocol field. 
+ * The function handles socket creation errors by printing an error message and exiting 
+ * the program.
+ * 
+ * Returns the socket descriptor if successful, otherwise terminates the program.
+ */
 int create_raw_socket(void)
 {
     int sd;
@@ -63,9 +72,20 @@ int create_raw_socket(void)
     return sd;
 }
 
-/*
- * This function stores struct sockaddr_ll addresses for all interfaces of the
- * node (except loopback interface)
+/**
+ * Retrieve MAC addresses from network interfaces and store them in a struct.
+ * 
+ * ifs: Pointer to a struct ifs_data where interface information will be stored.
+ * 
+ * This function enumerates network interfaces, excluding the loopback interface, 
+ * and stores their MAC addresses in the provided 'ifs_data' struct. It uses 
+ * 'getifaddrs' to dynamically allocate a list of interfaces and iterates through 
+ * this list to copy MAC address information into 'ifs'. The function ensures to 
+ * free the dynamically allocated memory after processing. It handles errors in 
+ * 'getifaddrs' by printing an error message and exiting the program.
+ * 
+ * Note: The function assumes 'ifs' has enough space to store the addresses and updates 
+ * the 'ifn' member of 'ifs' to reflect the number of interfaces processed.
  */
 void get_mac_from_ifaces(struct ifs_data *ifs)
 {
@@ -99,7 +119,18 @@ void get_mac_from_ifaces(struct ifs_data *ifs)
         freeifaddrs(ifaces);
 }
 
-// Initialize the interface data structure
+/**
+ * Initialize network interface data structure.
+ * 
+ * ifs: Pointer to a struct ifs_data to be initialized.
+ * rsock: The RAW socket associated with the node.
+ * mip_addr: The local MIP address of the node.
+ * 
+ * This function initializes a struct 'ifs_data' with network interface information.
+ * It retrieves MAC addresses from local network interfaces and stores them in 'ifs'.
+ * Additionally, it sets the RAW socket 'rsock' and the local MIP address 'mip_addr' 
+ * in the 'ifs_data' struct.
+ */
 void init_ifs(struct ifs_data *ifs, int rsock, uint8_t mip_addr)
 {
     /* Get some info about the local ifaces */
@@ -112,7 +143,18 @@ void init_ifs(struct ifs_data *ifs, int rsock, uint8_t mip_addr)
     ifs->local_mip_addr = mip_addr;
 }
 
-// Create a MIP ARP SDU
+/**
+ * Create a Single Data Unit (SDU) for MIP ARP request or response.
+ * 
+ * arp_type: An integer indicating ARP type (0 for request, 1 for response).
+ * mip_addr: The MIP address to be included in the SDU.
+ * 
+ * This function allocates memory for an SDU array, sets the ARP type and MIP address
+ * in the SDU, and returns a pointer to the allocated SDU array. The caller is responsible
+ * for freeing the memory allocated for the SDU array when it is no longer needed.
+ * 
+ * Returns a pointer to the allocated SDU array or NULL if memory allocation fails.
+ */
 uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr) {
     uint32_t *sdu_array = (uint32_t*) malloc(sizeof(uint32_t));
     if (sdu_array == NULL) {
@@ -139,9 +181,7 @@ uint32_t* create_sdu_miparp(int arp_type, uint8_t mip_addr) {
 void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, const char *message, const char *ttl) {
     // Initialize the buffer to zeros
 
-
     memset(buf, 0, buf_size);
-
 
     buf[0] = atoi(destination_host);
 
@@ -157,6 +197,20 @@ void fill_ping_buf(char *buf, size_t buf_size, const char *destination_host, con
 
 }
 
+/**
+ * Fill a buffer with a ping message.
+ * 
+ * buf: The buffer to be filled.
+ * buf_size: The size of the buffer.
+ * destination_host: The destination host identifier (usually an integer).
+ * message: The message to be included in the ping (optional, can be NULL).
+ * ttl: The Time to Live value for the ping packet.
+ * 
+ * This function initializes the buffer with zeros, sets the destination host and TTL,
+ * and constructs a ping message in the format "PING:message" if a message is provided.
+ * 
+ * Note: Ensure that the buffer is large enough to accommodate the message.
+ */
 void fill_pong_buf(char *buf, size_t buf_size, const char *destination_host, const char *message) {
     // Initialize the buffer to zeros
     memset(buf, 0, buf_size);
@@ -339,115 +393,15 @@ APP_handle handle_app_message(int app_fd, uint8_t *dst_mip_addr, char *msg, uint
 
 
 
-
-
-
-ROUTE_handle handle_route_message(int route_fd, uint8_t *buf, size_t buf_size)
-{
-    int rc;
-    ROUTE_handle route_type;
-
-    // Clear buffer
-    memset(buf, 0, buf_size);
-
-    // Read message from application
-    rc = read(route_fd, buf, buf_size);
-    if (rc <= 0) {
-        perror("read");
-        return -1; // Return an error code
-    }
-
-    if (buf[2] == 0x48 && buf[3] == 0x45 && buf[4] == 0x4C) {
-        route_type = ROUTE_HELLO;
-    } else if (buf[2] == 0x55 && buf[3] == 0x50 && buf[4] == 0x44) {
-        route_type = ROUTE_UPDATE;
-    } else if (buf[2] == 0x52 && buf[3] == 0x45 && buf[4] == 0x53) {
-        route_type = ROUTE_RESPONSE;
-    } else {
-        perror("Unknown message type");
-        return -1; // Return an error code
-    }
-
-    return route_type;
-}
-
-
 /**
- * Send a MIP packet using a raw socket.
- *
- * ifs: Pointer to the interface data structure.
- * src_mac_addr: Pointer to the source MAC address.
- * dst_mac_addr: Pointer to the destination MAC address.
- * src_mip_addr: Source MIP address.
- * dst_mip_addr: Destination MIP address.
- * ttl: Time-to-live value for the packet.
- * sdu_type: Type of service data unit.
- * sdu: Pointer to the service data unit payload.
- * sdu_len: Length of the service data unit payload.
+ * Find a matching sockaddr_ll structure based on the destination MAC address.
  * 
- * The function begins by allocating a PDU (Protocol Data Unit) structure. 
- * It then fills this PDU with the provided details, including MAC addresses, 
- * MIP addresses, TTL, SDU type, and the SDU payload. Once the PDU is filled, 
- * it is serialized into a send buffer.
+ * struct ifs_data *ifs: Pointer to the ifs_data structure containing interface information.
+ * uint8_t *dst_mac_addr: Pointer to the destination MAC address to match.
  * 
- * The function then finds the appropriate socket address structure 
- * for the source MAC address and sends the serialized buffer via a raw socket.
- * 
- * If in debug mode, the function prints details about the sent PDU.
- * 
- * The PDU is destroyed before exiting the function.
- * 
- * Returns 0 on successful execution. If there is an error in allocating the PDU, 
- * the function returns -ENOMEM.
+ * Returns:
+ * - Pointer to the matching sockaddr_ll structure if found, or NULL if not found.
  */
-// int send_mip_packet(struct ifs_data *ifs,
-//             uint8_t *src_mac_addr,
-//             uint8_t *dst_mac_addr,
-//             uint8_t src_mip_addr,
-//             uint8_t dst_mip_addr,
-//             uint8_t ttl,
-//             uint8_t sdu_type,
-//             const uint32_t *sdu,
-//             uint16_t sdu_len)
-// {
-//     struct pdu *pdu = alloc_pdu();
-//     uint8_t snd_buf[MAX_BUF_SIZE];
-    
-//     if (NULL == pdu)
-//         return -ENOMEM;
-
-
-
-//     fill_pdu(pdu, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
-
-//     pdu->miphdr->ttl--;
-
-//     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
-
-//     /* Send the serialized buffer via RAW socket */
-
-//     // Find matching interface
-//     struct sockaddr_ll *interface = find_matching_sockaddr(ifs, src_mac_addr);
-
-
-//     if (sendto(ifs->rsock, snd_buf, snd_len, 0,
-//         (struct sockaddr *)interface,
-//         sizeof(struct sockaddr_ll)) <= 0) {
-//         perror("sendto()");
-//         close(ifs->rsock);
-//     }
-
-//     if (debug_mode){
-//         printf("Sending PDU with content (size %zu):\n", snd_len);
-//         print_pdu_content(pdu);
-//     }
-
-
-//     destroy_pdu(pdu);
-//     return 0;
-// }
-
-
 struct sockaddr_ll* find_matching_sockaddr(struct ifs_data *ifs, uint8_t *dst_mac_addr) {
     if (ifs == NULL || dst_mac_addr == NULL) {
         return NULL;
@@ -514,6 +468,7 @@ uint32_t* stringToUint32Array(const char* str, uint8_t *length) {
 
     return arr;
 }
+
 
 uint32_t find_matching_if_index(struct ifs_data *ifs, struct sockaddr_ll *from_addr) {
     for (int i = 0; i < ifs->ifn; i++) {
@@ -597,198 +552,6 @@ char* uint32ArrayToString(uint32_t* arr) {
     return str - arr[0];
 }
 
-// TODO: remove
-// uint8_t routing_lookup(uint8_t host_mip_addr, int *route_fd) {
-//     uint8_t next_hop;
-
-//     // Request message format
-//     uint8_t request_msg[REQUEST_MSG_LEN] = {
-//         host_mip_addr,
-//         0x00, // TTL
-//         0x52, // 'R'
-//         0x45, // 'E'
-//         0x51, // 'Q'
-//         host_mip_addr // MIP address to look up
-//     };
-
-//     // Send request to routing daemon
-//     ssize_t sent_bytes = send(*route_fd, request_msg, REQUEST_MSG_LEN, 0);
-//     if (sent_bytes < 0) {
-//         perror("send");
-//         return 0; // 0 could signify an error
-//     }
-
-//     // Receive response from routing daemon
-//     uint8_t response_msg[RESPONSE_MSG_LEN];
-//     ssize_t received_bytes = recv(*route_fd, response_msg, RESPONSE_MSG_LEN, 0);
-//     if (received_bytes < 0) {
-//         perror("recv");
-//         return 0; // 0 could signify an error
-//     }
-
-//     // Validate the response
-//     if (received_bytes != RESPONSE_MSG_LEN || 
-//         response_msg[2] != 0x52 || response_msg[3] != 0x53 || response_msg[4] != 0x50) {
-//         fprintf(stderr, "Invalid response format.\n");
-//         return 0; // 0 could signify an error
-//     }
-
-//     // Extract the next hop MIP address
-//     next_hop = response_msg[5];
-//     return next_hop;
-// }
-
-// Function to send ARP request to all interfaces
-// void send_arp_request_to_all_interfaces(struct ifs_data *ifs, uint8_t target_mip_addr, int debug_mode) {
-//     // Create SDU for ARP request
-//     uint8_t sdu_len = 1 * sizeof(uint32_t); // MIP ARP SDU length is 1 uint32_t
-//     uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, target_mip_addr);
-
-//     // Create Broadcast MAC address
-//     uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-
-//     // Create broadcast MIP address
-//     uint8_t broadcast_mip_addr = 0xff;
-
-//     // Send MIP packet to all interfaces
-//     for (int interface = 0; interface < ifs->ifn; interface++) {
-//         if (debug_mode) {
-//             printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", broadcast_mip_addr, interface);
-//         }
-//         send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, broadcast_mip_addr, 0, SDU_TYPE_MIPARP, sdu, sdu_len);
-//     }
-
-//     free(sdu);
-// }
-
-// void fill_forward_data(struct forward_data *forward_data, uint8_t next_hop_MIP, struct pdu *pdu, int *waiting_to_forward) {
-
-//     // Set waiting_to_forward to 1
-//     *waiting_to_forward = 1;
-
-
-//     forward_data->next_hop_MIP = next_hop_MIP;
-//     forward_data->ttl = pdu->miphdr->ttl;
-//     forward_data->sdu_type = pdu->miphdr->sdu_type;
-
-//     // Calculate the number of elements in the SDU array
-//     size_t sdu_elements = pdu->miphdr->sdu_len;
-
-//     // Allocate memory for the SDU and initialize it to zero
-//     forward_data->sdu = (uint32_t *)calloc(sdu_elements, sizeof(uint32_t));
-//     if (forward_data->sdu == NULL) {
-//         perror("Failed to allocate memory for SDU");
-//         exit(EXIT_FAILURE);
-//     }
-
-//     // Copy the SDU content
-//     memcpy(forward_data->sdu, pdu->sdu, sdu_elements * sizeof(uint32_t));
-//     forward_data->sdu_len = pdu->miphdr->sdu_len;
-// }
-
-// void clear_forward_data(struct forward_data *forward_data, int *waiting_to_forward) {
-
-//     // Set waiting_to_forward to 0
-//     *waiting_to_forward = 0;
-
-
-//     // Free the dynamically allocated memory for the SDU
-//     if (forward_data->sdu != NULL) {
-//         free(forward_data->sdu);
-//         forward_data->sdu = NULL; // Set pointer to NULL to avoid dangling pointer
-//     }
-
-//     // Reset other fields to default values
-//     forward_data->next_hop_MIP = 0;
-//     forward_data->ttl = 0;
-//     forward_data->sdu_type = 0;
-//     forward_data->sdu_len = 0;
-// }
-
-// Send message to neighbours
-
-// void send_message_to_neighbours(struct ifs_data *ifs, uint8_t *src_mac_addr, uint8_t *dst_mac_addr, uint8_t src_mip_addr, uint8_t dst_mip_addr, uint8_t ttl, uint8_t sdu_type, const uint32_t *sdu, uint16_t sdu_len, int debug_mode) {
-//     // Send MIP packet to all interfaces
-//     for (int interface = 0; interface < ifs->ifn; interface++) {
-//         if (debug_mode) {
-//             printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", dst_mip_addr, interface);
-//         }
-//         send_mip_packet(ifs, src_mac_addr, dst_mac_addr, src_mip_addr, dst_mip_addr, ttl, sdu_type, sdu, sdu_len);
-//     }
-// }
-
-
-
-// void sendToRoutingDaemon(void) {
-//     printf("MADE");
-// }
-
-// void MIP_send(struct ifs_data *ifs, uint8_t dst_mip_addr, uint8_t ttl, const char* message, int type, struct pdu_queue *queue, int debug_mode) {
-//     // Lookup the MAC address for the destination MIP address
-
-//     if (dst_mip_addr == BROADCAST_MIP_ADDR){
-//         // Send MIP packet to all interfaces
-//         uint8_t broadcast_mac[6] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-
-//         uint8_t sdu_len;
-//         uint32_t *sdu = stringToUint32Array(message, &sdu_len);
-
-
-//         for (int interface = 0; interface < ifs->ifn; interface++) {
-//             if (debug_mode) {
-//                 printf("Sending MIP_BROADCAST to MIP: %u on interface %d\n", BROADCAST_MIP_ADDR, interface);
-//             }
-//             send_mip_packet(ifs, ifs->addr[interface].sll_addr, broadcast_mac, ifs->local_mip_addr, BROADCAST_MIP_ADDR, 0, type, sdu, sdu_len);
-//         }
-//     }else{
-
-//         uint8_t sdu_len;
-//         uint8_t *dst_mac_addr = arp_lookup(dst_mip_addr);
-//         uint8_t interface = arp_lookup_interface(dst_mip_addr);
-//         uint32_t *sdu = stringToUint32Array(message, &sdu_len);
-//         if (dst_mac_addr) {
-//             if (debug_mode) {
-//                 printf("We have the MAC address for MIP %u\n", dst_mip_addr);
-//             }
-
-//             if (debug_mode) {
-//                 printf("Sending MIP_PING to MIP: %u\n", dst_mip_addr);
-//             }
-
-//             // Subtract 1 from TTL to account for the current node
-
-//             if (ttl > 0) {
-//                 send_mip_packet(ifs, ifs->addr[interface].sll_addr, dst_mac_addr, ifs->local_mip_addr, dst_mip_addr, ttl, type, sdu, sdu_len*sizeof(uint32_t));
-//             }
-//             else {
-//                 printf("TTL is 0, not sending packet\n");
-//             }
-            
-
-//             free(sdu);
-
-//         } else {
-//             if (debug_mode) {
-//                 printf("MAC address for MIP %u not found in cache\n", dst_mip_addr);
-//             }
-
-//             send_arp_request_to_all_interfaces(ifs, dst_mip_addr, debug_mode);
-
-
-//             // Add to queue
-//             struct pdu *pdu = alloc_pdu();
-//             uint8_t sdu_len;
-//             uint32_t *sdu = stringToUint32Array(message, &sdu_len);
-
-//             fill_pdu(pdu, ifs.ifn[interface].sll_addr, dst_mac_addr, localMIP, dst_mip_addr, ttl, type, sdu, sdu_len*sizeof(uint32_t));
-//             enqueue(queue, pdu);
-
-//             free(sdu);
-
-//         }
-//     }
-// }
-
 struct pdu* create_PDU(uint8_t src_mip_addr,
             uint8_t dst_mip_addr,
             uint8_t ttl,
@@ -816,19 +579,6 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interfa
         return;
     }
 
-
-
-    // // Decrement TTL
-    // pdu->miphdr->ttl--;
-
-    // print ttl
-
-    printf("minus shit\n");
-    for (int i = 0; i < 2; i++){
-        printf("%u ", pdu->sdu[i]);
-    }
-
-
     size_t snd_len = mip_serialize_pdu(pdu, snd_buf);
 
 
@@ -848,11 +598,6 @@ void send_PDU(struct ifs_data *ifs, struct pdu *pdu, struct sockaddr_ll *interfa
 
     destroy_pdu(pdu);
 }
-
-
-
-
-
 
 
 

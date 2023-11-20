@@ -389,9 +389,6 @@ int main(int argc, char *argv[]) {
         } else if (events->data.fd == app_fd){
 
 
-
-
-
             printf("Received APP msg\n"); // TODO: Remove
             // Handle incoming application message and determine type of message
             APP_handle type = handle_app_message(app_fd, &ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
@@ -432,8 +429,6 @@ int main(int argc, char *argv[]) {
                     uint8_t sdu_len;
                     uint32_t *sdu = stringToUint32Array(ping_data.msg, &sdu_len);
 
-
-
                     // Create PDU
                     struct pdu *pdu = create_PDU(ifs.local_mip_addr, mip_return, ttl_return, SDU_TYPE_PING, sdu, sdu_len);
 
@@ -441,7 +436,6 @@ int main(int argc, char *argv[]) {
                     // We do not know the next hop, add to queue and send routing request
                     enqueue_forward(&queue_forward, pdu);
                     sendRequestToApp(route_fd, mip_return, local_mip_addr);
-
 
                     // Reset mip_return and ttl_return for next ping
                     mip_return = 0;
@@ -482,13 +476,6 @@ int main(int argc, char *argv[]) {
                 case ROUTE_HELLO: {
                     printf("Received ROUTE_HELLO\n");
                     
-                    
-                    // // print msg uint8t arr in hex
-                    for (int i = 0; i < 5; i++){
-                        printf("%x ", msg[i]);
-                    }
-
-                    printf("\n");
 
                     // Create SDU
                     uint8_t sdu_len;
@@ -556,10 +543,6 @@ int main(int argc, char *argv[]) {
                 case ROUTE_RESPONSE: {
                     printf("Received ROUTE_RESPONSE\n");
 
-                    // print msg uint8t arr
-                    for (int i = 0; i < 5; i++){
-                        printf("%u ", msg[i]);
-                    }
 
                     uint8_t next_hop = msg[5];
 

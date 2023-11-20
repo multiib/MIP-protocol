@@ -96,6 +96,7 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
+// Send messages to the main deamon
 void *sendMessagesThread(void *arg) {
     int route_fd = *((int *)arg);
     while (1) {
@@ -104,12 +105,15 @@ void *sendMessagesThread(void *arg) {
             sendUpdateFromApp(route_fd);
             routingTableHasChanged = 0;
         }
+
+        
         checkForNeighborTimeouts(route_fd);
         sleep(HELLO_INTERVAL);
     }
     return NULL;
 }
 
+// Receive messages from the main deamon
 void *receiveMessagesThread(void *arg) {
     int route_fd = *((int *)arg);
     while (1) {
@@ -118,6 +122,7 @@ void *receiveMessagesThread(void *arg) {
     return NULL;
 }
 
+// Parse command line arguments
 void parse_arguments(int argc, char *argv[], int *debug_mode, char **socket_lower) {
     int opt;
     *debug_mode = 0;
