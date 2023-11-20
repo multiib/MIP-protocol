@@ -17,7 +17,7 @@
 #define MAX_RETURN_SIZE 4
 #define MAX_QUEUE_SIZE 8
 
-extern struct pdu_queue_slot queue_arp[MAX_QUEUE_SIZE];
+
 
 struct pdu {
     struct eth_hdr *ethhdr;
@@ -52,6 +52,8 @@ struct queue_f {
     struct queue_node* rear;
     int size;
 };
+
+extern struct pdu_queue_slot queue_arp[MAX_QUEUE_SIZE];
 
 struct pdu * alloc_pdu(void);
 void fill_pdu(struct pdu *pdu,

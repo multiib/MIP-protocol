@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     arp_init();
 
     // Initialize queues
-    initialize_queue();
+    initialize_queue_arp();
     initialize_queue_forward(&queue_forward);
 
     // PARSE ARGUMENTS FROM CLI
@@ -575,7 +575,7 @@ int main(int argc, char *argv[]) {
                     } else {
                        
                         // Add to queue
-                        enqueue(packet, next_hop);
+                        enqueue_arp(packet, next_hop);
 
                         // Send ARP request
                         uint32_t *sdu = create_sdu_miparp(ARP_TYPE_REQUEST, next_hop);
