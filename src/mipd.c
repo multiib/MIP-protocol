@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
             // Handle incoming MIP packet and determine type of packet
             MIP_handle type = handle_mip_packet(&ifs, pdu, &recv_interface);
 
-
+            
             // FORWARD PACKET IF NOT FOR US
             if (pdu->miphdr->dst != local_mip_addr || pdu->miphdr->dst != 255){
                 if (debug_mode){
@@ -511,7 +511,7 @@ int main(int argc, char *argv[]) {
                         // Set source and destination MAC address
                         fill_ethhdr(pdu, src_mac_addr, dst_mac_addr);
 
-                        
+
                         send_PDU(&ifs, pdu, find_matching_sockaddr(&ifs, ifs.addr[interface].sll_addr));
                     }
 

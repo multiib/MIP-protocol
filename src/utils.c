@@ -202,7 +202,7 @@ MIP_handle handle_mip_packet(struct ifs_data *ifs, struct pdu *pdu, int *recv_if
 
     MIP_handle mip_type;
 
-    uint32_t rcv_buf[512];
+    uint8_t rcv_buf[512];
     struct sockaddr_ll from_addr;
     socklen_t from_addr_len = sizeof(from_addr);
     
