@@ -182,10 +182,11 @@ int main(int argc, char *argv[]) {
             // Handle incoming MIP packet and determine type of packet
             MIP_handle type = handle_mip_packet(&ifs, pdu, &recv_interface);
 
-            
+
             // FORWARD PACKET IF NOT FOR US
-            if (pdu->miphdr->dst != local_mip_addr || pdu->miphdr->dst != 255){
+            if (pdu->miphdr->dst != local_mip_addr && pdu->miphdr->dst != 255){
                 if (debug_mode){
+
                     printf("Packet not for us, forwarding..\n");
                 }
                 
