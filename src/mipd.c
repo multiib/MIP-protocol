@@ -385,6 +385,16 @@ int main(int argc, char *argv[]) {
         // INCOMING APPLICATION TRAFFIC
         } else if (events->data.fd == app_fd){
 
+            // Check if the client disconnected
+            if (events->data.fd & EPOLLHUP || events->data.fd & EPOLLRDHUP || events->data.fd & EPOLLERR) {
+                printf("Application client disconnected on fd %d\n", app_fd);
+                close(app_fd);
+                app_fd = -1; // Set the flag
+
+            }
+
+
+
             printf("Received APP msg\n"); // TODO: Remove
             // Handle incoming application message and determine type of message
             APP_handle type = handle_app_message(app_fd, &ping_data.dst_mip_addr, ping_data.msg, &ping_data.ttl);
@@ -488,7 +498,7 @@ int main(int argc, char *argv[]) {
                     uint32_t *sdu = uint8ArrayToUint32Array(msg, 5, &sdu_len);
                     
                     // Create PDU
-                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 1, SDU_TYPE_ROUTE, sdu, sdu_len);
 
                     // Broadcast PDU
                     for (int interface = 0; interface < ifs.ifn; interface++){
@@ -519,7 +529,7 @@ int main(int argc, char *argv[]) {
                     uint32_t *sdu = uint8ArrayToUint32Array(msg, 3 * MAX_NODES + 5, &sdu_len);
 
                     // Create PDU
-                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_ROUTE, sdu, sdu_len);
+                    struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 1, SDU_TYPE_ROUTE, sdu, sdu_len);
 
                     // Broadcast PDU
                     for (int interface = 0; interface < ifs.ifn; interface++){
@@ -581,7 +591,7 @@ int main(int argc, char *argv[]) {
                         for (int interface = 0; interface < ifs.ifn; interface++){
 
                             // Create PDU
-                            struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 0, SDU_TYPE_MIPARP, sdu, sizeof(uint32_t));
+                            struct pdu *pdu = create_PDU(ifs.local_mip_addr, BROADCAST_MIP_ADDR, 1, SDU_TYPE_MIPARP, sdu, sizeof(uint32_t));
 
                             // Get source MAC address
                             uint8_t *src_mac_addr = ifs.addr[interface].sll_addr;
